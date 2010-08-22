@@ -31,7 +31,7 @@
 /**
  * Backend modules
  */
-$GLOBALS['BE_MOD']['content']['dcaWizard']['tables'] = array(Input::getInstance()->get('table'));
+//$GLOBALS['BE_MOD']['content']['dcaWizard']['tables'] = array(Input::getInstance()->get('table'));
 
 
 /**

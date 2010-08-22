@@ -168,7 +168,7 @@
 	requestForeignDCA: function() 
 	{
   		var req = new Request.Mixed({
-			url: this.baseUrl + '?do=dcaWizard&table=' + this.foreignDCA + '&act=edit&id=' + this.currentRow.id,
+			url: this.baseUrl + '&act=edit&id=' + this.currentRow.id,
 			onRequest: function()
 			{
 				if(this.ajaxIndicatorState == 'hidden')
@@ -387,7 +387,7 @@
 	save: function(form, callback)
 	{
 		var req = new Request.Mixed({
-			url: this.baseUrl + '?do=dcaWizard&table=' + this.foreignDCA + '&act=edit&id=' + this.currentRow.id,
+			url: this.baseUrl + '&act=edit&id=' + this.currentRow.id,
 			onRequest: function()
 			{
 				AjaxRequest.displayBox('Saving...');

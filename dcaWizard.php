@@ -160,9 +160,8 @@ class dcaWizard extends Widget
 		$objTemplate->foreignDCA		= $this->foreignDCA;
 		$objTemplate->dcaPalette		= $GLOBALS['TL_DCA'][$this->foreignDCA]['palettes']['dcawizard'];
 		
-		// add entry button url and base url
-		$objTemplate->baseUrl			= $this->Environment->script;
-		$objTemplate->addItemUrl		= $this->Environment->script . '?do=doWizard&table=' . $this->foreignDCA . '&act=create';
+		// add base url
+		$objTemplate->baseUrl			= $this->Environment->script . '?do=doWizard&table=' . $this->foreignDCA;
 		
 		// theme
 		$objTemplate->theme				= $this->getTheme();
@@ -384,12 +383,13 @@ class dcaWizard extends Widget
 	* Add the CSS class to the fields from the dcawizard-palette so we can select them with JS later on.
 	* Thanks to Isotope and Andreas Schempp for his request for the loadDataContainer hook! That's the only way this wizard can work.
 	*
+	* @todo do not always inject the css class, especially when it has already been added (second call to loadDataContainer)
 	* @param string
 	*/	
 	public function injectCssClass($strName)
 	{
-		if($this->Input->get('do') == 'dcaWizard')
-		{
+//		if($this->Input->get('do') == 'dcaWizard')
+//		{
 			$table = $this->Input->get('table');
 			// Before we generate any DCA file we need to add the CSS class "dcaWizardField" to all the fields we need (defined in the DCA palette called "dcawizard")
 			$palette = $GLOBALS['TL_DCA'][$table]['palettes']['dcawizard'];
@@ -398,7 +398,7 @@ class dcaWizard extends Widget
 			{
 				$GLOBALS['TL_DCA'][$table]['fields'][$field]['eval']['tl_class'] .= ' dcaWizardField';
 			}
-		}
+//		}
 	}
 	
 	

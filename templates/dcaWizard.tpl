@@ -26,10 +26,10 @@
 					<?php endforeach; ?>
 					<td class="operations">
 						<div class="operations">
-							<a href="<?php echo $this->baseUrl . '?do=dcaWizard&table=' . $this->foreignDCA . '&act=edit&id=' . $id; ?>" class="edit">
+							<a href="<?php echo $this->baseUrl . '&act=edit&id=' . $id; ?>" class="edit">
 								<img width="14" height="16" class="tl_listwizard_img" alt="<?php echo $this->editItemAlt; ?>" src="system/themes/<?php echo $this->theme; ?>/images/edit.gif" />
 							</a>
-							<a href="<?php echo $this->baseUrl . '?do=dcaWizard&table=' . $this->foreignDCA . '&act=delete&id=' . $id; ?>" class="delete">
+							<a href="<?php echo $this->baseUrl . '&act=delete&id=' . $id; ?>" class="delete">
 								<img width="14" height="16" class="tl_listwizard_img" alt="<?php echo $this->deleteItemAlt; ?>" src="system/themes/<?php echo $this->theme; ?>/images/delete.gif" />
 							</a>
 						</div>
@@ -41,7 +41,7 @@
 		<tfoot>
 			<tr>
 				<td colspan="<?php echo $this->colspan; ?>">
-					<a class="add_item" href="<?php echo $this->addItemUrl; ?>">
+					<a class="add_item" href="<?php echo $this->baseUrl . '&act=create'; ?>">
 						<?php echo $this->addItemMsg; ?> <img width="14" height="16" class="tl_listwizard_img" alt="<?php echo $this->addItemMsg; ?>" src="system/themes/<?php echo $this->theme; ?>/images/new.gif" />
 					</a>
 				</td>
