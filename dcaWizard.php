@@ -23,6 +23,7 @@
  * PHP version 5
  * @copyright  Winans Creative 2009, Intelligent Spark 2010, iserv.ch GmbH 2010
  * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
+ * @author     Andreas Schempp <andreas@schempp.ch>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  */
 
@@ -58,12 +59,6 @@ class dcaWizard extends Widget
 	* @var string 
 	*/
 	protected $strCurField = '';
-	
-	/**
-	* Contao or TYPOlight?
-	* @var string 
-	*/
-	protected $strCTorTL = '';
 	
  
 	/**
@@ -124,7 +119,6 @@ class dcaWizard extends Widget
 	*/
 	public function generate()
 	{
-		$this->strCTorTL	= version_compare(VERSION.'.'.BUILD, '2.9.0', '<') ? 'typolight' : 'contao';
 		$this->intId		= $this->Input->get('id');
 		$this->strCurTable	= $this->arrConfiguration['strTable'];
 		$this->strCurField	= $this->arrConfiguration['strField'];		
@@ -161,8 +155,8 @@ class dcaWizard extends Widget
 		$objTemplate->dcaPalette		= $GLOBALS['TL_DCA'][$this->foreignDCA]['palettes']['dcawizard'];
 		
 		// add entry button url and base url
-		$objTemplate->baseUrl			= $this->Environment->base . $this->strCTorTL;
-		$objTemplate->addItemUrl		= $this->Environment->base . $this->strCTorTL . '/main.php?do=doWizard&table=' . $this->foreignDCA . '&act=create';
+		$objTemplate->baseUrl			= $this->Environment->script;
+		$objTemplate->addItemUrl		= $this->Environment->script . '?do=doWizard&table=' . $this->foreignDCA . '&act=create';
 		
 		// theme
 		$objTemplate->theme				= $this->getTheme();
