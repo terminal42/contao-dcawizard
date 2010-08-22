@@ -161,7 +161,7 @@ class dcaWizard extends Widget
 		$objTemplate->dcaPalette		= $GLOBALS['TL_DCA'][$this->foreignDCA]['palettes']['dcawizard'];
 		
 		// add base url
-		$objTemplate->baseUrl			= $this->Environment->script . '?do=doWizard&table=' . $this->foreignDCA;
+		$objTemplate->baseUrl			= $this->Environment->script . '?do=' . $this->Input->get('do') . '&table=' . $this->foreignDCA;
 		
 		// theme
 		$objTemplate->theme				= $this->getTheme();
