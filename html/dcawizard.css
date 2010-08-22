@@ -1,0 +1,80 @@
+@charset "utf-8";
+/* CSS Document */
+
+.dcaWizardEditBoxWrapper {
+	background:#efefef;
+	padding:0 5px 15px;
+	border:1px solid #b8b8b8;
+	border-bottom:none;
+	display:none;
+}
+
+
+.dcaWizardTable table {
+	width:100%;
+	border-collapse:collapse;
+	border:1px solid #b8b8b8;
+	border-top:1px solid #cfcfcf;
+
+}
+
+.dcaWizardTable thead {
+	font-weight:bold;
+	background:#dfdfdf;
+	line-height:30px;
+}
+
+.dcaWizardTable td {
+	border-bottom:1px solid #b8b8b8;
+	padding:0 5px;
+}
+
+.dcaWizardTable tbody td {
+	line-height:25px;
+	border-left:1px solid #cfcfcf;
+}
+
+.dcaWizardTable td img {
+	margin-top:-4px;
+	margin-left:2px;
+}
+
+.dcaWizardTable tr.odd:hover td, .dcaWizardTable tr.even:hover td, .dcaWizardTable tfoot:hover td {
+	background:#ebfdd7;
+}
+
+.dcaWizardTable tr.active.odd td, .dcaWizardTable tr.active.even td{
+	color:#000;
+	background:#bfe4ff;
+}
+
+.dcaWizardTable tr.disabled td {
+	color:#aaa;
+	text-decoration:line-through;
+}
+
+.dcaWizardTable tr.odd td {
+	background:#efefef;
+}
+
+.dcaWizardTable tr.noitem td {
+	text-align:center;
+}
+
+.dcaWizardTable tfoot td {
+	border-bottom:none;
+	font-weight:bold;
+	text-align:right;
+	line-height:30px;
+}
+
+.dcaWizardTable tfoot td a {
+	display:block;
+	padding-right:10px;
+}
+
+.dcaWizardButtons {
+	margin-top:20px;
+	margin-right: 17px;
+	float:right;
+}
