@@ -27,6 +27,7 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  */
 
+
 class dcaWizard extends Widget
 {
 
@@ -70,6 +71,12 @@ class dcaWizard extends Widget
 	{
 		switch($strKey)
 		{
+			// very special case: these classes are imported and must not be added to arrData
+			case 'Isotope':
+			case 'dcaWizard':
+				$this->$strKey = $varValue;
+				break;
+				
 			case 'value':
 				$this->varValue = $varValue;
 				break;
@@ -147,8 +154,7 @@ class dcaWizard extends Widget
 		$objTemplate->dcaTable			= $this->strCurTable;
 		$objTemplate->dcaField			= $this->strCurField;
 		
-		// can't use loadDataContainer here for a yet unknown reason...
-		$this->loadDataContainerAlias($this->foreignDCA);
+		$this->loadDataContainer($this->foreignDCA);
 		$this->loadLanguageFile($this->foreignDCA);
 		
 		$objTemplate->foreignDCA		= $this->foreignDCA;
@@ -377,9 +383,10 @@ class dcaWizard extends Widget
 	/**
 	* Add the CSS class to the fields from the dcawizard-palette so we can select them with JS later on.
 	* Thanks to Isotope and Andreas Schempp for his request for the loadDataContainer hook! That's the only way this wizard can work.
+	*
 	* @param string
 	*/	
-	public function loadDataContainer($strName)
+	public function injectCssClass($strName)
 	{
 		if($this->Input->get('do') == 'dcaWizard')
 		{
@@ -439,24 +446,5 @@ class dcaWizard extends Widget
 		$this->Database->prepare("DELETE FROM ".$this->foreignDCA." WHERE id=?")
 					   ->execute($id);
 	}
-	
-	
-	/**
-	 * Load a set of DCA files
-	 */
-	protected function loadDataContainerAlias($strName)
-	{
-		foreach ($this->Config->getActiveModules() as $strModule)
-		{
-			$strFile = sprintf('%s/system/modules/%s/dca/%s.php', TL_ROOT, $strModule, $strName);
-
-			if (file_exists($strFile))
-			{
-				include_once($strFile);
-			}
-		}
-
-		@include(TL_ROOT . '/system/config/dcaconfig.php');
-	}
 }
-?>
+

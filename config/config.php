@@ -23,17 +23,27 @@
  * PHP version 5
  * @copyright  Winans Creative 2009, Intelligent Spark 2010, iserv.ch GmbH 2010
  * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
+ * @author     Andreas Schempp <andreas@schempp.ch>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  */
 
-$GLOBALS['TL_HOOKS']['executePostActions'][] = array('dcaWizard', 'generateAjax');
-$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('dcaWizard', 'loadDataContainer');
-$GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('dcaWizard', 'outputBackendTemplate');
 
-$GLOBALS['BE_FFL']['dcaWizard'] = 'dcaWizard';
-
+/**
+ * Backend modules
+ */
 $GLOBALS['BE_MOD']['content']['dcaWizard']['tables'] = array(Input::getInstance()->get('table'));
 
-$GLOBALS['TL_HOOKS']['dcaWizard'] = array();
 
-?>
+/**
+ * Backend form fields
+ */
+$GLOBALS['BE_FFL']['dcaWizard'] = 'dcaWizard';
+
+
+/**
+ * Hooks
+ */
+$GLOBALS['TL_HOOKS']['executePostActions'][] = array('dcaWizard', 'generateAjax');
+$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('dcaWizard', 'injectCssClass');
+$GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('dcaWizard', 'outputBackendTemplate');
+
