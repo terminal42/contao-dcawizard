@@ -26,7 +26,7 @@
 
  var dcaWizard = new Class({
 
-	Implements: [Options,Request.HTML],
+	Implements: [Options, Request.HTML],
 
 	/* attributes */
 	currentRow: {el:null,id:null},
@@ -41,7 +41,6 @@
 	dcaPalette: null,
 	foreignDCA: null,
 	addItemButton: null,
-	foreignDCA: null,
 	submitButtonLbl: null,
 	ajaxIndicatorState: 'hidden',
 	baseUrl: '',
@@ -167,7 +166,7 @@
 	 */
 	requestForeignDCA: function() 
 	{
-  		var req = new Request.Mixed({
+  		new Request.Mixed({
 			url: this.baseUrl + '&act=edit&id=' + this.currentRow.id,
 			onRequest: function()
 			{
@@ -186,23 +185,28 @@
 				var container = this.filterContainer(txt);
 				
 				
-				var form = this.prepareHTML(container);
-				form.inject(this.dcaWizardEditBox);
-				
-				// execute the javascript
-				if (js)
+				if (this.prepareHTML(container))
 				{
-					$exec(js);
+					// execute the javascript
+					if (js)
+					{
+						$exec(js);
+					}
+					
+					// add onchange events to all the fields
+					this.addOnChangeEventsToFields();
+					
+					// preset the fields if they have already been edited --> cache
+					this.setCachedValues();
 				}
-				
-				// add onchange events to all the fields
-				this.addOnChangeEventsToFields();
-				
-				// preset the fields if they have already been edited --> cache
-				this.setCachedValues();
+				else
+				{
+					alert('Error1');
+				}
 				
 				AjaxRequest.hideBox();
 				this.ajaxIndicatorState = 'hidden';
+				
    			}.bind(this),
 			onFailure: function()
 			{
@@ -261,6 +265,8 @@
 	 */
 	prepareHTML: function(container) 
 	{
+//		var form = container.getElement(('form#' + this.foreignDCA));
+
 		var form = null;
 		var self = this;
 		
@@ -272,10 +278,23 @@
 				form = el;
 			}
 		});
-
-		// now we search for all the fields we want to display. We need to dispose them from the DOM as we empty() later on and without disposing we'd kill everything
-		var fields = form.getElements('div.dcaWizardField').dispose();
-
+		
+		if (!form)
+		{
+			return false;
+		}
+		
+		// now we search for all the fields we want to display.
+		var fields = form.getElements('div.dcaWizardField');
+		
+		if (!fields)
+		{
+			return false;
+		}
+		
+		// We need to dispose them from the DOM as we empty() later on and without disposing we'd kill everything
+		fields.dispose();
+		
 		// now we need to build a hidden input field, as we can not use the given one because our palette may not be the one of the foreign dca
 		var formfields = new Element('input', {
 			'type': 'hidden',
@@ -296,7 +315,9 @@
 		formfields.inject(form, 'bottom');
 		buttons.inject(form, 'bottom');
 		
-		return form;
+		form.inject(this.dcaWizardEditBox);
+		
+		return true;
 	},
 
 	
@@ -386,7 +407,7 @@
 	 */
 	save: function(form, callback)
 	{
-		var req = new Request.Mixed({
+		new Request.Mixed({
 			url: this.baseUrl + '&act=edit&id=' + this.currentRow.id,
 			onRequest: function()
 			{
@@ -440,21 +461,28 @@
 			return false;
 		}
 		
-		this.dcaWizardEditBox.set('html','');
-		var form = this.prepareHTML(container);
-		form.inject(this.dcaWizardEditBox);
-		
-		// execute the javascript
-		if (js)
+		this.dcaWizardEditBox.set('html', '');
+		if (this.prepareHTML(container))
 		{
-			$exec(js);
+			// execute the javascript
+			if (js)
+			{
+				$exec(js);
+			}
+			
+			this.addOnChangeEventsToFields();
+			
+			// preset the fields if they have already been edited --> cache
+			this.setCachedValues();
+			
+			return true;
+		}
+		else
+		{
+			alert('Error2');
 		}
 		
-		this.addOnChangeEventsToFields();
-		
-		// preset the fields if they have already been edited --> cache
-		this.setCachedValues();
-		return true;
+		return false;
 	},
 	
 
