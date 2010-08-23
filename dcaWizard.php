@@ -401,20 +401,6 @@ class dcaWizard extends Widget
 //		}
 	}
 	
-	
-	/**
-	* Remove the dcaWizard module from the navigation
-	* @param string
-	* @param string
-	*/	
-	public function outputBackendTemplate($strContent, $strTemplate)
-	{
-		if ($strTemplate == 'be_main')
-		{
-			return preg_replace('/<li><a[^>]*(dcaWizard[^"]*)[^>]*>([ 0-9a-zA-Z]+)<\/a><\/li>/isx','', $strContent);
-		}
-	}
-	
 
 	/**
 	* Add a new item --> called by Ajax

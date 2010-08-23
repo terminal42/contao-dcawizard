@@ -45,5 +45,4 @@ $GLOBALS['BE_FFL']['dcaWizard'] = 'dcaWizard';
  */
 $GLOBALS['TL_HOOKS']['executePostActions'][] = array('dcaWizard', 'generateAjax');
 $GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('dcaWizard', 'injectCssClass');
-$GLOBALS['TL_HOOKS']['outputBackendTemplate'][] = array('dcaWizard', 'outputBackendTemplate');
 
