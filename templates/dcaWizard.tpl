@@ -41,7 +41,7 @@
 		<tfoot>
 			<tr>
 				<td colspan="<?php echo $this->colspan; ?>">
-					<a class="add_item" href="<?php echo $this->baseUrl . '&act=create'; ?>">
+					<a class="add_item" href="<?php echo $this->baseUrl, '&act=create&mode=2&pid=', $this->Input->get('id'); ?>">
 						<?php echo $this->addItemMsg; ?> <img width="14" height="16" class="tl_listwizard_img" alt="<?php echo $this->addItemMsg; ?>" src="system/themes/<?php echo $this->theme; ?>/images/new.gif" />
 					</a>
 				</td>
