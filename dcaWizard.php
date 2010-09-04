@@ -112,6 +112,14 @@ class dcaWizard extends Widget
 					return $config;
 				}
 				break;
+				
+			case 'setPID':
+				$config = $GLOBALS['TL_DCA'][$this->strCurTable]['fields'][$this->strCurField]['setPID'];
+				if(isset($config))
+				{
+					return $config;
+				}
+				break;
 
 			default:
 				parent::__get($strKey);
@@ -128,7 +136,8 @@ class dcaWizard extends Widget
 	{
 		$this->intId		= $this->Input->get('id');
 		$this->strCurTable	= $this->arrConfiguration['strTable'];
-		$this->strCurField	= $this->arrConfiguration['strField'];		
+		$this->strCurField	= $this->arrConfiguration['strField'];
+		$pid				= ($this->setPID) ? $this->setPID : $this->intId;
 		
 		// add JS and CSS
 		$GLOBALS['TL_JAVASCRIPT']['dcaWizard']	= 'system/modules/dcawizard/html/dcawizard.js';
@@ -136,7 +145,7 @@ class dcaWizard extends Widget
 		
 		
 		$return  = $this->generateWidget();
-		$return .= sprintf('<input type="hidden" name="%s" id="ctrl_%s" value="%s" />',$this->strName,$this->strId,$this->intId);
+		$return .= sprintf('<input type="hidden" name="%s" id="ctrl_%s" value="%s" />',$this->strName,$this->strId,$pid);
 		return $return;
 	}
 	
@@ -180,11 +189,12 @@ class dcaWizard extends Widget
 		$objTemplate->saveNcreateLbl	= $GLOBALS['TL_LANG']['MSC']['saveNcreate'];
 		
 		// parent id
-		$objTemplate->parentId = $this->intId;
+		$pid = ($this->setPID) ? $this->setPID : $this->intId;
+		$objTemplate->parentId = $pid;
 		
 		// entries
 		$objEntries   = $this->Database->prepare("SELECT * FROM ".$this->foreignDCA." WHERE pid=?")
-									  ->execute($this->intId);
+									   ->execute($pid);
 		
 		$objTemplate->noItemsYet = ($objEntries->numRows < 1) ? true : false;
 		
