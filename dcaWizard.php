@@ -192,8 +192,15 @@ class dcaWizard extends Widget
 		$pid = ($this->setPID) ? $this->setPID : $this->intId;
 		$objTemplate->parentId = $pid;
 		
+		$query = "SELECT * FROM ".$this->foreignDCA." WHERE pid=?";
+		
+		// sorting
+		if(is_array($GLOBALS['TL_DCA'][$this->foreignDCA]['list']['sorting']['fields']))
+		{
+			$query .= ' ORDER BY ' . implode(', ', $GLOBALS['TL_DCA'][$this->foreignDCA]['list']['sorting']['fields']);
+		}
 		// entries
-		$objEntries   = $this->Database->prepare("SELECT * FROM ".$this->foreignDCA." WHERE pid=?")
+		$objEntries   = $this->Database->prepare($query)
 									   ->execute($pid);
 		
 		$objTemplate->noItemsYet = ($objEntries->numRows < 1) ? true : false;
