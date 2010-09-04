@@ -248,13 +248,22 @@
 			noitemtr.destroy();
 		
 		// set row active, delete the other actives and show wizard
+		this.removeActiveClass();
+		this.currentRow.el.addClass('active');
+		
+		this.dcaWizardEditBoxWrapper.setStyle('display', 'block');
+	},
+	
+	
+	/**
+	 * Remove class="active" from all the rows if there is one
+	 */
+	removeActiveClass: function() 
+	{		
 		this.tableRows.each( function(row)
 		{
 			row.removeClass('active');
 		});
-		this.currentRow.el.addClass('active');
-		
-		this.dcaWizardEditBoxWrapper.setStyle('display', 'block');
 	},
 	
 	
@@ -385,6 +394,7 @@
 		    'events': {
 				'click': function(e) {
 					e.stop();
+					self.removeActiveClass();
 					self.hideWizard();			
 				}
 			}
