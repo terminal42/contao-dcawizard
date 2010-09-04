@@ -555,6 +555,8 @@
 	 */
 	addItem: function()
 	{
+		var self = this;
+		
 		// is the next element odd or even?
 		var last = this.dcaWizardTable.getElement('tbody').getLast('tr.item');
 		if(last)
@@ -597,7 +599,17 @@
 						case 'operations':
 							var editA = new Element('a', {
 								'class': 'edit',
-								'href': '#'
+								'href': '#',
+								'events':
+								{
+									'click': function(e)
+									{
+										e.stop();
+										self.currentRow.el = tr;
+										self.currentRow.id = tr.get('id').replace('itemId_', '');
+										self.showWizard();
+									}
+								}
 							});
 							var editImg = new Element('img', {
 								'height': '16',
@@ -610,7 +622,17 @@
 							
 							var deleteA = new Element('a', {
 								'class': 'delete',
-								'href': '#'
+								'href': '#',
+								'events':
+								{
+									'click': function(e)
+									{
+										e.stop();
+										self.currentRow.el = tr;
+										self.currentRow.id = tr.get('id').replace('itemId_', '');
+										self.deleteItem();
+									}
+								}
 							});
 							var deleteImg = new Element('img', {
 								'height': '16',
@@ -649,7 +671,6 @@
 				this.currentRow.el = tr;
 				this.currentRow.id = response;
 				
-				this.addOnClickEventsToOperations();
 				this.showWizard();
    			}.bind(this),
 			onFailure: function()
