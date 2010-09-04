@@ -201,7 +201,7 @@
 				}
 				else
 				{
-					alert('Error1');
+					this.showErrorBox(this.failureMsg);
 				}
 				
 				AjaxRequest.hideBox();
@@ -489,7 +489,7 @@
 		}
 		else
 		{
-			alert('Error2');
+			this.showErrorBox(this.failureMsg);
 		}
 		
 		return false;
