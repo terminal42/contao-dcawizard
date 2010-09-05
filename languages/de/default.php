@@ -32,4 +32,5 @@
 $GLOBALS['TL_LANG']['dcaWizard']['deleteConfirmMsg'] = 'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
 $GLOBALS['TL_LANG']['dcaWizard']['failureMsg'] = 'Es ist leider ein Problem bei einem Ajax-Request aufgetreten.';
 $GLOBALS['TL_LANG']['dcaWizard']['closeLbl'] = 'schliessen';
+$GLOBALS['TL_LANG']['dcaWizard']['hasBeenEditedWarning'] = 'Wenn Sie diesen Vorgang ohne zu speichern fortsetzen, gehen die getätigten Änderungen verloren. Sind Sie sicher, dass Sie weiterfahren möchten?';
 ?>

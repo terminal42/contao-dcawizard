@@ -176,17 +176,18 @@ class dcaWizard extends Widget
 		$objTemplate->theme				= $this->getTheme();
 		
 		// language
-		$objTemplate->failureMsg		= $GLOBALS['TL_LANG']['dcaWizard']['failureMsg'];
-		$objTemplate->deleteConfirmMsg	= $GLOBALS['TL_LANG']['dcaWizard']['deleteConfirmMsg'];
-		$objTemplate->closeLbl			= $GLOBALS['TL_LANG']['dcaWizard']['closeLbl'];
-		$objTemplate->noItemsYetMsg		= $GLOBALS['TL_LANG']['MSC']['noResult'];
-		$objTemplate->addItemMsg		= $GLOBALS['TL_LANG'][$this->foreignDCA]['new'][0];
-		$objTemplate->deleteItemAlt		= $GLOBALS['TL_LANG'][$this->foreignDCA]['delete'][0];
-		$objTemplate->editItemAlt		= $GLOBALS['TL_LANG'][$this->foreignDCA]['edit'][0];
-		$objTemplate->saveLbl			= $GLOBALS['TL_LANG']['MSC']['save'];
-		$objTemplate->saveNcloseLbl		= $GLOBALS['TL_LANG']['MSC']['saveNclose'];
-		$objTemplate->cancelLbl			= $GLOBALS['TL_LANG']['MSC']['cancelBT'];
-		$objTemplate->saveNcreateLbl	= $GLOBALS['TL_LANG']['MSC']['saveNcreate'];
+		$objTemplate->failureMsg			= $GLOBALS['TL_LANG']['dcaWizard']['failureMsg'];
+		$objTemplate->deleteConfirmMsg		= $GLOBALS['TL_LANG']['dcaWizard']['deleteConfirmMsg'];
+		$objTemplate->hasBeenEditedWarning	= $GLOBALS['TL_LANG']['dcaWizard']['hasBeenEditedWarning'];
+		$objTemplate->closeLbl				= $GLOBALS['TL_LANG']['dcaWizard']['closeLbl'];
+		$objTemplate->noItemsYetMsg			= $GLOBALS['TL_LANG']['MSC']['noResult'];
+		$objTemplate->addItemMsg			= $GLOBALS['TL_LANG'][$this->foreignDCA]['new'][0];
+		$objTemplate->deleteItemAlt			= $GLOBALS['TL_LANG'][$this->foreignDCA]['delete'][0];
+		$objTemplate->editItemAlt			= $GLOBALS['TL_LANG'][$this->foreignDCA]['edit'][0];
+		$objTemplate->saveLbl				= $GLOBALS['TL_LANG']['MSC']['save'];
+		$objTemplate->saveNcloseLbl			= $GLOBALS['TL_LANG']['MSC']['saveNclose'];
+		$objTemplate->cancelLbl				= $GLOBALS['TL_LANG']['MSC']['cancelBT'];
+		$objTemplate->saveNcreateLbl		= $GLOBALS['TL_LANG']['MSC']['saveNcreate'];
 		
 		// parent id
 		$pid = ($this->setPID) ? $this->setPID : $this->intId;

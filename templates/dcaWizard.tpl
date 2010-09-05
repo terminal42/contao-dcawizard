@@ -72,7 +72,8 @@ window.addEvent('domready',function(){
 		saveNcreateLbl: '<?php echo $this->saveNcreateLbl; ?>',
 		closeLbl: '<?php echo $this->closeLbl; ?>',
 		theme: '<?php echo $this->theme; ?>',
-		failureMsg: '<?php echo $this->failureMsg; ?>'
+		failureMsg: '<?php echo $this->failureMsg; ?>',
+		hasBeenEditedWarning: '<?php echo $this->hasBeenEditedWarning; ?>'
 	});
 });
 //--><!]]>

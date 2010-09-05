@@ -32,4 +32,5 @@
 $GLOBALS['TL_LANG']['dcaWizard']['deleteConfirmMsg'] = 'Are you sure you want to delete this entry? You can\'t undo this action.';
 $GLOBALS['TL_LANG']['dcaWizard']['failureMsg'] = 'Unfortunately an error with an Ajax request occured.';
 $GLOBALS['TL_LANG']['dcaWizard']['closeLbl'] = 'close';
+$GLOBALS['TL_LANG']['dcaWizard']['hasBeenEditedWarning'] = 'If you proceed without saving, the changes you have made will be lost. Are you sure, you want to proceed?';
 ?>

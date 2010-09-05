@@ -29,7 +29,7 @@
 	Implements: [Options, Request.HTML],
 
 	/* attributes */
-	currentRow: {el:null,id:null},
+	currentRow: {el:null,id:null,hasBeenChanged:0},
 	dcaWizardEditBox: null,
 	dcaWizardTable: null,
 	objData: {},
@@ -72,7 +72,8 @@
 		saveNcreateLbl: '',
 		closeLbl: '',
 		theme: '',
-		failureMsg: ''
+		failureMsg: '',
+		hasBeenEditedWarning: ''
 	},
 	initialize: function(options)
 	{
@@ -141,6 +142,13 @@
 	 */
 	showWizard: function() 
 	{
+		// check if the data has been stored and warn if that is not the case
+		if(this.currentRow.hasBeenChanged == 1)
+		{
+			var msg = confirm(this.options.hasBeenEditedWarning);
+			if(!msg) return;
+		}
+		
 		// if the user clicks on edit of another row and the wizard is still open, we need to clean that first
 		if(this.dcaWizardEditBoxWrapper.getStyle('display') == 'block')
 		{
@@ -431,6 +439,9 @@
 	
 				AjaxRequest.hideBox();
 				this.ajaxIndicatorState = 'hidden';
+				
+				// set "hasBeenChanged" to false
+				this.currentRow.hasBeenChanged = 0;
 
 				// if there are no errors we call a callback function, if there is any
 				if(!hasErrors && callback)
@@ -529,7 +540,10 @@
 				objFields[name] = value;
 				
 				// save data in this.objData
-				this.objData[this.currentRow.id] = objFields;				
+				this.objData[this.currentRow.id] = objFields;
+
+				// set "hasBeenChanged" to true so we can warn the user later on
+				this.currentRow.hasBeenChanged = 1;
 			}.bind(this));			
 		}.bind(this));
 	},
