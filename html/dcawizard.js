@@ -726,9 +726,9 @@
 			}.bind(this),
 			onSuccess: function(response)
 			{
-				// add "disabled" CSS class, destroy the operations
-				this.currentRow.el.addClass('disabled');
-				this.currentRow.el.getElement('div.operations').destroy();
+				// destroy the row
+				this.currentRow.el.destroy();
+				
 				AjaxRequest.hideBox();
 				this.ajaxIndicatorState = 'hidden';
 			}.bind(this),

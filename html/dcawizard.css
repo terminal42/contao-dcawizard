@@ -48,11 +48,6 @@
 	background:#bfe4ff;
 }
 
-.dcaWizardTable tr.disabled td {
-	color:#aaa;
-	text-decoration:line-through;
-}
-
 .dcaWizardTable tr.odd td {
 	background:#efefef;
 }
