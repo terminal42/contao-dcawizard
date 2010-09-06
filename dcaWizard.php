@@ -239,7 +239,7 @@ class dcaWizard extends Widget
 		$arrTableColumns = array();
 		foreach($this->tableColumns as $name)
 		{
-			$arrTableColumns[$name] = $GLOBALS['TL_LANG'][$this->foreignDCA][$name][0];
+			$arrTableColumns[$name] = ($GLOBALS['TL_LANG'][$this->foreignDCA][$name][0]) ? $GLOBALS['TL_LANG'][$this->foreignDCA][$name][0] : $name;
 		}
 		
 		// add an empty value add the bottom for the empty td for the operations column
