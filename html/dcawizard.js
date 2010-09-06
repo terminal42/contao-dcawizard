@@ -374,6 +374,7 @@
 		    'events': {
 				'click': function(e) {
 					e.stop();
+					self.removeActiveClass();
 					self.save(form, 'hideWizard');
 				}
 			}
