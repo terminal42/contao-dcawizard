@@ -233,7 +233,7 @@
 	{
 		var container = null;
 		var elements = Elements.from(html);
-		
+
  		elements.each( function(el)
 		{
 			if(el.get('id') == 'container' && el.get('tag') == 'div')
@@ -282,19 +282,7 @@
 	 */
 	prepareHTML: function(container) 
 	{
-//		var form = container.getElement(('form#' + this.foreignDCA));
-
-		var form = null;
-		var self = this;
-		
-		// search the form
- 		container.getElements('form').each( function(el)
-		{
-			if(el.get('id') == self.foreignDCA)
-			{
-				form = el;
-			}
-		});
+		var form = container.getElement(('form[id='+this.foreignDCA+']'));
 		
 		if (!form)
 		{
