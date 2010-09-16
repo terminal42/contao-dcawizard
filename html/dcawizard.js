@@ -205,7 +205,7 @@
 					this.addOnChangeEventsToFields();
 					
 					// preset the fields if they have already been edited --> cache
-					this.setCachedValues();
+//					this.setCachedValues();
 				}
 				else
 				{
