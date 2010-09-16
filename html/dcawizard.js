@@ -467,7 +467,7 @@
 		// if there are no errors we update the table
 		if(errors.length == 0)
 		{
-			this.updateTable();
+			this.updateTable(container);
 			return false;
 		}
 		
@@ -541,7 +541,7 @@
 	/**
 	 * Update the table row after updating data in field
 	 */
-	updateTable: function()
+	updateTable: function(container)
 	{
 		var row	= $('itemId_' + this.currentRow.id);
 		
@@ -551,6 +551,19 @@
 
 		$each(this.objData[this.currentRow.id], function(value, key)
 		{
+			var element = container.getElement(('*[id=ctrl_'+key+']'));
+			
+			if (element && element.get('tag') == 'select')
+			{
+				$each(element.options, function(option)
+				{
+					if (option.value == value)
+					{
+						value =option.get('text');
+					}
+				});
+			}
+
 			var tdclass = 'td.' + key;
 			
 			// get the td element but we are not sure if there even is one as not all fields have to necessarily appear in the table
