@@ -29,20 +29,7 @@
 
 
 /**
- * Backend modules
- */
-//$GLOBALS['BE_MOD']['content']['dcaWizard']['tables'] = array(Input::getInstance()->get('table'));
-
-
-/**
  * Backend form fields
  */
 $GLOBALS['BE_FFL']['dcaWizard'] = 'dcaWizard';
-
-
-/**
- * Hooks
- */
-$GLOBALS['TL_HOOKS']['executePostActions'][] = array('dcaWizard', 'generateAjax');
-$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('dcaWizard', 'injectCssClass');
 

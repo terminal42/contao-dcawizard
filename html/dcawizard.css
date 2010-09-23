@@ -1,75 +1,57 @@
 @charset "utf-8";
 /* CSS Document */
 
-.dcaWizardEditBoxWrapper {
-	background:#efefef;
-	padding:0 5px 15px;
-	border:1px solid #b8b8b8;
-	border-bottom:none;
-	display:none;
+.dcawizard {
+	border-top: 1px solid #E9E9E9;
+	background-color: #FAFAFA;
 }
 
-
-.dcaWizardTable table {
-	width:100%;
-	border-collapse:collapse;
-	border:1px solid #b8b8b8;
-	border-top:1px solid #cfcfcf;
-
+.dcawizard .tl_show {
+	width: 655px;
 }
 
-.dcaWizardTable thead {
-	font-weight:bold;
-	background:#dfdfdf;
-	line-height:30px;
+.dcawizard .tl_empty_parent_view {
+	padding-bottom: 10px;
 }
 
-.dcaWizardTable td {
-	border-bottom:1px solid #b8b8b8;
-	padding:0 5px;
+.dcawizard .tl_formbody_edit {
+	padding-top: 10px;
 }
 
-.dcaWizardTable tbody td {
-	line-height:25px;
-	border-left:1px solid #cfcfcf;
+.dcawizard #saveNback {
+	display: none;
 }
 
-.dcaWizardTable td img {
-	margin-top:-4px;
-	margin-left:2px;
+.dcawizard .long .tl_text {
+	width: 642px;
 }
 
-.dcaWizardTable tr.odd:hover td, .dcaWizardTable tr.even:hover td, .dcaWizardTable tfoot:hover td {
-	background:#ebfdd7;
+.dcawizard .tl_textarea {
+	width: 642px;
 }
 
-.dcaWizardTable tr.active.odd td, .dcaWizardTable tr.active.even td{
-	color:#000;
-	background:#bfe4ff;
+.dcawizard .tl_error, .dcawizard .tl_error {
+	margin-top: 20px;
+	padding: 4px 2px 5px 22px;
+	background: #FAEEEE url(http://www.medtronic-diabetes.co.uk/system/themes/default/images/error.gif) no-repeat 2px 50%;
+	font-size: 11px;
 }
 
-.dcaWizardTable tr.odd td {
-	background:#efefef;
+.dcawizard .tl_tbox .tl_error, .dcawizard .tl_box .tl_error {
+	font-size: 10px;
+	background: none;
+	padding: 0px;
 }
 
-.dcaWizardTable tr.noitem td {
-	text-align:center;
+h3 .tl_content_right {
+	font-weight: normal;
 }
 
-.dcaWizardTable tfoot td {
-	border-bottom:none;
-	font-weight:bold;
-	text-align:right;
-	line-height:30px;
+h3 .tl_content_right a:after {
+	content:"  ::  ";
 }
 
-.dcaWizardTable tfoot td a {
-	display:block;
-	padding-right:10px;
+h3 .tl_content_right a:last-child:after {
+	content:"";
 }
 
-.dcaWizardButtons {
-	margin-top:20px;
-	margin-right: 17px;
-	float:right;
-}
