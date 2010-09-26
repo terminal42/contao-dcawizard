@@ -34,7 +34,15 @@ var dcaWizard = new Class({
 		table: '',
 		scroll: false
 	},
-
+	
+	
+	/**
+	 * Initialize the DCA Wizard
+	 *
+	 * @param  Element
+	 * @param  Object
+	 * @return void
+	 */
 	initialize: function(element, options)
 	{
 		this.element = document.id(element);
@@ -52,6 +60,9 @@ var dcaWizard = new Class({
 			onComplete: function()
 			{
 				AjaxRequest.hideBox();
+				
+				if (this.options.scroll)
+					new Fx.Scroll(window).toElement(this.element);
 			},
 			onCancel: function()
 			{
@@ -67,10 +78,6 @@ var dcaWizard = new Class({
 				{
 					if ($(el).get && el.get('id') == 'container')
 					{
-						console.log(el);
-						if (this.options.scroll)
-							new Fx.Scroll(window).toElement(this.element);
-						
 						if (el.getElement('.tl_formbody_edit'))
 						{
 							this.edit(el);
@@ -83,8 +90,22 @@ var dcaWizard = new Class({
 						{
 							this.list(el);
 						}
+						else
+						{
+							alert('The current view could not be detected.');
+						}
 						
-						eval(responseJavaScript);
+						$exec(responseJavaScript);
+						
+						// Stupid TinyMCE is relying on window "load" event to initialize. This will never occure if tinyMCE is initialized trough ajax.
+						try
+						{
+							if ($defined(tinyMCE) && !tinyMCE.dom.Event.domLoaded)
+							{
+								tinyMCE.dom.Event._pageInit(window);
+							}
+						}
+						catch(e) {}
 					}
 				}.bind(this));
 			}.bind(this)
@@ -97,6 +118,13 @@ var dcaWizard = new Class({
 		this.request.send({url:$H(url).toQueryString(), method:'get'});
 	},
 	
+	
+	/**
+	 * Submit a button (link) using AJAX
+	 *
+	 * @param  Event
+	 * @return bool
+	 */
 	sendOperation: function(event)
 	{
 		button = event.target;
@@ -113,6 +141,13 @@ var dcaWizard = new Class({
 		return false;
 	},
 	
+	
+	/**
+	 * DCA view "edit"
+	 *
+	 * @param  Element
+	 * @return void
+	 */
 	edit: function(container)
 	{
 		container.getElements('form.tl_form').each( function(form)
@@ -123,7 +158,18 @@ var dcaWizard = new Class({
 		
 				form.addEvent('submit', function()
 				{
+					// if we have a tinyMCE, we need to save its value to the text areas before submitting
+					try
+					{
+						if ($defined(tinyMCE))
+						{
+							tinyMCE.triggerSave();
+						}
+					}
+					catch(e) {}
+					
 					this.request.send({url:form.action, data:form.toQueryString(), method:'post'});
+					
 					return false;
 				}.bind(this));
 			}
@@ -132,6 +178,13 @@ var dcaWizard = new Class({
 		this.adoptButtons(container);
 	},
 	
+	
+	/**
+	 * DCA view "show"
+	 *
+	 * @param  Element
+	 * @return void
+	 */
 	show: function(container)
 	{
 		this.element.empty().adopt(container.getElement('table.tl_show'));
@@ -139,6 +192,13 @@ var dcaWizard = new Class({
 		this.adoptButtons(container);
 	},
 	
+	
+	/**
+	 * DCA view "list"
+	 *
+	 * @param  Element
+	 * @return void
+	 */
 	list: function(container)
 	{
 		this.element.empty().adopt(container.getElements('.tl_content, .tl_empty_parent_view, .tl_listing'));
@@ -153,6 +213,14 @@ var dcaWizard = new Class({
 		this.adoptButtons(container, true);
 	},
 	
+	
+	/**
+	 * Replace global operations
+	 *
+	 * @param  Element
+	 * @param  book
+	 * @return void
+	 */
 	adoptButtons: function(container, hideBackButton)
 	{
 		if (container.getElement('div[id=tl_buttons]'))
@@ -182,6 +250,115 @@ var dcaWizard = new Class({
 				
 			}.bind(this));
 		}
-	}
+	},
 });
 
+
+
+/*
+---
+
+script: Group.js
+
+description: Class for monitoring collections of events
+
+license: MIT-style license
+
+authors:
+- Valerio Proietti
+
+requires:
+- core:1.2.4/Events
+- /MooTools.More
+
+provides: [Group]
+
+...
+*/
+
+var Group = new Class({
+
+	initialize: function(){
+		this.instances = Array.flatten(arguments);
+		this.events = {};
+		this.checker = {};
+	},
+
+	addEvent: function(type, fn){
+		this.checker[type] = this.checker[type] || {};
+		this.events[type] = this.events[type] || [];
+		if (this.events[type].contains(fn)) return false;
+		else this.events[type].push(fn);
+		this.instances.each(function(instance, i){
+			instance.addEvent(type, this.check.bind(this, [type, instance, i]));
+		}, this);
+		return this;
+	},
+
+	check: function(type, instance, i){
+		this.checker[type][i] = true;
+		var every = this.instances.every(function(current, j){
+			return this.checker[type][j] || false;
+		}, this);
+		if (!every) return;
+		this.checker[type] = {};
+		this.events[type].each(function(event){
+			event.call(this, this.instances, instance);
+		}, this);
+	}
+
+});
+
+
+
+/**
+ * http://mootools.net/forge/p/request_html_with_external_javascripts
+ */
+Request.HTML = Class.refactor(Request.HTML,
+{
+	options:
+	{
+		evalExternalScripts: true
+	},
+	success: function(text)
+	{
+		if (this.options.evalExternalScripts)
+		{
+			var regex = /<script.*src=('|")([^>'"\r\n]*)('|")[^>]*><\/script>/gi;
+			var matches = scripts = [];
+			
+			while (matches = regex.exec(text))
+			{
+				if (!document.getElement(('script[src='+matches[2]+']')))
+				{
+					scripts.push(matches[2]);
+				}
+			}
+			
+			if (scripts.length > 0)
+			{
+				var h = document.getElementsByTagName('head')[0];
+				var sobjects = [];
+				
+				scripts.each(function(script)
+				{
+					// .addEvent('load', function() {fn.apply(this,[text]);}.bind(this))
+					sobjects.push(new Element('script', {type: 'text/javascript', src: script}));
+					h.grab(sobjects[sobjects.length-1]);
+				});
+				
+				var fn = this.previous;
+				var group = new Group(sobjects);
+				group.addEvent('load', function() {fn.apply(this,[text]);}.bind(this));
+			}
+			else
+			{
+				this.previous(text);
+			}
+		}
+		else
+		{
+			this.previous(text);
+		}
+	}
+});
