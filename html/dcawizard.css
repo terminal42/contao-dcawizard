@@ -24,7 +24,7 @@
 }
 
 .dcawizard .tl_empty_parent_view {
-	padding-bottom: 10px;
+	padding: 10px;
 }
 
 .dcawizard .tl_formbody_edit {
@@ -44,7 +44,6 @@
 }
 
 .dcawizard .tl_error {
-	margin-top: 20px;
 	padding: 4px 2px 5px 22px;
 	background: #FAEEEE url(http://www.medtronic-diabetes.co.uk/system/themes/default/images/error.gif) no-repeat 2px 50%;
 	font-size: 11px;
