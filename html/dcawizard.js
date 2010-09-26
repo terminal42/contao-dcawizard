@@ -49,6 +49,12 @@ var dcaWizard = new Class({
 		
 		this.setOptions(options);
 		
+		// Store original accesskey attributes
+		document.getElements('.tl_formbody_submit .tl_submit').each( function(button)
+		{
+			button.set('_accesskey', button.get('accesskey'));
+		});
+		
 		this.request = new Request.HTML(
 		{
 			link: 'abort',
@@ -78,6 +84,19 @@ var dcaWizard = new Class({
 				{
 					if ($(el).get && el.get('id') == 'container')
 					{
+						// Disable original submit buttons to enable new access keys
+						document.getElements('.tl_formbody_submit .tl_submit').each( function(button)
+						{
+							if (el.getElement('.tl_formbody_submit'))
+							{
+								button.set('disabled', true).set('accesskey', '');
+							}
+							else
+							{
+								button.set('disabled', false).set('accesskey', button.get('_accesskey'));
+							}
+						});
+												
 						this.element.empty().adopt(el.getElement('div[id=main]').getChildren());
 						
 						// Add AJAX event to listing buttons
@@ -98,7 +117,10 @@ var dcaWizard = new Class({
 								{
 									if ($defined(tinyMCE))
 									{
-										tinyMCE.triggerSave();
+										document.getElements('textarea').each( function(textarea)
+										{
+											tinyMCE.execCommand('mceRemoveEditor', false, textarea.get('id'));
+										});
 									}
 								}
 								catch(e) {}
@@ -127,7 +149,7 @@ var dcaWizard = new Class({
 						// Stupid TinyMCE is relying on window "load" event to initialize. This will never occure if tinyMCE is initialized trough ajax.
 						try
 						{
-							if ($defined(tinyMCE) && !tinyMCE.dom.Event.domLoaded)
+							if ($defined(tinyMCE))
 							{
 								tinyMCE.dom.Event._pageInit(window);
 							}
