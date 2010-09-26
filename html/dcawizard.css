@@ -2,8 +2,21 @@
 /* CSS Document */
 
 .dcawizard {
-	border-top: 1px solid #E9E9E9;
+	border-top: 1px solid #BBB;
 	background-color: #FAFAFA;
+}
+
+.dcawizard h1,
+.dcawizard h2,
+.dcawizard .tl_panel,
+.dcawizard #tl_buttons,
+.dcawizard .tl_listing_container .tl_header {
+	display: none;
+}
+
+.dcawizard .tl_listing_container {
+	margin: 0;
+	padding: 0;
 }
 
 .dcawizard .tl_show {
@@ -30,7 +43,7 @@
 	width: 642px;
 }
 
-.dcawizard .tl_error, .dcawizard .tl_error {
+.dcawizard .tl_error {
 	margin-top: 20px;
 	padding: 4px 2px 5px 22px;
 	background: #FAEEEE url(http://www.medtronic-diabetes.co.uk/system/themes/default/images/error.gif) no-repeat 2px 50%;

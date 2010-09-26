@@ -31,7 +31,7 @@ var dcaWizard = new Class({
 	
 	options:
 	{
-		table: '',
+		baseURL: '',
 		scroll: false
 	},
 	
@@ -78,22 +78,49 @@ var dcaWizard = new Class({
 				{
 					if ($(el).get && el.get('id') == 'container')
 					{
-						if (el.getElement('.tl_formbody_edit'))
+						this.element.empty().adopt(el.getElement('div[id=main]').getChildren());
+						
+						// Add AJAX event to listing buttons
+						this.element.getElements('.tl_content_right a, .tl_right_nowrap a').each( function(button)
 						{
-							this.edit(el);
-						}
-						else if (el.getElement('table.tl_show'))
+							button.dcaclick = button.onclick;
+							button.onclick = '';
+							button.addEvent('click', this.sendOperation);
+						}.bind(this));
+						
+						// Add AJAX event to forms
+						this.element.getElements('form.tl_form').each( function(form)
 						{
-							this.show(el);
-						}
-						else if (el.getElement('.tl_listing_container'))
-						{
-							this.list(el);
-						}
-						else
-						{
-							alert('The current view could not be detected.');
-						}
+							form.addEvent('submit', function()
+							{
+								// if we have a tinyMCE, we need to save its value to the text areas before submitting
+								try
+								{
+									if ($defined(tinyMCE))
+									{
+										tinyMCE.triggerSave();
+									}
+								}
+								catch(e) {}
+								
+								this.request.send({url:form.action, data:form.toQueryString(), method:'post'});
+								
+								return false;
+							}.bind(this));
+							
+							// Add hidden element of the clicked button (Mootools Bug)
+							form.getElements('input.tl_submit').each( function(button)
+							{
+								button.addEvent('click', function()
+								{
+									new Element('input', {type:'hidden', name:button.get('name'), value:button.get('value')}).inject(form);
+								});
+							}.bind(this));
+							
+						}.bind(this));
+						
+						// Adopt buttons
+						this.adoptButtons(el);
 						
 						$exec(responseJavaScript);
 						
@@ -111,11 +138,14 @@ var dcaWizard = new Class({
 			}.bind(this)
 		});
 		
-		var url = window.location.href.parseQueryString();
-		url.act = '';
-		url.table = this.options.table;
+//		var url = window.location.href.parseQueryString();
+//		url.act = '';
+//		url.table = this.options.table;
+//		url.token = 'dcawizard'; // Supplying a token prevents BackendUser from storing referer. Otherwise we would be redirected to the wrong page on saveNclose.
+
+//		this.baseURL = $H(url).toQueryString();
 		
-		this.request.send({url:$H(url).toQueryString(), method:'get'});
+		this.request.send({url:this.options.baseURL, method:'get'});
 	},
 	
 	
@@ -134,83 +164,11 @@ var dcaWizard = new Class({
 			button = button.getParent();
 		}
 		
-		if (button.myclick && button.myclick() == false)
+		if (button.dcaclick && button.dcaclick() == false)
 			return false;
 		
 		this.request.send({url:button.get('href'), method:'get'});
 		return false;
-	},
-	
-	
-	/**
-	 * DCA view "edit"
-	 *
-	 * @param  Element
-	 * @return void
-	 */
-	edit: function(container)
-	{
-		container.getElements('form.tl_form').each( function(form)
-		{
-			if (form.get('id') != 'tl_version')
-			{
-				this.element.empty().adopt(form);
-		
-				form.addEvent('submit', function()
-				{
-					// if we have a tinyMCE, we need to save its value to the text areas before submitting
-					try
-					{
-						if ($defined(tinyMCE))
-						{
-							tinyMCE.triggerSave();
-						}
-					}
-					catch(e) {}
-					
-					this.request.send({url:form.action, data:form.toQueryString(), method:'post'});
-					
-					return false;
-				}.bind(this));
-			}
-		}.bind(this));
-		
-		this.adoptButtons(container);
-	},
-	
-	
-	/**
-	 * DCA view "show"
-	 *
-	 * @param  Element
-	 * @return void
-	 */
-	show: function(container)
-	{
-		this.element.empty().adopt(container.getElement('table.tl_show'));
-		
-		this.adoptButtons(container);
-	},
-	
-	
-	/**
-	 * DCA view "list"
-	 *
-	 * @param  Element
-	 * @return void
-	 */
-	list: function(container)
-	{
-		this.element.empty().adopt(container.getElements('.tl_content, .tl_empty_parent_view, .tl_listing'));
-		
-		this.element.getElements('.tl_content_right a, .tl_right_nowrap a').each( function(button)
-		{
-			button.myclick = button.onclick;
-			button.onclick = '';
-			button.addEvent('click', this.sendOperation);
-		}.bind(this));
-		
-		this.adoptButtons(container, true);
 	},
 	
 	
@@ -221,9 +179,9 @@ var dcaWizard = new Class({
 	 * @param  book
 	 * @return void
 	 */
-	adoptButtons: function(container, hideBackButton)
+	adoptButtons: function()
 	{
-		if (container.getElement('div[id=tl_buttons]'))
+		if (this.element.getElement('div[id=tl_buttons]'))
 		{
 			var buttons = this.element.getPrevious().getElement('.tl_content_right');
 
@@ -234,14 +192,16 @@ var dcaWizard = new Class({
 			
 			buttons.empty();
 			
-			container.getElement('div[id=tl_buttons]').getElements('a').each( function(button)
+			var hideBack = $defined(this.element.getElement('.tl_listing_container'));
+			
+			this.element.getElement('div[id=tl_buttons]').getElements('a').each( function(button)
 			{
-				if (hideBackButton && button.hasClass('header_back'))
+				if (hideBack && button.hasClass('header_back'))
 					return;
 					
 				if (button.hasClass('header_new') || button.hasClass('header_back'))
 				{
-					button.myclick = button.onclick;
+					button.dcaclick = button.onclick;
 					button.onclick = '';
 					button.addEvent('click', this.sendOperation);
 				}
