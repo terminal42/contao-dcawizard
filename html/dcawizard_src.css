@@ -1,0 +1,69 @@
+@charset "utf-8";
+/* CSS Document */
+
+.dcawizard {
+	border-top: 1px solid #BBB;
+	background-color: #FAFAFA;
+}
+
+.dcawizard h1,
+.dcawizard h2,
+.dcawizard .tl_panel,
+.dcawizard #tl_buttons,
+.dcawizard .tl_listing_container .tl_header {
+	display: none;
+}
+
+.dcawizard .tl_listing_container {
+	margin: 0;
+	padding: 0;
+}
+
+.dcawizard .tl_show {
+	width: 655px;
+}
+
+.dcawizard .tl_empty_parent_view {
+	padding: 10px;
+}
+
+.dcawizard .tl_formbody_edit {
+	padding-top: 10px;
+}
+
+.dcawizard #saveNback {
+	display: none;
+}
+
+.dcawizard .long .tl_text {
+	width: 642px;
+}
+
+.dcawizard .tl_textarea {
+	width: 642px;
+}
+
+.dcawizard .tl_error {
+	padding: 4px 2px 5px 22px;
+	background: #FAEEEE url(http://www.medtronic-diabetes.co.uk/system/themes/default/images/error.gif) no-repeat 2px 50%;
+	font-size: 11px;
+}
+
+.dcawizard .tl_tbox .tl_error, .dcawizard .tl_box .tl_error {
+	font-size: 10px;
+	background: none;
+	padding: 0px;
+}
+
+h3 .tl_content_right {
+	font-weight: normal;
+}
+
+h3 .tl_content_right a:after {
+	content:"  ::  ";
+}
+
+h3 .tl_content_right a:last-child:after {
+	content:"";
+}
+
