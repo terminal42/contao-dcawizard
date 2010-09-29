@@ -30,7 +30,7 @@
 
 class dcaWizard extends Widget
 {
-
+	
 	/**
 	 * Template
 	 * @var string 
@@ -72,6 +72,10 @@ class dcaWizard extends Widget
 			case 'value':
 				$this->varValue = $varValue;
 				break;
+				
+			case 'mandatory':
+				$this->arrConfiguration[$strKey] = $varValue ? true : false;
+				break;
 
 			default:
 				parent::__set($strKey, $varValue);
@@ -96,6 +100,28 @@ class dcaWizard extends Widget
 			default:
 				return parent::__get($strKey);
 				break;
+		}
+	}
+	
+	
+	/**
+	 * Validate input
+	 */
+	public function validate()
+	{
+		if ($this->mandatory)
+		{
+			$this->import('Database');
+			$objRecords = $this->Database->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
+			
+			if (!$objRecords->numRows && $this->strLabel == '')
+			{
+				$this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
+			}
+			elseif (!$objRecords->numRows)
+			{
+				$this->addError(sprintf($GLOBALS['TL_LANG']['ERR']['mandatory'], $this->strLabel));
+			}
 		}
 	}
 
