@@ -32,6 +32,7 @@ var dcaWizard = new Class({
 	options:
 	{
 		baseURL: '',
+		referer: '',
 		scroll: false
 	},
 	
@@ -54,6 +55,40 @@ var dcaWizard = new Class({
 		{
 			button.set('_accesskey', button.get('accesskey'));
 		});
+		
+		
+		// UGLY HACK: set referrer
+		document.getElements('form.tl_form').each( function(form)
+		{
+			form.addEvent('submit', function()
+			{
+				form.removeEvents();
+				
+				new Request(
+				{
+					method:'get',
+					url:this.options.referer,
+					onComplete: function()
+					{
+						form.submit();
+					}
+				}).send();
+				
+				return false;
+			}.bind(this));
+			
+			// Add hidden element of the clicked button (Mootools Bug)
+			form.getElements('input.tl_submit').each( function(button)
+			{
+				button.addEvent('click', function()
+				{
+					new Element('input', {type:'hidden', name:button.get('name'), value:button.get('value')}).inject(form);
+				});
+			});
+			
+		}.bind(this));
+		
+		
 		
 		this.request = new Request.HTML(
 		{
@@ -141,8 +176,7 @@ var dcaWizard = new Class({
 							
 						}.bind(this));
 						
-						// Adopt buttons
-						this.adoptButtons(el);
+						this.adoptButtons();
 						
 						$exec(responseJavaScript);
 						
@@ -159,13 +193,6 @@ var dcaWizard = new Class({
 				}.bind(this));
 			}.bind(this)
 		});
-		
-//		var url = window.location.href.parseQueryString();
-//		url.act = '';
-//		url.table = this.options.table;
-//		url.token = 'dcawizard'; // Supplying a token prevents BackendUser from storing referer. Otherwise we would be redirected to the wrong page on saveNclose.
-
-//		this.baseURL = $H(url).toQueryString();
 		
 		this.request.send({url:this.options.baseURL, method:'get'});
 	},
@@ -214,11 +241,11 @@ var dcaWizard = new Class({
 			
 			buttons.empty();
 			
-			var hideBack = $defined(this.element.getElement('.tl_listing_container'));
+			var hideBackButton = $defined(this.element.getElement('.tl_listing_container'));
 			
 			this.element.getElement('div[id=tl_buttons]').getElements('a').each( function(button)
 			{
-				if (hideBack && button.hasClass('header_back'))
+				if (hideBackButton && button.hasClass('header_back'))
 					return;
 					
 				if (button.hasClass('header_new') || button.hasClass('header_back'))

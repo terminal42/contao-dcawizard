@@ -142,7 +142,7 @@ class dcaWizard extends Widget
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
 window.addEvent(\'domready\',function(){
-	new dcaWizard(\'ctrl_' . $this->strId . '\', {baseURL: \'' . $this->Environment->base . $this->Environment->script . '?do='.$this->Input->get('do').'&table='.$this->foreignTable.'&id='.$this->Input->get('id') . '\'});
+	new dcaWizard(\'ctrl_' . $this->strId . '\', {baseURL: \'' . $this->Environment->base . $this->Environment->script . '?do='.$this->Input->get('do').'&table='.$this->foreignTable.'&id='.$this->Input->get('id') . '\', referer: \'' . $this->getReferer() . '\'});
 });
 //--><!]]>
 </script>';
