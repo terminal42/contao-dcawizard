@@ -4,6 +4,7 @@
 .dcawizard {
 	border-top: 1px solid #BBB;
 	background-color: #FAFAFA;
+	overflow: visible;
 }
 
 .dcawizard h1,
@@ -29,6 +30,7 @@
 
 .dcawizard .tl_formbody_edit {
 	padding-top: 10px;
+	padding-right: 0;
 }
 
 .dcawizard #saveNback {

@@ -178,7 +178,7 @@ var dcaWizard = new Class({
 						
 						this.adoptButtons();
 						
-						$exec(responseJavaScript);
+						$exec(responseJavaScript.replace(/.*<!--.*|.*-->.*/g, ''));
 						
 						// Stupid TinyMCE is relying on window "load" event to initialize. This will never occure if tinyMCE is initialized trough ajax.
 						try
@@ -236,7 +236,7 @@ var dcaWizard = new Class({
 
 			if (!buttons)
 			{
-				buttons = new Element('div', {'class': 'tl_content_right'}).inject(this.element.getPrevious());
+				buttons = new Element('div', {'class': 'tl_content_right'}).inject(this.element.getPrevious(), 'top');
 			}
 			
 			buttons.empty();
@@ -259,7 +259,7 @@ var dcaWizard = new Class({
 				
 			}.bind(this));
 		}
-	},
+	}
 });
 
 
@@ -353,12 +353,12 @@ Request.HTML = Class.refactor(Request.HTML,
 				{
 					// .addEvent('load', function() {fn.apply(this,[text]);}.bind(this))
 					sobjects.push(new Element('script', {type: 'text/javascript', src: script}));
-					h.grab(sobjects[sobjects.length-1]);
+					$(h).grab(sobjects[sobjects.length-1]);
 				});
 				
 				var fn = this.previous;
 				var group = new Group(sobjects);
-				group.addEvent('load', function() {fn.apply(this,[text]);}.bind(this));
+				group.addEvent('load', function() {fn.apply(this,[text]);}.bind(this)).addEvent('readystatechange', function() {fn.apply(this,[text]);}.bind(this));
 			}
 			else
 			{
