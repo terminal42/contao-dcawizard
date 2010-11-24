@@ -327,10 +327,25 @@ Request.HTML = Class.refactor(Request.HTML,
 {
 	options:
 	{
-		evalExternalScripts: true
+		evalExternalScripts: true,
+		evalExternalStyles: true
 	},
 	success: function(text)
 	{
+		if (this.options.evalExternalStyles)
+		{
+			var regex = /<link.*href=('|")([^>'"\r\n]*)('|")[^>]*>/gi;
+			var matches = stylesheets = [];
+			
+			while (matches = regex.exec(text))
+			{
+				if (!/fixes.css/.exec(matches[2]) && !document.getElement(('link[href='+matches[2]+']')))
+				{
+					Asset.css(matches[2]);
+				}
+			}
+		}
+		
 		if (this.options.evalExternalScripts)
 		{
 			var regex = /<script.*src=('|")([^>'"\r\n]*)('|")[^>]*><\/script>/gi;
@@ -351,7 +366,6 @@ Request.HTML = Class.refactor(Request.HTML,
 				
 				scripts.each(function(script)
 				{
-					// .addEvent('load', function() {fn.apply(this,[text]);}.bind(this))
 					sobjects.push(new Element('script', {type: 'text/javascript', src: script}));
 					$(h).grab(sobjects[sobjects.length-1]);
 				});
