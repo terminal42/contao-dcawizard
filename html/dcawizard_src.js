@@ -67,7 +67,7 @@ var dcaWizard = new Class({
 				new Request(
 				{
 					method:'get',
-					url:this.options.referer,
+					url:(this.options.referer+'&dcaWizard=1'),
 					onComplete: function()
 					{
 						form.submit();
@@ -160,7 +160,7 @@ var dcaWizard = new Class({
 								}
 								catch(e) {}
 								
-								this.request.send({url:form.action, data:form.toQueryString(), method:'post'});
+								this.request.send({url:(form.action+'&dcaWizard=1'), data:form.toQueryString(), method:'post'});
 								
 								return false;
 							}.bind(this));
@@ -194,7 +194,7 @@ var dcaWizard = new Class({
 			}.bind(this)
 		});
 		
-		this.request.send({url:this.options.baseURL, method:'get'});
+		this.request.send({url:(this.options.baseURL+'&dcaWizard=1'), method:'get'});
 	},
 	
 	
@@ -216,7 +216,7 @@ var dcaWizard = new Class({
 		if (button.dcaclick && button.dcaclick() == false)
 			return false;
 		
-		this.request.send({url:button.get('href'), method:'get'});
+		this.request.send({url:(button.get('href')+'&dcaWizard=1'), method:'get'});
 		return false;
 	},
 	

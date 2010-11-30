@@ -37,12 +37,6 @@ class dcaWizard extends Widget
 	 */
 	protected $strTemplate = 'be_widget';
 	
-	/**
-	 * Foreign table
-	 * @var string
-	 */
-	protected $fTable = '';
-	
 	
 	/**
 	 * Initialize the object
@@ -52,18 +46,16 @@ class dcaWizard extends Widget
 	{
 		parent::__construct($arrAttributes);
 		
-		$this->fTable = $this->foreignTable;
-		
-		if(is_array($this->foreignTableCallback) && count($this->foreignTableCallback) && !$this->foreignTable)
+		if (is_array($this->foreignTableCallback) && count($this->foreignTableCallback))
 		{
 			$this->import($this->foreignTableCallback[0]);
-			$this->fTable = $this->{$this->foreignTableCallback[0]}->{$this->foreignTableCallback[1]}();
+			$this->foreignTable = $this->{$this->foreignTableCallback[0]}->{$this->foreignTableCallback[1]}();
 		}
 
 		if ($this->foreignTable != '')
 		{
-			$this->loadDataContainer($this->fTable);
-			$this->loadLanguageFile($this->fTable);
+			$this->loadDataContainer($this->foreignTable);
+			$this->loadLanguageFile($this->foreignTable);
 		}
 	}
 	
@@ -89,6 +81,10 @@ class dcaWizard extends Widget
 				
 			case 'mandatory':
 				$this->arrConfiguration[$strKey] = $varValue ? true : false;
+				break;
+				
+			case 'foreignTable':
+				$GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] = $varValue;
 				break;
 
 			default:
@@ -130,7 +126,7 @@ class dcaWizard extends Widget
 		if ($this->mandatory)
 		{
 			$this->import('Database');
-			$objRecords = $this->Database->execute("SELECT * FROM {$this->fTable} WHERE pid={$this->currentRecord}");
+			$objRecords = $this->Database->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
 			
 			if (!$objRecords->numRows && $this->strLabel == '')
 			{
@@ -152,18 +148,32 @@ class dcaWizard extends Widget
 	public function generate()
 	{
 		// add JS and CSS
-		$GLOBALS['TL_JAVASCRIPT']['dcaWizard']	= 'system/modules/dcawizard/html/dcawizard_src.js';
+		$GLOBALS['TL_JAVASCRIPT']['dcaWizard']	= 'system/modules/dcawizard/html/dcawizard.js';
 		$GLOBALS['TL_CSS']['dcaWizard']			= 'system/modules/dcawizard/html/dcawizard.css|screen';
 		
 		return '
-<div id="ctrl_' . $this->strId . '" class="dcawizard"><p class="tl_gerror">Your browser does not support javascript. Please use <a href="' . $this->addToUrl('act=&table='.$this->fTable) . '">the regular backend</a> to manage data.</div>
+<div id="ctrl_' . $this->strId . '" class="dcawizard"><p class="tl_gerror">Your browser does not support javascript. Please use <a href="' . $this->addToUrl('act=&table='.$this->foreignTable) . '">the regular backend</a> to manage data.</div>
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
 window.addEvent(\'domready\',function(){
-	new dcaWizard(\'ctrl_' . $this->strId . '\', {baseURL: \'' . $this->Environment->base . $this->Environment->script . '?do='.$this->Input->get('do').'&table='.$this->fTable.'&id='.$this->Input->get('id') . '\', referer: \'' . $this->getReferer() . '\'});
+	new dcaWizard(\'ctrl_' . $this->strId . '\', {baseURL: \'' . $this->Environment->base . $this->Environment->script . '?do='.$this->Input->get('do').'&table='.$this->foreignTable.'&id='.$this->Input->get('id') . '\', referer: \'' . $this->getReferer() . '\'});
 });
 //--><!]]>
 </script>';
+	}
+	
+	
+	/**
+	 * Stop Contao from deleting new records if it's an ajax request
+	 */
+	public function doNotReviseTable($table, &$new_records, $parent_table, $child_tables)
+	{
+		if ($this->Input->get('dcaWizard'))
+		{
+			$new_records = array();
+		}
+		
+		return false;
 	}
 }
 
