@@ -215,13 +215,13 @@ var dcaWizard = new Class({
 		
 		if (button.dcaclick && button.dcaclick() == false)
 			return false;
-			
+
 	    // UGLY HACK: set referrer
         new Request(
         {
             method:'get',
-            url:(this.options.referer+'&dcaWizard=1'),
-            onComplete: function()
+            url:(this.options.baseURL+'&dcaWizard=1'),
+            onSuccess: function()
             {
                 this.request.send({url:(button.get('href')+'&dcaWizard=1'), method:'get'});
             }.bind(this)
