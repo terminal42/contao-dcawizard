@@ -145,6 +145,9 @@ var dcaWizard = new Class({
 						// Add AJAX event to forms
 						this.element.getElements('form.tl_form').each( function(form)
 						{
+						    // make Backend.autoSubmit work
+                            form.submit = function() {return this.fireEvent('submit');}
+						    						    
 							form.addEvent('submit', function()
 							{
 								// if we have a tinyMCE, we need to save its value to the text areas before submitting
