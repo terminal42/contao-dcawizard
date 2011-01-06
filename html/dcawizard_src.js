@@ -152,7 +152,7 @@ var dcaWizard = new Class({
 								{
 									if ($defined(tinyMCE))
 									{
-										document.getElements('textarea').each( function(textarea)
+										form.getElements('textarea').each( function(textarea)
 										{
 											tinyMCE.execCommand('mceRemoveEditor', false, textarea.get('id'));
 										});
