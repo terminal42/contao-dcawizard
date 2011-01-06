@@ -27,7 +27,7 @@
 var dcaWizard = new Class({
 
 	Implements: [Options],
-	Binds: ['sendOperation'],
+	Binds: ['sendOperation', 'addURLFragment'],
 	
 	options:
 	{
@@ -67,7 +67,7 @@ var dcaWizard = new Class({
 				new Request(
 				{
 					method:'get',
-					url:(this.options.referer+'&dcaWizard=1'),
+					url:(this.addURLFragment(this.options.referer)),
 					onComplete: function()
 					{
 						form.submit();
@@ -160,7 +160,7 @@ var dcaWizard = new Class({
 								}
 								catch(e) {}
 								
-								this.request.send({url:(form.action+'&dcaWizard=1'), data:form.toQueryString(), method:'post'});
+								this.request.send({url:(this.addURLFragment(form.action)), data:form.toQueryString(), method:'post'});
 								
 								return false;
 							}.bind(this));
@@ -194,7 +194,7 @@ var dcaWizard = new Class({
 			}.bind(this)
 		});
 		
-		this.request.send({url:(this.options.baseURL+'&dcaWizard=1'), method:'get'});
+		this.request.send({url:(this.addURLFragment(this.options.baseURL)), method:'get'});
 	},
 	
 	
@@ -220,10 +220,10 @@ var dcaWizard = new Class({
         new Request(
         {
             method:'get',
-            url:(this.options.baseURL+'&dcaWizard=1'),
+            url:(this.addURLFragment(this.options.baseURL)),
             onSuccess: function()
             {
-                this.request.send({url:(button.get('href')+'&dcaWizard=1'), method:'get'});
+                this.request.send({url: this.addURLFragment(button.get('href')), method:'get'});
             }.bind(this)
         }).send();		
 		
@@ -269,7 +269,23 @@ var dcaWizard = new Class({
 				
 			}.bind(this));
 		}
-	}
+	},
+	
+	
+	/**
+	 * Adds "&dcaWizard=1" to an URL string if not already present
+	 * @param string
+	 * @return string
+	 */
+	 addURLFragment: function(url)
+	 {
+	     if(!url.contains('&dcaWizard=1'))
+	     {
+	         url += '&dcaWizard=1'
+	     }
+	     
+	     return url;
+	 }
 });
 
 
