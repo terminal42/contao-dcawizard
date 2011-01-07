@@ -192,6 +192,9 @@ var dcaWizard = new Class({
 							}
 						}
 						catch(e) {}
+						
+						// make tooltips work
+                        Backend.addInteractiveHelp();
 					}
 				}.bind(this));
 			}.bind(this)
