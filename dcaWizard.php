@@ -10,12 +10,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program. If not, please visit the Free
  * Software Foundation website at <http://www.gnu.org/licenses/>.
@@ -30,14 +30,14 @@
 
 class dcaWizard extends Widget
 {
-	
+
 	/**
 	 * Template
-	 * @var string 
+	 * @var string
 	 */
 	protected $strTemplate = 'be_widget';
-	
-	
+
+
 	/**
 	 * Initialize the object
 	 * @param array
@@ -45,7 +45,7 @@ class dcaWizard extends Widget
 	public function __construct($arrAttributes=false)
 	{
 		parent::__construct($arrAttributes);
-		
+
 		if (is_array($this->foreignTableCallback) && count($this->foreignTableCallback))
 		{
 			$this->import($this->foreignTableCallback[0]);
@@ -58,15 +58,15 @@ class dcaWizard extends Widget
 			$this->loadLanguageFile($this->foreignTable);
 		}
 	}
-	
- 
+
+
 	/**
 	* Add specific attributes
 	* @param string
 	* @param mixed
 	*/
 	public function __set($strKey, $varValue)
-	{		
+	{
 		switch($strKey)
 		{
 			// very special case: these classes are imported and must not be added to arrData
@@ -74,15 +74,15 @@ class dcaWizard extends Widget
 			case 'dcaWizard':
 				$this->$strKey = $varValue;
 				break;
-				
+
 			case 'value':
 				$this->varValue = $varValue;
 				break;
-				
+
 			case 'mandatory':
 				$this->arrConfiguration[$strKey] = $varValue ? true : false;
 				break;
-				
+
 			case 'foreignTable':
 				$GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] = $varValue;
 				break;
@@ -92,11 +92,11 @@ class dcaWizard extends Widget
 				break;
 		}
 	}
-	
+
 
     /**
      * Return a parameter
-     * @return string 
+     * @return string
      * @throws Exception
      */
     public function __get($strKey)
@@ -106,7 +106,7 @@ class dcaWizard extends Widget
 			case 'foreignTable':
 				return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'];
 				break;
-				
+
 			case 'foreignTableCallback':
 				return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback'];
 				break;
@@ -116,8 +116,8 @@ class dcaWizard extends Widget
 				break;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Validate input
 	 */
@@ -127,7 +127,7 @@ class dcaWizard extends Widget
 		{
 			$this->import('Database');
 			$objRecords = $this->Database->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
-			
+
 			if (!$objRecords->numRows && $this->strLabel == '')
 			{
 				$this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -143,14 +143,14 @@ class dcaWizard extends Widget
 	/**
 	 * Generate the widget
 	 *
-	 * @return string 
+	 * @return string
 	 */
 	public function generate()
 	{
 		// add JS and CSS
 		$GLOBALS['TL_JAVASCRIPT']['dcaWizard']	= 'system/modules/dcawizard/html/dcawizard.js';
 		$GLOBALS['TL_CSS']['dcaWizard']			= 'system/modules/dcawizard/html/dcawizard.css|screen';
-		
+
 		return '
 <div id="ctrl_' . $this->strId . '" class="dcawizard"><p class="tl_gerror">Your browser does not support javascript. Please use <a href="' . $this->addToUrl('act=&table='.$this->foreignTable) . '">the regular backend</a> to manage data.</div>
 <script type="text/javascript">
@@ -161,8 +161,8 @@ window.addEvent(\'domready\',function(){
 //--><!]]>
 </script>';
 	}
-	
-	
+
+
 	/**
 	 * Stop Contao from deleting new records if it's an ajax request
 	 */
@@ -172,7 +172,7 @@ window.addEvent(\'domready\',function(){
 		{
 			$new_records = array();
 		}
-		
+
 		return false;
 	}
 }
