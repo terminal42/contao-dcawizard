@@ -28,15 +28,15 @@ var dcaWizard = new Class({
 
 	Implements: [Options],
 	Binds: ['sendOperation', 'addURLFragment'],
-	
+
 	options:
 	{
 		baseURL: '',
 		referer: '',
 		scroll: false
 	},
-	
-	
+
+	 
 	/**
 	 * Initialize the DCA Wizard
 	 *
@@ -47,23 +47,26 @@ var dcaWizard = new Class({
 	initialize: function(element, options)
 	{
 		this.element = document.id(element);
-		
+
 		this.setOptions(options);
-		
+
 		// Store original accesskey attributes
 		document.getElements('.tl_formbody_submit .tl_submit').each( function(button)
 		{
 			button.set('_accesskey', button.get('accesskey'));
 		});
-		
-		
+
+
 		// UGLY HACK: set referrer
 		document.getElements('form.tl_form').each( function(form)
 		{
+			if (form.getParent('.tl_version_panel'))
+				return;
+
 			form.addEvent('submit', function()
 			{
 				form.removeEvents();
-				
+
 				new Request(
 				{
 					method:'get',
@@ -73,10 +76,10 @@ var dcaWizard = new Class({
 						form.submit();
 					}
 				}).send();
-				
+
 				return false;
 			}.bind(this));
-			
+
 			// Add hidden element of the clicked button (Mootools Bug)
 			form.getElements('input.tl_submit').each( function(button)
 			{
@@ -85,11 +88,11 @@ var dcaWizard = new Class({
 					new Element('input', {type:'hidden', name:button.get('name'), value:button.get('value')}).inject(form);
 				});
 			});
-			
+
 		}.bind(this));
-		
-		
-		
+
+
+
 		this.request = new Request.HTML(
 		{
 			link: 'abort',
@@ -101,7 +104,7 @@ var dcaWizard = new Class({
 			onComplete: function()
 			{
 				AjaxRequest.hideBox();
-				
+
 				if (this.options.scroll)
 					new Fx.Scroll(window).toElement(this.element);
 			},
@@ -131,9 +134,12 @@ var dcaWizard = new Class({
 								button.set('disabled', false).set('accesskey', button.get('_accesskey'));
 							}
 						});
-												
+
+						if (el.getElement('.tl_panel'))
+							el.getElement('.tl_panel').getParent('form').destroy();
+
 						this.element.empty().adopt(el.getElement('div[id=main]').getChildren());
-						
+
 						// Add AJAX event to listing buttons
 						this.element.getElements('.tl_content_right a, .tl_right_nowrap a').each( function(button)
 						{
@@ -141,13 +147,13 @@ var dcaWizard = new Class({
 							button.onclick = '';
 							button.addEvent('click', this.sendOperation);
 						}.bind(this));
-						
+
 						// Add AJAX event to forms
 						this.element.getElements('form.tl_form').each( function(form)
 						{
-						    // make Backend.autoSubmit work
-                            form.submit = function() {return this.fireEvent('submit');}
-						    						    
+							// make Backend.autoSubmit work
+							form.submit = function() {return this.fireEvent('submit');}
+
 							form.addEvent('submit', function()
 							{
 								// if we have a tinyMCE, we need to save its value to the text areas before submitting
@@ -162,12 +168,12 @@ var dcaWizard = new Class({
 									}
 								}
 								catch(e) {}
-								
+
 								this.request.send({url:(this.addURLFragment(form.action)), data:form.toQueryString(), method:'post'});
-								
+
 								return false;
 							}.bind(this));
-							
+
 							// Add hidden element of the clicked button (Mootools Bug)
 							form.getElements('input.tl_submit').each( function(button)
 							{
@@ -176,13 +182,13 @@ var dcaWizard = new Class({
 									new Element('input', {type:'hidden', name:button.get('name'), value:button.get('value')}).inject(form);
 								});
 							}.bind(this));
-							
+
 						}.bind(this));
-						
+
 						this.adoptButtons();
-						
+
 						$exec(responseJavaScript.replace(/.*<!--.*|.*-->.*/g, ''));
-						
+
 						// Stupid TinyMCE is relying on window "load" event to initialize. This will never occure if tinyMCE is initialized trough ajax.
 						try
 						{
@@ -192,18 +198,18 @@ var dcaWizard = new Class({
 							}
 						}
 						catch(e) {}
-						
+
 						// make tooltips work
-                        Backend.addInteractiveHelp();
+						Backend.addInteractiveHelp();
 					}
 				}.bind(this));
 			}.bind(this)
 		});
-		
+
 		this.request.send({url:(this.addURLFragment(this.options.baseURL)), method:'get'});
 	},
-	
-	
+
+
 	/**
 	 * Submit a button (link) using AJAX
 	 *
@@ -213,30 +219,30 @@ var dcaWizard = new Class({
 	sendOperation: function(event)
 	{
 		button = event.target;
-		
+
 		if (button.getParent().get('tag') == 'a')
 		{
 			button = button.getParent();
 		}
-		
+
 		if (button.dcaclick && button.dcaclick() == false)
 			return false;
 
-	    // UGLY HACK: set referrer
-        new Request(
-        {
-            method:'get',
-            url:(this.addURLFragment(this.options.baseURL)),
-            onSuccess: function()
-            {
-                this.request.send({url: this.addURLFragment(button.get('href')), method:'get'});
-            }.bind(this)
-        }).send();		
-		
+		// UGLY HACK: set referrer
+		new Request(
+		{
+			method:'get',
+			url:(this.addURLFragment(this.options.baseURL)),
+			onSuccess: function()
+			{
+				this.request.send({url: this.addURLFragment(button.get('href')), method:'get'});
+			}.bind(this)
+		}).send();
+
 		return false;
 	},
-	
-	
+
+
 	/**
 	 * Replace global operations
 	 *
@@ -254,30 +260,30 @@ var dcaWizard = new Class({
 			{
 				buttons = new Element('div', {'class': 'tl_content_right'}).inject(this.element.getPrevious(), 'top');
 			}
-			
+
 			buttons.empty();
-			
+
 			var hideBackButton = $defined(this.element.getElement('.tl_listing_container'));
-			
+
 			this.element.getElement('div[id=tl_buttons]').getElements('a').each( function(button)
 			{
 				if (hideBackButton && button.hasClass('header_back'))
 					return;
-					
+
 				if (button.hasClass('header_new') || button.hasClass('header_back'))
 				{
 					button.dcaclick = button.onclick;
 					button.onclick = '';
 					button.addEvent('click', this.sendOperation);
 				}
-				
+
 				buttons.grab(button);
-				
+
 			}.bind(this));
 		}
 	},
-	
-	
+
+
 	/**
 	 * Adds "&dcaWizard=1" to an URL string if not already present
 	 * @param string
@@ -285,12 +291,12 @@ var dcaWizard = new Class({
 	 */
 	 addURLFragment: function(url)
 	 {
-	     if(!url.contains('&dcaWizard=1'))
-	     {
-	         url += '&dcaWizard=1'
-	     }
-	     
-	     return url;
+		if(!url.contains('&dcaWizard=1'))
+		{
+			url += '&dcaWizard=1'
+		}
+
+		return url;
 	 }
 });
 
@@ -347,7 +353,7 @@ var Group = new Class(
 			i = type[2];
 			type = type[0];
 		}
-		
+
 		this.checker[type][i] = true;
 		var every = this.instances.every(function(current, j){
 			return this.checker[type][j] || false;
@@ -378,7 +384,7 @@ Request.HTML = Class.refactor(Request.HTML,
 		{
 			var regex = /<link.*href=('|")([^>'"\r\n]*)('|")[^>]*>/gi;
 			var matches = stylesheets = [];
-			
+
 			while (matches = regex.exec(text))
 			{
 				if (!/fixes.css/.exec(matches[2]) && !document.getElement(('link[href='+matches[2]+']')))
@@ -387,12 +393,12 @@ Request.HTML = Class.refactor(Request.HTML,
 				}
 			}
 		}
-		
+
 		if (this.options.evalExternalScripts)
 		{
 			var regex = /<script.*src=('|")([^>'"\r\n]*)('|")[^>]*><\/script>/gi;
 			var matches = scripts = [];
-			
+
 			while (matches = regex.exec(text))
 			{
 				if (!document.getElement(('script[src='+matches[2]+']')))
@@ -400,18 +406,18 @@ Request.HTML = Class.refactor(Request.HTML,
 					scripts.push(matches[2]);
 				}
 			}
-			
+
 			if (scripts.length > 0)
 			{
 				var h = document.getElementsByTagName('head')[0];
 				var sobjects = [];
-				
+
 				scripts.each(function(script)
 				{
 					sobjects.push(new Element('script', {type: 'text/javascript', src: script}));
 					$(h).grab(sobjects[sobjects.length-1]);
 				});
-				
+
 				var fn = this.previous;
 				var group = new Group(sobjects);
 				group.addEvent('load', function() {fn.apply(this,[text]);}.bind(this)).addEvent('readystatechange', function() {fn.apply(this,[text]);}.bind(this));

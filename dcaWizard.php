@@ -152,7 +152,7 @@ class dcaWizard extends Widget
 		$GLOBALS['TL_CSS']['dcaWizard']			= 'system/modules/dcawizard/html/dcawizard.css|screen';
 
 		return '
-<div id="ctrl_' . $this->strId . '" class="dcawizard"><p class="tl_gerror">Your browser does not support javascript. Please use <a href="' . $this->addToUrl('act=&table='.$this->foreignTable) . '">the regular backend</a> to manage data.</div>
+<div id="ctrl_' . $this->strId . '" class="dcawizard"><p class="tl_gerror">Your browser does not support javascript. Please use <a href="' . ampersand($this->addToUrl('act=&table='.$this->foreignTable)) . '">the regular backend</a> to manage data.</div>
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
 window.addEvent(\'domready\',function(){
