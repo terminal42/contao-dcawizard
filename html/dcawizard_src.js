@@ -47,6 +47,7 @@ var dcaWizard = new Class({
 	initialize: function(element, options)
 	{
 		this.element = document.id(element);
+		this.element.dcawizard = this;
 
 		this.setOptions(options);
 
@@ -433,3 +434,52 @@ Request.HTML = Class.refactor(Request.HTML,
 		}
 	}
 });
+
+
+Backend.previousMakeParentViewSortable = Backend.makeParentViewSortable;
+Backend.makeParentViewSortable = function(ul)
+{
+	ul = $(ul);
+	if (ul.getParent('.dcawizard'))
+	{
+		var list = new Sortables(ul,
+		{
+			contstrain: true,
+			opacity: 0.6
+		});
+
+		list.active = false;
+
+		list.addEvent('start', function()
+		{
+			list.active = true;
+		});
+
+		list.addEvent('complete', function(el)
+		{
+	    	if (!list.active)
+	    	{
+    			return;
+    		}
+
+    		if (el.getPrevious())
+    		{
+    			var id = el.get('id').replace(/li_/, '');
+    			var pid = el.getPrevious().get('id').replace(/li_/, '');
+    			var req = new URI(ul.getParent('.dcawizard').dcawizard.options.baseURL).get('query').replace(/id=[0-9]*/, 'id=' + id) + '&act=cut&mode=1&pid=' + pid;
+    			new Request({url: ul.getParent('.dcawizard').dcawizard.options.baseURL, method: 'get', data: req}).send();
+    		}
+    		else if (el.getParent())
+    		{
+    			var id = el.get('id').replace(/li_/, '');
+    			var pid = el.getParent().get('id').replace(/ul_/, '');
+    			var req = new URI(ul.getParent('.dcawizard').dcawizard.options.baseURL).get('query').replace(/id=[0-9]*/, 'id=' + id) + '&act=cut&mode=2&pid=' + pid;
+				new Request({url: ul.getParent('.dcawizard').dcawizard.options.baseURL, method: 'get', data: req}).send();
+    		}
+    	});
+	}
+	else
+	{
+		Backend.previousMakeParentViewSortable(ul);
+	}
+}
