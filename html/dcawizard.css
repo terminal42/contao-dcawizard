@@ -10,4 +10,5 @@ h3 .tl_content_right{font-weight:400}
 h3 .tl_content_right a:after{content:"  ::  "}
 h3 .tl_content_right a:last-child:after{content:""}
 .dcawizard h1,.dcawizard h2,.dcawizard #tl_buttons,.dcawizard .tl_listing_container .tl_header,.dcawizard #saveNback{display:none}
-.dcawizard .long .tl_text,.dcawizard .tl_textarea{width:642px}
+.dcawizard .long .tl_text,.dcawizard .tl_textarea, .dcawizard .filetree {width:642px}
+.dcawizard .tl_tbox { background-image: none; }

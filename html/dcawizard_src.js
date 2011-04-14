@@ -141,6 +141,14 @@ var dcaWizard = new Class({
 
 						this.element.empty().adopt(el.getElement('div[id=main]').getChildren());
 
+						// add insert after button from tl_header
+						var newButton = this.element.getElement('a[href*="act=create"]');
+						if($defined(newButton))
+						{
+							this.element.getElement('a.header_new').set('href',newButton.get('href'));
+						}
+							
+						
 						// Add AJAX event to listing buttons
 						this.element.getElements('.tl_content_right a, .tl_right_nowrap a').each( function(button)
 						{
@@ -202,6 +210,9 @@ var dcaWizard = new Class({
 
 						// make tooltips work
 						Backend.addInteractiveHelp();
+						
+						// collapse fileTrees
+						Backend.hideTreeBody();
 					}
 				}.bind(this));
 			}.bind(this)

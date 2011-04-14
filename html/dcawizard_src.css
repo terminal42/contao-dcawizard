@@ -33,14 +33,14 @@
 }
 
 .dcawizard #saveNback {
-	display: none;
+	display: none;
 }
 
 .dcawizard .long .tl_text {
 	width: 642px;
 }
 
-.dcawizard .tl_textarea {
+.dcawizard .tl_textarea, .dcawizard .filetree {
 	width: 642px;
 }
 
@@ -68,3 +68,6 @@ h3 .tl_content_right a:last-child:after {
 	content:"";
 }
 
+.dcawizard .tl_tbox {
+	background-image: none;
+}
