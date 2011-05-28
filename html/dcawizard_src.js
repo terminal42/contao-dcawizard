@@ -21,6 +21,7 @@
  * PHP version 5
  * @copyright  Winans Creative 2009, Intelligent Spark 2010, iserv.ch GmbH 2010
  * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
+ * @author     Andreas Schempp <andreas@schempp.ch>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  */
 
@@ -141,14 +142,6 @@ var dcaWizard = new Class({
 
 						this.element.empty().adopt(el.getElement('div[id=main]').getChildren());
 
-						// add insert after button from tl_header
-						var newButton = this.element.getElement('a[href*="act=create"]');
-						if($defined(newButton))
-						{
-							this.element.getElement('a.header_new').set('href',newButton.get('href'));
-						}
-							
-						
 						// Add AJAX event to listing buttons
 						this.element.getElements('.tl_content_right a, .tl_right_nowrap a').each( function(button)
 						{
@@ -282,7 +275,7 @@ var dcaWizard = new Class({
 				if (hideBackButton && button.hasClass('header_back'))
 					return;
 
-				if (button.hasClass('header_new') || button.hasClass('header_back'))
+				if (button.hasClass('header_new') || button.hasClass('header_back') || button.hasClass('header_clipboard'))
 				{
 					button.dcaclick = button.onclick;
 					button.onclick = '';
@@ -292,6 +285,24 @@ var dcaWizard = new Class({
 				buttons.grab(button);
 
 			}.bind(this));
+			
+			if (this.element.getElement('.tl_header .tl_content_right'))
+			{
+				this.element.getElements('.tl_header .tl_content_right a').each( function(button)
+				{
+					if (button.href.test(/act=edit/))
+						return;
+
+					button.dcaclick = button.onclick;
+					button.onclick = '';
+					button.addEvent('click', this.sendOperation);
+					
+					new Element('span', {text:button.getElement('img').get('alt'), styles:{'padding-left':'5px'}}).inject(button);
+					
+					buttons.grab(button);
+	
+				}.bind(this));
+			}
 		}
 	},
 
