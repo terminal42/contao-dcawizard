@@ -24,6 +24,7 @@
  * @copyright  Winans Creative 2009, Intelligent Spark 2010, iserv.ch GmbH 2010
  * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
  * @author     Andreas Schempp <andreas@schempp.ch>
+ * @author     Christian de la Haye <service@delahaye.de>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  */
 
@@ -151,15 +152,19 @@ class dcaWizard extends Widget
 		$GLOBALS['TL_JAVASCRIPT']['dcaWizard']	= 'system/modules/dcawizard/html/dcawizard.js';
 		$GLOBALS['TL_CSS']['dcaWizard']			= 'system/modules/dcawizard/html/dcawizard.css|screen';
 
+		// inject JS in HTML5 style from Contao 2.10
+		$strScriptBegin = (version_compare(VERSION, '2.9', '>') ? '<script>' : '<script type="text/javascript">
+<!--//--><![CDATA[//><!--');
+		$strScriptEnd = (version_compare(VERSION, '2.9', '>') ? '</script>' : '//--><!]]>
+</script>');
+
 		return '
 <div id="ctrl_' . $this->strId . '" class="dcawizard"><p class="tl_gerror">Your browser does not support javascript. Please use <a href="' . ampersand($this->addToUrl('act=&table='.$this->foreignTable)) . '">the regular backend</a> to manage data.</div>
-<script type="text/javascript">
-<!--//--><![CDATA[//><!--
+'.$strScriptBegin.'
 window.addEvent(\'domready\',function(){
 	new dcaWizard(\'ctrl_' . $this->strId . '\', {baseURL: \'' . $this->Environment->base . $this->Environment->script . '?do='.$this->Input->get('do').'&table='.$this->foreignTable.'&id='.$this->Input->get('id') . '\', referer: \'' . $this->getReferer() . '\'});
 });
-//--><!]]>
-</script>';
+'.$strScriptEnd;
 	}
 
 
@@ -188,4 +193,3 @@ window.addEvent(\'domready\',function(){
 		}
 	}
 }
-
