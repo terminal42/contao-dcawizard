@@ -1,7 +1,7 @@
 @charset utf-8;
 .dcawizard{border-top:1px solid #BBB;background-color:#FAFAFA;overflow:visible}
 .dcawizard .tl_listing_container{margin:0;padding:0}
-.dcawizard .tl_show{width:655px}
+.dcawizard .tl_show,.dcawizard .tl_listing{width:655px}
 .dcawizard .tl_empty_parent_view{padding:10px}
 .dcawizard .tl_formbody_edit{padding-top:10px;padding-right:0}
 .dcawizard .tl_error{background:#FAEEEE url(http://www.medtronic-diabetes.co.uk/system/themes/default/images/error.gif) no-repeat 2px 50%;font-size:11px;padding:4px 2px 5px 22px}

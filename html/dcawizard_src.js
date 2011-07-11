@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program. If not, please visit the Free
  * Software Foundation website at <http://www.gnu.org/licenses/>.
@@ -37,7 +37,7 @@ var dcaWizard = new Class({
 		scroll: false
 	},
 
-	 
+
 	/**
 	 * Initialize the DCA Wizard
 	 *
@@ -95,7 +95,7 @@ var dcaWizard = new Class({
 
 
 
-		this.request = new Request.HTML(
+		this.request = new Request.DCAWizard(
 		{
 			link: 'abort',
 			evalScripts: false,
@@ -114,7 +114,7 @@ var dcaWizard = new Class({
 			{
 				AjaxRequest.hideBox();
 			},
-			onFailure: function()
+			onFailure: function(xhr)
 			{
 				alert('failed');
 			},
@@ -122,7 +122,7 @@ var dcaWizard = new Class({
 			{
 				$A(responseTree).each( function(el)
 				{
-					if ($(el).get && el.get('id') == 'container')
+					if ($(el) && $(el).get && el.get('id') == 'container')
 					{
 						// Disable original submit buttons to enable new access keys
 						document.getElements('.tl_formbody_submit .tl_submit').each( function(button)
@@ -171,7 +171,7 @@ var dcaWizard = new Class({
 								}
 								catch(e) {}
 
-								this.request.send({url:(this.addURLFragment(form.action)), data:form.toQueryString(), method:'post'});
+								this.request.send({url:(this.addURLFragment(form.action)), data:this.addURLFragment(form.toQueryString(), true), method:'post'});
 
 								return false;
 							}.bind(this));
@@ -203,7 +203,7 @@ var dcaWizard = new Class({
 
 						// make tooltips work
 						Backend.addInteractiveHelp();
-						
+
 						// collapse fileTrees
 						Backend.hideTreeBody();
 					}
@@ -285,7 +285,7 @@ var dcaWizard = new Class({
 				buttons.grab(button);
 
 			}.bind(this));
-			
+
 			if (this.element.getElement('.tl_header .tl_content_right'))
 			{
 				this.element.getElements('.tl_header .tl_content_right a').each( function(button)
@@ -296,11 +296,11 @@ var dcaWizard = new Class({
 					button.dcaclick = button.onclick;
 					button.onclick = '';
 					button.addEvent('click', this.sendOperation);
-					
+
 					new Element('span', {text:button.getElement('img').get('alt'), styles:{'padding-left':'5px'}}).inject(button);
-					
+
 					buttons.grab(button);
-	
+
 				}.bind(this));
 			}
 		}
@@ -312,9 +312,13 @@ var dcaWizard = new Class({
 	 * @param string
 	 * @return string
 	 */
-	 addURLFragment: function(url)
+	 addURLFragment: function(url, post)
 	 {
-		if(!url.contains('&dcaWizard=1'))
+		if(post && !url.contains('&action=dcaWizard'))
+		{
+			url += '&action=dcaWizard'
+		}
+		else if (!url.contains('&dcaWizard=1'))
 		{
 			url += '&dcaWizard=1'
 		}
@@ -394,15 +398,48 @@ var Group = new Class(
 /**
  * http://mootools.net/forge/p/request_html_with_external_javascripts
  */
-Request.HTML = Class.refactor(Request.HTML,
+Request.DCAWizard = Class.refactor(Request.HTML,
 {
 	options:
 	{
 		evalExternalScripts: true,
 		evalExternalStyles: true
 	},
+	
 	success: function(text)
 	{
+		var json;
+
+		try
+		{
+			json = JSON.decode(text);
+			
+			// Automatically set the new request token
+			if (json.token)
+			{
+				REQUEST_TOKEN = json.token;
+
+				// Update all forms
+				$$('input[type="hidden"]').each(function(el)
+				{
+					if (el.name == 'REQUEST_TOKEN')
+					{
+						el.value = REQUEST_TOKEN;
+					}
+				});
+			}
+			
+			if (json.target)
+			{
+				this.cancel();
+				this.send({url:json.target});
+				return;
+			}
+
+			text = json.content;
+		}
+		catch (error){}
+		
 		if (this.options.evalExternalStyles)
 		{
 			var regex = /<link.*href=('|")([^>'"\r\n]*)('|")[^>]*>/gi;
@@ -505,3 +542,4 @@ Backend.makeParentViewSortable = function(ul)
 		Backend.previousMakeParentViewSortable(ul);
 	}
 }
+

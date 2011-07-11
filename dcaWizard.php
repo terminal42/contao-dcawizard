@@ -175,5 +175,17 @@ window.addEvent(\'domready\',function(){
 
 		return false;
 	}
+	
+	
+	/**
+	 * We need to disable ajax actions for DC_Table
+	 */
+	public function preventAjaxActions($strAction)
+	{
+		if ($strAction == 'dcaWizard')
+		{
+			$this->Environment->isAjaxRequest = false;
+		}
+	}
 }
 

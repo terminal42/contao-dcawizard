@@ -46,7 +46,8 @@
 	padding: 0;
 }
 
-.dcawizard .tl_show {
+.dcawizard .tl_show,
+.dcawizard .tl_listing {
 	width: 655px;
 }
 

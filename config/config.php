@@ -38,4 +38,5 @@ $GLOBALS['BE_FFL']['dcaWizard'] = 'dcaWizard';
  * Hooks
  */
 $GLOBALS['TL_HOOKS']['reviseTable'][] = array('dcaWizard', 'doNotReviseTable');
+$GLOBALS['TL_HOOKS']['executePreActions'][] = array('dcaWizard', 'preventAjaxActions');
 

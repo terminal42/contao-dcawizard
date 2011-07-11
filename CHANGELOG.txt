@@ -1,0 +1,31 @@
+===========================
+Isotope eCommerce Changelog
+===========================
+
+Version 1.2.0 stable (2011-07-??)
+---------------------------------
+- Backend view is now sortable using drag&drop
+- Added support for Contao 2.10 request tokens
+- Fixed fileTree & pageTree width
+
+Version 1.1.1 stable (2011-07-06)
+---------------------------------
+- Fixed: Adopt buttons from mode 4 header (Thanks to Christoph Wiechert)
+- Fixed: IE problem when having form inside form (list view)
+- Fixed: Collapse page trees
+- Fixed page tree width
+
+Version 1.1.0 stable (2010-01-19)
+---------------------------------
+- added support for multiple dcaWizard usage on the same page
+- added support for subpalettes
+- added support for tooltips
+- added support for loading style sheets and javascript
+- fixed problem with reviseTable deleting new records
+- fixed bug with tinyMCE working in the dcaWizard but not on the current page
+- fixed bug where dcaWizard=1 was set multiple times in request url
+- fixed issues in Chrome
+
+Version 1.0.0 stable (2010-11-29)
+---------------------------------
+- Initial stable release
