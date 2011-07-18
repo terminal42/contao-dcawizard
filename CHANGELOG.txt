@@ -2,18 +2,14 @@
 Isotope eCommerce Changelog
 ===========================
 
-Version 1.2.0 beta1 (2011-07-11)
+Version 1.2.0 beta1 (2011-07-18)
 ---------------------------------
 - Backend view is now sortable using drag&drop
 - Added support for Contao 2.10 request tokens
 - Fixed fileTree & pageTree width
-
-Version 1.1.1 stable (2011-07-06)
----------------------------------
 - Fixed: Adopt buttons from mode 4 header (Thanks to Christoph Wiechert)
 - Fixed: IE problem when having form inside form (list view)
 - Fixed: Collapse page trees
-- Fixed page tree width
 
 Version 1.1.0 stable (2010-01-19)
 ---------------------------------
