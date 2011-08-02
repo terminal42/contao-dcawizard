@@ -2,8 +2,12 @@
 Isotope eCommerce Changelog
 ===========================
 
+Version 1.2.0 beta2 (2011-??-??)
+--------------------------------
+- Fixed issue with Contao 2.10 request tokens
+
 Version 1.2.0 beta1 (2011-07-18)
----------------------------------
+--------------------------------
 - Backend view is now sortable using drag&drop
 - Added support for Contao 2.10 request tokens
 - Fixed fileTree & pageTree width

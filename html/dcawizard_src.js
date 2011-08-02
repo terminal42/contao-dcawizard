@@ -413,22 +413,7 @@ Request.DCAWizard = Class.refactor(Request.HTML,
 		try
 		{
 			json = JSON.decode(text);
-			
-			// Automatically set the new request token
-			if (json.token)
-			{
-				REQUEST_TOKEN = json.token;
 
-				// Update all forms
-				$$('input[type="hidden"]').each(function(el)
-				{
-					if (el.name == 'REQUEST_TOKEN')
-					{
-						el.value = REQUEST_TOKEN;
-					}
-				});
-			}
-			
 			if (json.target)
 			{
 				this.cancel();
@@ -436,10 +421,33 @@ Request.DCAWizard = Class.refactor(Request.HTML,
 				return;
 			}
 
+			// Automatically set the new request token
+			if (json.token)
+			{
+				REQUEST_TOKEN = json.token;
+			}
+
 			text = json.content;
 		}
 		catch (error){}
-		
+
+		// Update request token
+		var regex = /var REQUEST_TOKEN = '([^']+)';/gi;
+		while (matches = regex.exec(text))
+		{
+			REQUEST_TOKEN = matches[1];
+		}
+
+		// Update all forms
+		$$('input[type="hidden"]').each(function(el)
+		{
+			if (el.name == 'REQUEST_TOKEN')
+			{
+				el.value = REQUEST_TOKEN;
+			}
+		});
+
+		// load new style sheets
 		if (this.options.evalExternalStyles)
 		{
 			var regex = /<link.*href=('|")([^>'"\r\n]*)('|")[^>]*>/gi;
@@ -454,6 +462,7 @@ Request.DCAWizard = Class.refactor(Request.HTML,
 			}
 		}
 
+		// load new javascript files
 		if (this.options.evalExternalScripts)
 		{
 			var regex = /<script.*src=('|")([^>'"\r\n]*)('|")[^>]*><\/script>/gi;
