@@ -180,8 +180,8 @@ window.addEvent(\'domready\',function(){
 
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * We need to disable ajax actions for DC_Table
 	 */

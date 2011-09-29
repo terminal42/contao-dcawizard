@@ -405,7 +405,7 @@ Request.DCAWizard = Class.refactor(Request.HTML,
 		evalExternalScripts: true,
 		evalExternalStyles: true
 	},
-	
+
 	success: function(text)
 	{
 		var json;
