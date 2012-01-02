@@ -21,7 +21,7 @@
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  Winans Creative 2009, Intelligent Spark 2010, iserv.ch GmbH 2010
+ * @copyright  Isotope eCommerce Workgroup 2009-2012
  * @author     Yanick Witschi <yanick.witschi@certo-net.ch>
  * @author     Andreas Schempp <andreas@schempp.ch>
  * @author     Christian de la Haye <service@delahaye.de>

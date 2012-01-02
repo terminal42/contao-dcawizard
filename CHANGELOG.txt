@@ -2,7 +2,7 @@
 Isotope eCommerce Changelog
 ===========================
 
-Version 1.2.0 beta2 (2011-??-??)
+Version 1.2.0 beta2 (2012-02-01)
 --------------------------------
 - Fixed issue with Contao 2.10 request tokens
 
