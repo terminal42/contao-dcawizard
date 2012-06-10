@@ -120,6 +120,13 @@ var dcaWizard = new Class({
 			},
 			onSuccess: function(responseTree, responseElements, responseHTML, responseJavaScript)
 			{
+				// if Contao is sending a reload/redirect response (see System::reload() or System::redirect())
+				if (responseTree.length < 2 && responseHTML.test(/^http/))
+				{
+					this.request.send({url:(this.addURLFragment(this.options.baseURL)), method:'get'});
+					return;
+				}
+
 				$A(responseTree).each( function(el)
 				{
 					if ($(el) && $(el).get && el.get('id') == 'container')
