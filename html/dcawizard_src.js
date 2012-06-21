@@ -121,7 +121,7 @@ var dcaWizard = new Class({
 			onSuccess: function(responseTree, responseElements, responseHTML, responseJavaScript)
 			{
 				// if Contao is sending a reload/redirect response (see System::reload() or System::redirect())
-				if (responseTree.length < 2 && responseHTML.test(/^http/))
+				if (responseTree.length < 2 && responseHTML.test(/^http|\/main.php/))
 				{
 					this.request.send({url:(this.addURLFragment(this.options.baseURL)), method:'get'});
 					return;
