@@ -1,10 +1,22 @@
+
+dcawizard Changelog
 ===========================
-Isotope eCommerce Changelog
-===========================
+
+
+Version 1.2.1 stable (2012-06-29)
+---------------------------------
+- Now support redirects from Contao 2.11
+
+
+Version 1.2.0 stable (2012-06-10)
+---------------------------------
+- Fixed "you do not have javascript enable" message
+
 
 Version 1.2.0 beta2 (2012-02-01)
 --------------------------------
 - Fixed issue with Contao 2.10 request tokens
+
 
 Version 1.2.0 beta1 (2011-07-18)
 --------------------------------
@@ -14,6 +26,7 @@ Version 1.2.0 beta1 (2011-07-18)
 - Fixed: Adopt buttons from mode 4 header (Thanks to Christoph Wiechert)
 - Fixed: IE problem when having form inside form (list view)
 - Fixed: Collapse page trees
+
 
 Version 1.1.0 stable (2010-01-19)
 ---------------------------------
@@ -25,6 +38,7 @@ Version 1.1.0 stable (2010-01-19)
 - fixed bug with tinyMCE working in the dcaWizard but not on the current page
 - fixed bug where dcaWizard=1 was set multiple times in request url
 - fixed issues in Chrome
+
 
 Version 1.0.0 stable (2010-11-29)
 ---------------------------------
