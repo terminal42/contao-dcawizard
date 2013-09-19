@@ -28,9 +28,6 @@ var DcaWizard =
             'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
             'onHide': function() { document.body.setStyle('overflow', 'auto'); }
         });
-        M.addButton(Contao.lang.close, 'btn', function() {
-            this.hide();
-        });
         M.addButton(Contao.lang.apply, 'btn primary', function() {
             var frm = null,
                 frms = window.frames;
