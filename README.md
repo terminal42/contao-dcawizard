@@ -20,6 +20,9 @@ How to use:
 
     'eval'                  => array
     (
+    	// Use a custom label for button
+    	'buttonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_button'],
+
     	// Use the field "name" in the list
     	'listField' => array('name'),
 

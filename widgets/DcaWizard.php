@@ -157,7 +157,7 @@ class DcaWizard extends \Widget
         }
 
         return $strReturn . '
-<p><a href="contao/main.php?do='.\Input::get('do').'&amp;table='.$this->foreignTable.'&amp;field='.$this->strField.'&amp;id='.$this->currentRecord.'&amp;popup=1&amp;rt='.REQUEST_TOKEN.'" class="tl_submit" onclick="Backend.getScrollOffset();DcaWizard.openModalWindow({\'width\':765,\'title\':\''.specialchars($this->strLabel).'\',\'url\':this.href,\'id\':\''.$this->strId.'\'});return false">'.$GLOBALS['TL_LANG']['MSC']['changeSelection'].'</a></p>
+<p><a href="contao/main.php?do='.\Input::get('do').'&amp;table='.$this->foreignTable.'&amp;field='.$this->strField.'&amp;id='.$this->currentRecord.'&amp;popup=1&amp;rt='.REQUEST_TOKEN.'" class="tl_submit" onclick="Backend.getScrollOffset();DcaWizard.openModalWindow({\'width\':765,\'title\':\''.specialchars($this->strLabel).'\',\'url\':this.href,\'id\':\''.$this->strId.'\'});return false">'.($this->buttonLabel ? $this->buttonLabel : $this->strLabel).'</a></p>
 </div>
 </div>';
     }
