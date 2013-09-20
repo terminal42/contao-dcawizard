@@ -49,7 +49,7 @@ class DcaWizard extends \Widget
 
         if ($this->foreignTable != '') {
             $this->loadDataContainer($this->foreignTable);
-            $this->loadLanguageFile($this->foreignTable);
+            \System::loadLanguageFile($this->foreignTable);
         }
     }
 
