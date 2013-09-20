@@ -150,8 +150,31 @@ class DcaWizard extends \Widget
             }
         }
 
+        $arrParams = array
+        (
+            'do'        => \Input::get('do'),
+            'table'     => $this->foreignTable,
+            'field'     => $this->strField,
+            'id'        => $this->currentRecord,
+            'popup'     => 1,
+            'rt'        => REQUEST_TOKEN,
+        );
+
+        $arrOptions = array
+        (
+            'width'         => 765,
+            'title'         => "'" . specialchars($this->strLabel) . "'",
+            'url'           => 'this.href',
+            'id'            => "'" . $this->strId . "'",
+            'applyLabel'    => "'" . specialchars($this->applyButtonLabel) . "'"
+        );
+
+        $strOptions = implode(', ', array_map(function ($v, $k) { return sprintf("'%s':%s", $k, $v); }, $arrOptions, array_keys($arrOptions)));
+
         return $strReturn . '
-<p style="margin-top:9px;"><a href="contao/main.php?do='.\Input::get('do').'&amp;table='.$this->foreignTable.'&amp;field='.$this->strField.'&amp;id='.$this->currentRecord.'&amp;popup=1&amp;rt='.REQUEST_TOKEN.'" class="tl_submit" onclick="Backend.getScrollOffset();DcaWizard.openModalWindow({\'width\':765,\'title\':\''.specialchars($this->strLabel).'\',\'url\':this.href,\'id\':\''.$this->strId.'\'});return false">'.($this->buttonLabel ? $this->buttonLabel : $this->strLabel).'</a></p>
+<p style="margin-top:9px;">
+<a href="contao/main.php?' . ampersand(http_build_query($arrParams)) . '" class="tl_submit" onclick="Backend.getScrollOffset();DcaWizard.openModalWindow({' . $strOptions . '});return false">'.($this->editButtonLabel ? $this->editButtonLabel : $this->strLabel).'</a>
+</p>
 </div>
 </div>';
     }

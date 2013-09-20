@@ -23,6 +23,8 @@ How to use:
         // Use a custom label for the edit button
         'editButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_edit_button'],
 
+        // Use a custom label for the apply button
+        'applyButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_apply_button'],
 
         // Use the field "name" in the list
         'listField' => array('name'),

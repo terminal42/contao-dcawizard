@@ -24,11 +24,12 @@ var DcaWizard =
             'width': opt.width,
             'btn_ok': Contao.lang.close,
             'draggable': false,
+            'closeButton': false,
             'overlayOpacity': .5,
             'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
             'onHide': function() { document.body.setStyle('overflow', 'auto'); }
         });
-        M.addButton(Contao.lang.apply, 'btn primary', function() {
+        M.addButton(opt.applyLabel, 'btn primary', function() {
             var frm = null,
                 frms = window.frames;
             for (var i=0; i<frms.length; i++) {
