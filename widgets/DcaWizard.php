@@ -107,7 +107,7 @@ class DcaWizard extends \Widget
     public function validate()
     {
         if ($this->mandatory) {
-            $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
+            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
 
             if (!$objRecords->numRows && $this->strLabel == '') {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -204,7 +204,7 @@ class DcaWizard extends \Widget
                     die('Bad Request');
                 }
 
-                $objRow = \Database::getInstance()->prepare("SELECT * FROM " . $dc->table . " WHERE id=?")
+                $objRow = \Database::getInstance()->prepare("SELECT id FROM " . $dc->table . " WHERE id=?")
                                                   ->execute($intId);
 
                 // The record does not exist
