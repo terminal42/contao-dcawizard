@@ -219,6 +219,7 @@ class DcaWizard extends \Widget
             $arrData = $GLOBALS['TL_DCA'][$dc->table]['fields'][$strField];
             $objWidget = new $strClass($strClass::getAttributesFromDca($arrData, $strFieldName, null, $strField, $dc->table, $dc));
 
+            header('Content-Type: text/html; charset=' . $GLOBALS['TL_CONFIG']['characterSet']);
             echo $objWidget->generate();
             exit;
         }
