@@ -128,7 +128,7 @@ class DcaWizard extends \Widget
 <div class="selector_container">';
 
         // Add assets
-        $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = 'system/modules/dcawizard/assets/dcawizard.min.js';
+        $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
         // Get the available records
         $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord}" . ($this->listField ? " ORDER BY {$this->listField}" : ""));
