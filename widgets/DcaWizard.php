@@ -62,11 +62,6 @@ class DcaWizard extends \Widget
     public function __set($strKey, $varValue)
     {
         switch($strKey) {
-            // very special case: these classes are imported and must not be added to arrData
-            case 'Isotope':
-            case 'dcaWizard':
-                $this->$strKey = $varValue;
-                break;
             case 'value':
                 $this->varValue = $varValue;
                 break;
