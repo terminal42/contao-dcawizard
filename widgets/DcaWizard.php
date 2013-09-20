@@ -43,8 +43,8 @@ class DcaWizard extends \Widget
 
         // Load the table from callback
         if (is_array($this->foreignTableCallback) && count($this->foreignTableCallback)) {
-            $this->import($this->foreignTableCallback[0]);
-            $this->foreignTable = $this->{$this->foreignTableCallback[0]}->{$this->foreignTableCallback[1]}();
+            $objCallback = \System::importStatic($this->foreignTableCallback[0]);
+            $this->foreignTable = $objCallback->{$this->foreignTableCallback[1]}();
         }
 
         if ($this->foreignTable != '') {
@@ -112,8 +112,7 @@ class DcaWizard extends \Widget
     public function validate()
     {
         if ($this->mandatory) {
-            $this->import('Database');
-            $objRecords = $this->Database->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
+            $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
 
             if (!$objRecords->numRows && $this->strLabel == '') {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -142,8 +141,8 @@ class DcaWizard extends \Widget
         if ($objRecords->numRows) {
             // Use the callback to generate the list
             if (is_array($this->listCallback) && count($this->listCallback)) {
-                $this->import($this->listCallback[0]);
-                $strReturn .= $this->{$this->listCallback[0]}->{$this->listCallback[1]}($objRecords, $this->strId);
+                $objCallback = \System::importStatic($this->listCallback[0]);
+                $strReturn .= $objCallback->{$this->listCallback[1]}($objRecords, $this->strId);
             } else {
                 $strReturn .= '<ul id="sort_' . $this->strId . '">';
 
