@@ -22,7 +22,7 @@ var DcaWizard =
         if (!opt.height || opt.height > max) opt.height = max;
         var M = new SimpleModal({
             'width': opt.width,
-            'btn_ok': Contao.lang.close,
+            'hideFooter': true,
             'draggable': false,
             'closeButton': false,
             'overlayOpacity': .5,
