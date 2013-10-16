@@ -24,7 +24,7 @@ var DcaWizard =
             'width': opt.width,
             'hideFooter': true,
             'draggable': false,
-            'closeButton': false,
+            'closeButton': true,
             'overlayOpacity': .5,
             'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
             'onHide': function() { document.body.setStyle('overflow', 'auto'); }
