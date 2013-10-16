@@ -19,17 +19,18 @@ var DcaWizard =
     {
         var opt = options || {};
         var max = (window.getSize().y-180).toInt();
+        var label = opt.applyLabel ? opt.applyLabel : Contao.lang.close;
         if (!opt.height || opt.height > max) opt.height = max;
         var M = new SimpleModal({
             'width': opt.width,
-            'hideFooter': true,
+            'btn_ok': label,
             'draggable': false,
-            'closeButton': true,
+            'closeButton': false,
             'overlayOpacity': .5,
             'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
             'onHide': function() { document.body.setStyle('overflow', 'auto'); }
         });
-        M.addButton(opt.applyLabel, 'btn primary', function() {
+        M.addButton(label, 'btn primary', function() {
             var frm = null,
                 frms = window.frames;
             for (var i=0; i<frms.length; i++) {
