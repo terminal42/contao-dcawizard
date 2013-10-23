@@ -196,7 +196,7 @@ var dcaWizard = new Class({
 
 						this.adoptButtons();
 
-						$exec(responseJavaScript.replace(/.*<!--.*|.*-->.*/g, ''));
+						new Element('script', {text:responseJavaScript}).inject(document.body);
 
 						// Stupid TinyMCE is relying on window "load" event to initialize. This will never occure if tinyMCE is initialized trough ajax.
 						try
