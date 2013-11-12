@@ -20,16 +20,22 @@ How to use:
 
     'eval'                  => array
     (
+        // A list of fields to be displayed in the table
+        'fields' => array('id', 'name', 'alias'),
+
+        // Header fields of the table (leave empty to use labels)
+        'headerFields' => array('ID', 'Name', 'Alias'),
+
         // Use a custom label for the edit button
         'editButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_edit_button'],
 
         // Use a custom label for the apply button
         'applyButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_apply_button'],
 
-        // Use the field "name" in the list
-        'listField' => array('name'),
+        // Order records by a particular field
+        'orderField' => array("name DESC"),
 
-         // Use the callback to generate the list
+        // Use the callback to generate the list
         'listCallback' => array('Isotope\tl_iso_prices', 'generateWizardList'),
     ),
 ),

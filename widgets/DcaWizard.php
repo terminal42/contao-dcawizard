@@ -124,6 +124,8 @@ class DcaWizard extends \Widget
      */
     public function generate()
     {
+        $blnCallback = is_array($this->listCallback) && count($this->listCallback);
+        $arrHeaderFields = $this->headerFields;
         $strReturn = '<div id="ctrl_' . $this->strId . '" class="dcawizard">
 <div class="selector_container">';
 
@@ -131,22 +133,49 @@ class DcaWizard extends \Widget
         $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
         // Get the available records
-        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord} AND tstamp>0" . ($this->listField ? " ORDER BY {$this->listField}" : ""));
+        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord} AND tstamp>0" . ($this->orderField ? " ORDER BY {$this->orderField}" : ""));
+
+        // Automatically get the header fields
+        if (!$blnCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
+            \System::loadLanguageFile($this->foreignTable);
+
+            foreach ($this->fields as $field) {
+                if ($field == 'id') {
+                    $arrHeaderFields[] = 'ID';
+                    continue;
+                }
+
+                $arrHeaderFields[] = $GLOBALS['TL_LANG'][$this->foreignTable][$field][0];
+            }
+        }
 
         if ($objRecords->numRows) {
             // Use the callback to generate the list
-            if (is_array($this->listCallback) && count($this->listCallback)) {
+            if ($blnCallback) {
                 $objCallback = \System::importStatic($this->listCallback[0]);
                 $strReturn .= $objCallback->{$this->listCallback[1]}($objRecords, $this->strId);
             } else {
-                $strReturn .= '<ul id="sort_' . $this->strId . '">';
+                $strReturn .= '<table class="tl_listing showColumns"><thead>';
+
+                // Add header fields
+                foreach ($arrHeaderFields as $field) {
+                    $strReturn .= '<td class="tl_folder_tlist">' . $field . '</td>';
+                }
+
+                $strReturn .='</thead><tbody>';
 
                 // Generate the records
                 while ($objRecords->next()) {
-                    $strReturn .= $this->generateListRow($objRecords);
+                    $strReturn .= '<tr>';
+
+                    foreach ($this->fields as $field) {
+                        $strReturn .= '<td class="tl_file_list">' . $objRecords->$field . '</td>';
+                    }
+
+                    $strReturn .= '</tr>';
                 }
 
-                $strReturn .= '</ul>';
+                $strReturn .= '</tbody></table>';
             }
         }
 
@@ -177,17 +206,6 @@ class DcaWizard extends \Widget
 </p>
 </div>
 </div>';
-    }
-
-
-    /**
-     * Generate the list row and return it as HTML string
-     * @param object
-     * @return string
-     */
-    protected function generateListRow($objRecords)
-    {
-        return '<li>' . ($this->listField ? ($objRecords->{$this->listField} . ' ') : '') . '(ID: ' . $objRecords->id . ')</li>';
     }
 
 
