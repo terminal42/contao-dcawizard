@@ -137,8 +137,6 @@ class DcaWizard extends \Widget
 
         // Automatically get the header fields
         if (!$blnCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
-            \System::loadLanguageFile($this->foreignTable);
-
             foreach ($this->fields as $field) {
                 if ($field == 'id') {
                     $arrHeaderFields[] = 'ID';
