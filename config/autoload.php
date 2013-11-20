@@ -12,13 +12,9 @@
 
 
 /**
- * Backend form fields
+ * Register the classes
  */
-$GLOBALS['BE_FFL']['dcaWizard'] = 'DcaWizard';
-
-
-/**
- * Hooks
- */
-$GLOBALS['TL_HOOKS']['executePostActions'][] = array('DcaWizard', 'handleAjaxActions');
-
+ClassLoader::addClasses(array
+(
+    'Contao\DcaWizard' => 'system/modules/dcawizard/widgets/DcaWizard.php'
+));

@@ -3,6 +3,11 @@ dcawizard Changelog
 ===========================
 
 
+Version 2.0.0 stable (2013-??-??)
+---------------------------------
+- Support Contao 3 and drop the support for Contao 2
+
+
 Version 1.2.1 stable (2012-06-29)
 ---------------------------------
 - Now support redirects from Contao 2.11
