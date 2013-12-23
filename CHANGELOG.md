@@ -2,6 +2,10 @@
 dcawizard Changelog
 ===========================
 
+Version 2.0.2 stable (2013-12-23)
+---------------------------------
+- Fixed dependencies in Composer
+
 Version 2.0.1 stable (2013-12-23)
 ---------------------------------
 - Support for Composer
