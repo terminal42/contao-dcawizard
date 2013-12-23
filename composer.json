@@ -24,7 +24,7 @@
     "extra":{
         "contao": {
             "sources":{
-                "system/modules/dcawizard": "system/modules/dcawizard"
+                "": "system/modules/dcawizard"
             }
         }
     }
