@@ -2,8 +2,11 @@
 dcawizard Changelog
 ===========================
 
+Version 2.0.1 stable (2013-12-23)
+---------------------------------
+- Support for Composer
 
-Version 2.0.0 stable (2013-??-??)
+Version 2.0.0 stable (2013-11-20)
 ---------------------------------
 - Support Contao 3 and drop the support for Contao 2
 
