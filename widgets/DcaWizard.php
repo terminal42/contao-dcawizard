@@ -12,6 +12,8 @@
 
 namespace Contao;
 
+use \Haste\Util\Format;
+
 
 /**
  * Class DcaWizard
@@ -145,7 +147,7 @@ class DcaWizard extends \Widget
                     continue;
                 }
 
-                $arrHeaderFields[] = $GLOBALS['TL_LANG'][$this->foreignTable][$field][0];
+                $arrHeaderFields[] = Format::dcaLabel($this->foreignTable, $field);
             }
         }
 
@@ -169,7 +171,7 @@ class DcaWizard extends \Widget
                     $strReturn .= '<tr>';
 
                     foreach ($this->fields as $field) {
-                        $strReturn .= '<td class="tl_file_list">' . $objRecords->$field . '</td>';
+                        $strReturn .= '<td class="tl_file_list">' . Format::dcaValue($this->foreignTable, $field, $objRecords->$field) . '</td>';
                     }
 
                     $strReturn .= '</tr>';
