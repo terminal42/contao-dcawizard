@@ -65,12 +65,14 @@ class DcaWizard extends \Widget
             case 'value':
                 $this->varValue = $varValue;
                 break;
+
             case 'mandatory':
                 $this->arrConfiguration[$strKey] = $varValue ? true : false;
                 break;
             case 'foreignTable':
                 $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] = $varValue;
                 break;
+
             default:
                 parent::__set($strKey, $varValue);
                 break;
