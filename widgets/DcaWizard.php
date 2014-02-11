@@ -109,7 +109,7 @@ class DcaWizard extends \Widget
     public function validate()
     {
         if ($this->mandatory) {
-            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
+            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition());
 
             if (!$objRecords->numRows && $this->strLabel == '') {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -135,7 +135,7 @@ class DcaWizard extends \Widget
         $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
         // Get the available records
-        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord} AND tstamp>0" . ($this->orderField ? " ORDER BY {$this->orderField}" : ""));
+        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . ($this->orderField ? " ORDER BY {$this->orderField}" : ""));
 
         // Automatically get the header fields
         if (!$blnCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
@@ -264,5 +264,16 @@ class DcaWizard extends \Widget
             echo $objWidget->generate();
             exit;
         }
+    }
+
+    /**
+     * Return SQL WHERE condition for foreign table
+     * @return string
+     */
+    private function getForeignTableCondition()
+    {
+        $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
+
+        return "pid={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
     }
 }
