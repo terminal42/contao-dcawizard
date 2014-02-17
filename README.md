@@ -33,7 +33,7 @@ How to use:
         'applyButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_apply_button'],
 
         // Order records by a particular field
-        'orderField' => array("name DESC"),
+        'orderField' => 'name DESC',
 
         // Use the callback to generate the list
         'listCallback' => array('Isotope\tl_iso_prices', 'generateWizardList'),
