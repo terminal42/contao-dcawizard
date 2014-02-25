@@ -92,6 +92,9 @@ class DcaWizard extends \Widget
             case 'currentRecord':
                 return \Input::get('id');
 
+            case 'params':
+                return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'];
+
             case 'foreignTable':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'];
 
@@ -198,6 +201,11 @@ class DcaWizard extends \Widget
             'popup'     => 1,
             'rt'        => REQUEST_TOKEN,
         );
+
+        // Merge params
+        if (is_array($this->params) && count($this->params) > 0) {
+            $arrParams = array_merge($arrParams, $this->params);
+        }
 
         $arrOptions = array
         (

@@ -21,6 +21,16 @@ How to use:
     // Use the callback to determine the foreign table
     'foreignTableCallback'  => array('tl_iso_prices', 'getTableName'),
 
+    // Add special params to the link of the button
+    'params'                  => array
+    (
+        // Change the do parameter
+        'do'                  => 'member',
+
+        // Add new parameter, for example to filter the list
+        'filterField'         => 'group',
+    ),
+
     'eval'                  => array
     (
         // A list of fields to be displayed in the table
