@@ -71,6 +71,9 @@ class DcaWizard extends \Widget
             case 'foreignTable':
                 $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] = $varValue;
                 break;
+            case 'foreignField':
+                $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] = $varValue;
+                break;
             default:
                 parent::__set($strKey, $varValue);
                 break;
@@ -92,6 +95,15 @@ class DcaWizard extends \Widget
             case 'foreignTable':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'];
 
+            case 'foreignField':
+                $foreignField = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'];
+
+                if (empty($foreignField)) {
+                    $foreignField = 'pid';
+                }
+
+                return $foreignField;
+
             case 'foreignTableCallback':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback'];
 
@@ -107,7 +119,7 @@ class DcaWizard extends \Widget
     public function validate()
     {
         if ($this->mandatory) {
-            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
+            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE {$this->foreignField}={$this->currentRecord}");
 
             if (!$objRecords->numRows && $this->strLabel == '') {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -133,7 +145,7 @@ class DcaWizard extends \Widget
         $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
         // Get the available records
-        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord} AND tstamp>0" . ($this->orderField ? " ORDER BY {$this->orderField}" : ""));
+        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE {$this->foreignField}={$this->currentRecord} AND tstamp>0" . ($this->orderField ? " ORDER BY {$this->orderField}" : ""));
 
         // Automatically get the header fields
         if (!$blnCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {

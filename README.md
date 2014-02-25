@@ -15,6 +15,9 @@ How to use:
     // Define the foreign table
     'foreignTable'          => 'tl_iso_prices',
 
+    // Define the foreign field (e.g. fid instead of pid)
+    'foreignField'          => 'fid',
+
     // Use the callback to determine the foreign table
     'foreignTableCallback'  => array('tl_iso_prices', 'getTableName'),
 
