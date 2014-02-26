@@ -74,7 +74,9 @@ class DcaWizard extends \Widget
             case 'foreignTable':
                 $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] = $varValue;
                 break;
-
+            case 'foreignField':
+                $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] = $varValue;
+                break;
             default:
                 parent::__set($strKey, $varValue);
                 break;
@@ -93,8 +95,20 @@ class DcaWizard extends \Widget
             case 'currentRecord':
                 return \Input::get('id');
 
+            case 'params':
+                return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'];
+
             case 'foreignTable':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'];
+
+            case 'foreignField':
+                $foreignField = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'];
+
+                if (empty($foreignField)) {
+                    $foreignField = 'pid';
+                }
+
+                return $foreignField;
 
             case 'foreignTableCallback':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback'];
@@ -191,6 +205,11 @@ class DcaWizard extends \Widget
             'rt'        => REQUEST_TOKEN,
         );
 
+        // Merge params
+        if (!emtpy($this->params) && is_array($this->params)) {
+            $arrParams = array_merge($arrParams, $this->params);
+        }
+
         $arrOptions = array
         (
             'width'         => 765,
@@ -276,6 +295,6 @@ class DcaWizard extends \Widget
     {
         $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
 
-        return "pid={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
+        return "{$this->foreignField}={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
     }
 }
