@@ -203,7 +203,7 @@ class DcaWizard extends \Widget
         );
 
         // Merge params
-        if (is_array($this->params) && count($this->params) > 0) {
+        if (!emtpy($this->params) && is_array($this->params)) {
             $arrParams = array_merge($arrParams, $this->params);
         }
 
