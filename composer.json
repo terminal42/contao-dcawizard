@@ -16,7 +16,7 @@
         "contao-community-alliance/composer-installer":"*"
     },
     "autoload":{
-        "classmap":["/widgets"]
+        "classmap":["widgets"]
     },
     "replace": {
         "contao-legacy/dcawizard": "self.version"
