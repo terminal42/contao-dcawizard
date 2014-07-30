@@ -144,6 +144,15 @@ class DcaWizard extends \Widget
     {
         $blnCallback = is_array($this->listCallback) && count($this->listCallback);
         $arrHeaderFields = $this->headerFields;
+        $strOrderBy = '';
+        $orderFields = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'];
+
+        if ($this->orderField) {
+            $strOrderBy = ' ORDER BY ' . $this->orderField;
+        } elseif (!empty($orderFields) && is_array($orderFields)) {
+            $strOrderBy = ' ORDER BY ' . implode(',', $orderFields);
+        }
+
         $strReturn = '<div id="ctrl_' . $this->strId . '" class="dcawizard">
 <div class="selector_container">';
 
@@ -151,7 +160,7 @@ class DcaWizard extends \Widget
         $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
         // Get the available records
-        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . ($this->orderField ? " ORDER BY {$this->orderField}" : ""));
+        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $strOrderBy);
 
         // Automatically get the header fields
         if (!$blnCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
