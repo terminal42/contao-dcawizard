@@ -142,7 +142,7 @@ class DcaWizard extends \Widget
      */
     public function generate()
     {
-        $blnCallback = is_array($this->listCallback) && count($this->listCallback);
+        $varCallback = $this->listCallback;
         $arrHeaderFields = $this->headerFields;
         $strOrderBy = '';
         $orderFields = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'];
@@ -163,7 +163,7 @@ class DcaWizard extends \Widget
         $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $strOrderBy);
 
         // Automatically get the header fields
-        if (!$blnCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
+        if (null === $varCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
             foreach ($this->fields as $field) {
                 if ($field == 'id') {
                     $arrHeaderFields[] = 'ID';
@@ -176,9 +176,11 @@ class DcaWizard extends \Widget
 
         if ($objRecords->numRows) {
             // Use the callback to generate the list
-            if ($blnCallback) {
-                $objCallback = \System::importStatic($this->listCallback[0]);
-                $strReturn .= $objCallback->{$this->listCallback[1]}($objRecords, $this->strId);
+            if (is_array($varCallback)) {
+                $strReturn .= \System::importStatic($varCallback[0])->{$varCallback[1]}($objRecords, $this->strId);
+            } elseif (is_callable($varCallback)) {
+                $strReturn .= $varCallback($objRecords, $this->strId);
+
             } else {
                 $strReturn .= '<table class="tl_listing showColumns"><thead>';
 
