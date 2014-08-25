@@ -12,6 +12,8 @@
 
 namespace Contao;
 
+use \Haste\Util\Format;
+
 
 /**
  * Class DcaWizard
@@ -65,11 +67,15 @@ class DcaWizard extends \Widget
             case 'value':
                 $this->varValue = $varValue;
                 break;
+
             case 'mandatory':
                 $this->arrConfiguration[$strKey] = $varValue ? true : false;
                 break;
             case 'foreignTable':
                 $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] = $varValue;
+                break;
+            case 'foreignField':
+                $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] = $varValue;
                 break;
             default:
                 parent::__set($strKey, $varValue);
@@ -89,8 +95,20 @@ class DcaWizard extends \Widget
             case 'currentRecord':
                 return \Input::get('id');
 
+            case 'params':
+                return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'];
+
             case 'foreignTable':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'];
+
+            case 'foreignField':
+                $foreignField = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'];
+
+                if (empty($foreignField)) {
+                    $foreignField = 'pid';
+                }
+
+                return $foreignField;
 
             case 'foreignTableCallback':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback'];
@@ -107,7 +125,7 @@ class DcaWizard extends \Widget
     public function validate()
     {
         if ($this->mandatory) {
-            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE pid={$this->currentRecord}");
+            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition());
 
             if (!$objRecords->numRows && $this->strLabel == '') {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -124,8 +142,17 @@ class DcaWizard extends \Widget
      */
     public function generate()
     {
-        $blnCallback = is_array($this->listCallback) && count($this->listCallback);
+        $varCallback = $this->listCallback;
         $arrHeaderFields = $this->headerFields;
+        $strOrderBy = '';
+        $orderFields = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'];
+
+        if ($this->orderField) {
+            $strOrderBy = ' ORDER BY ' . $this->orderField;
+        } elseif (!empty($orderFields) && is_array($orderFields)) {
+            $strOrderBy = ' ORDER BY ' . implode(',', $orderFields);
+        }
+
         $strReturn = '<div id="ctrl_' . $this->strId . '" class="dcawizard">
 <div class="selector_container">';
 
@@ -133,25 +160,27 @@ class DcaWizard extends \Widget
         $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
         // Get the available records
-        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE pid={$this->currentRecord} AND tstamp>0" . ($this->orderField ? " ORDER BY {$this->orderField}" : ""));
+        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $strOrderBy);
 
         // Automatically get the header fields
-        if (!$blnCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
+        if (null === $varCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
             foreach ($this->fields as $field) {
                 if ($field == 'id') {
                     $arrHeaderFields[] = 'ID';
                     continue;
                 }
 
-                $arrHeaderFields[] = $GLOBALS['TL_LANG'][$this->foreignTable][$field][0];
+                $arrHeaderFields[] = Format::dcaLabel($this->foreignTable, $field);
             }
         }
 
         if ($objRecords->numRows) {
             // Use the callback to generate the list
-            if ($blnCallback) {
-                $objCallback = \System::importStatic($this->listCallback[0]);
-                $strReturn .= $objCallback->{$this->listCallback[1]}($objRecords, $this->strId);
+            if (is_array($varCallback)) {
+                $strReturn .= \System::importStatic($varCallback[0])->{$varCallback[1]}($objRecords, $this->strId);
+            } elseif (is_callable($varCallback)) {
+                $strReturn .= $varCallback($objRecords, $this->strId);
+
             } else {
                 $strReturn .= '<table class="tl_listing showColumns"><thead>';
 
@@ -167,7 +196,7 @@ class DcaWizard extends \Widget
                     $strReturn .= '<tr>';
 
                     foreach ($this->fields as $field) {
-                        $strReturn .= '<td class="tl_file_list">' . $objRecords->$field . '</td>';
+                        $strReturn .= '<td class="tl_file_list">' . Format::dcaValue($this->foreignTable, $field, $objRecords->$field) . '</td>';
                     }
 
                     $strReturn .= '</tr>';
@@ -186,6 +215,11 @@ class DcaWizard extends \Widget
             'popup'     => 1,
             'rt'        => REQUEST_TOKEN,
         );
+
+        // Merge params
+        if (!empty($this->params) && is_array($this->params)) {
+            $arrParams = array_merge($arrParams, $this->params);
+        }
 
         $arrOptions = array
         (
@@ -262,5 +296,16 @@ class DcaWizard extends \Widget
             echo $objWidget->generate();
             exit;
         }
+    }
+
+    /**
+     * Return SQL WHERE condition for foreign table
+     * @return string
+     */
+    private function getForeignTableCondition()
+    {
+        $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
+
+        return "{$this->foreignField}={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
     }
 }

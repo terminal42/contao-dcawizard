@@ -15,8 +15,21 @@ How to use:
     // Define the foreign table
     'foreignTable'          => 'tl_iso_prices',
 
+    // Define the foreign field (e.g. fid instead of pid)
+    'foreignField'          => 'fid',
+
     // Use the callback to determine the foreign table
     'foreignTableCallback'  => array('tl_iso_prices', 'getTableName'),
+
+    // Add special params to the link of the button
+    'params'                  => array
+    (
+        // Change the do parameter
+        'do'                  => 'member',
+
+        // Add new parameter, for example to filter the list
+        'filterField'         => 'group',
+    ),
 
     'eval'                  => array
     (
@@ -33,7 +46,7 @@ How to use:
         'applyButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_apply_button'],
 
         // Order records by a particular field
-        'orderField' => array("name DESC"),
+        'orderField' => 'name DESC',
 
         // Use the callback to generate the list
         'listCallback' => array('Isotope\tl_iso_prices', 'generateWizardList'),
