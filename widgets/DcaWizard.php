@@ -55,10 +55,10 @@ class DcaWizard extends \Widget
 
 
     /**
-    * Add specific attributes
-    * @param string
-    * @param mixed
-    */
+     * Add specific attributes
+     * @param string
+     * @param mixed
+     */
     public function __set($strKey, $varValue)
     {
         switch($strKey) {
@@ -180,7 +180,7 @@ class DcaWizard extends \Widget
      * @param \Database_Result
      * @return array
      */
-    protected function getRows($objRecords)
+    public function getRows($objRecords)
     {
         if (!$objRecords->numRows) {
             return array();
@@ -204,7 +204,7 @@ class DcaWizard extends \Widget
      * Get dca wizard javascript options
      * @return array
      */
-    protected function getDcaWizardOptions()
+    public function getDcaWizardOptions()
     {
         return array
         (
@@ -221,7 +221,7 @@ class DcaWizard extends \Widget
      * Get button href
      * @return string
      */
-    protected function getButtonHref()
+    public function getButtonHref()
     {
         $arrParams = array
         (
@@ -246,7 +246,7 @@ class DcaWizard extends \Widget
      * Get button label
      * @return string
      */
-    protected function getButtonLabel()
+    public function getButtonLabel()
     {
         return specialchars($this->editButtonLabel ? $this->editButtonLabel : $this->strLabel);
     }
@@ -256,7 +256,7 @@ class DcaWizard extends \Widget
      * Get records
      * @return \Database_Result
      */
-    protected function getRecords()
+    public function getRecords()
     {
         return \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $this->getOrderBy());
     }
@@ -266,7 +266,7 @@ class DcaWizard extends \Widget
      * Get header fields
      * @return array()
      */
-    protected function getHeaderFields()
+    public function getHeaderFields()
     {
         $arrHeaderFields = $this->headerFields;
 
@@ -289,7 +289,7 @@ class DcaWizard extends \Widget
      * Get ORDER BY statement
      * @return string
      */
-    protected function getOrderBy()
+    public function getOrderBy()
     {
         $strOrderBy = '';
         $orderFields = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'];
@@ -308,7 +308,7 @@ class DcaWizard extends \Widget
      * Return SQL WHERE condition for foreign table
      * @return string
      */
-    protected function getForeignTableCondition()
+    public function getForeignTableCondition()
     {
         $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
 
@@ -353,7 +353,7 @@ class DcaWizard extends \Widget
                 }
 
                 $objRow = \Database::getInstance()->prepare("SELECT id FROM " . $dc->table . " WHERE id=?")
-                                                  ->execute($intId);
+                    ->execute($intId);
 
                 // The record does not exist
                 if ($objRow->numRows < 1) {
