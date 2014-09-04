@@ -140,6 +140,9 @@ class DcaWizard extends \Widget
     public function generate()
     {
         $varCallback = $this->listCallback;
+        $blnShowOperations = $this->showOperations;
+        $widget = $this;
+
         // Add assets
         $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
@@ -157,6 +160,14 @@ class DcaWizard extends \Widget
             $objTemplate->headerFields = $this->getHeaderFields();
             $objTemplate->hasRows = !empty($arrRows);
             $objTemplate->rows = $arrRows;
+            $objTemplate->showOperations = $blnShowOperations;
+            if ($blnShowOperations) {
+                $objTemplate->operations = $this->getActiveRowOperations();
+            }
+            $objTemplate->generateOperation = function($operation, $row) use ($widget) {
+                return $widget->generateRowOperation($operation, $row);
+            };
+
         } else {
             $strCallback = '';
             if (is_array($varCallback)) {
@@ -178,6 +189,60 @@ class DcaWizard extends \Widget
 
 
     /**
+     * Generate a row operation
+     * @param   string operation name
+     * @param   array Db row
+     * @return  string
+     */
+    public function generateRowOperation($operation, $row)
+    {
+        // Load the button definition from the subtable
+        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation];
+
+        $id = specialchars(rawurldecode($row['id']));
+
+        $label = $def['label'][0] ?: $operation;
+        $title = sprintf($def['label'][1] ?: $operation, $id);
+        $attributes = ($def['attributes'] != '') ? ' ' . ltrim(sprintf($def['attributes'], $id, $id)) : '';
+
+        // Add the key as CSS class
+        if (strpos($attributes, 'class="') !== false) {
+            $attributes = str_replace('class="', 'class="' . $operation . ' ', $attributes);
+        }
+        else {
+            $attributes = ' class="' . $operation . '"' . $attributes;
+        }
+
+        // Call a custom function instead of using the default button
+        if (is_array($def['button_callback']))  {
+            return \System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'], $label, $title, $def['icon'], $attributes);
+        } elseif (is_callable($def['button_callback'])) {
+            return $def['button_callback']($row, $def['href'], $label, $title, $def['icon'], $attributes);
+        }
+
+        $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'];
+
+        return sprintf(
+            '<a href="%s" title="%s"%s>%s</a> ',
+            $buttonHref,
+            specialchars($title),
+            $attributes,
+            \Image::getHtml($def['icon'], $label)
+        );
+    }
+
+
+    /**
+     * Get active row operations
+     * @return  array
+     */
+    public function getActiveRowOperations()
+    {
+        return (array) ($this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']));
+    }
+
+
+    /**
      * Get rows
      * @param \Database_Result
      * @return array
@@ -193,7 +258,7 @@ class DcaWizard extends \Widget
         while ($objRecords->next()) {
             $arrField = array();
             foreach ($this->fields as $field) {
-                $arrField[] = Format::dcaValue($this->foreignTable, $field, $objRecords->$field);
+                $arrField[$field] = Format::dcaValue($this->foreignTable, $field, $objRecords->$field);
             }
             $arrRows[] = $arrField;
         }
@@ -225,6 +290,19 @@ class DcaWizard extends \Widget
      */
     public function getButtonHref()
     {
+        return \Environment::get('base')
+            . \Environment::get('script')
+            . '?'
+            . http_build_query($this->getButtonParams());
+    }
+
+
+    /**
+     * Get button params
+     * @return array
+     */
+    public function getButtonParams()
+    {
         $arrParams = array
         (
             'do'        => \Input::get('do'),
@@ -240,7 +318,7 @@ class DcaWizard extends \Widget
             $arrParams = array_merge($arrParams, $this->params);
         }
 
-        return \Environment::get('base') . \Environment::get('script') . '?' . http_build_query($arrParams);
+        return $arrParams;
     }
 
 
