@@ -151,9 +151,12 @@ class DcaWizard extends \Widget
         $objRecords = $this->getRecords();
 
         if ($varCallback === null) {
+            $arrRows = $this->getRows($objRecords);
+
             $objTemplate->hasListCallback = false;
             $objTemplate->headerFields = $this->getHeaderFields();
-            $objTemplate->rows = $this->getRows($objRecords);
+            $objTemplate->hasRows = !empty($arrRows);
+            $objTemplate->rows = $arrRows;
         } else {
             $strCallback = '';
             if (is_array($varCallback)) {

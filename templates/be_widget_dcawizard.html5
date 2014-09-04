@@ -3,6 +3,7 @@
         <?php if ($this->hasListCallback): ?>
             <?php echo $this->listCallbackContent; ?>
         <?php else: ?>
+        <?php if ($this->hasRows): ?>
         <table class="tl_listing showColumns">
             <thead>
                 <?php foreach ($this->headerFields as $field): ?>
@@ -19,6 +20,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        <?php endif; ?>
         <?php endif; ?>
 
         <p style="margin-top:9px;">
