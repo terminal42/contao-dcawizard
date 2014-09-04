@@ -200,10 +200,17 @@ class DcaWizard extends \Widget
         $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation];
 
         $id = specialchars(rawurldecode($row['id']));
+        $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'];
 
         $label = $def['label'][0] ?: $operation;
         $title = sprintf($def['label'][1] ?: $operation, $id);
         $attributes = ($def['attributes'] != '') ? ' ' . ltrim(sprintf($def['attributes'], $id, $id)) : '';
+
+        // Dca wizard specific
+        $arrBaseOptions = $this->getDcaWizardOptions();
+        $arrBaseOptions['url'] = $buttonHref;
+        $attributes .= ' data-options="' . specialchars(json_encode($arrBaseOptions)) . '"';
+        $attributes .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
 
         // Add the key as CSS class
         if (strpos($attributes, 'class="') !== false) {
@@ -219,8 +226,6 @@ class DcaWizard extends \Widget
         } elseif (is_callable($def['button_callback'])) {
             return $def['button_callback']($row, $def['href'], $label, $title, $def['icon'], $attributes);
         }
-
-        $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'];
 
         return sprintf(
             '<a href="%s" title="%s"%s>%s</a> ',
