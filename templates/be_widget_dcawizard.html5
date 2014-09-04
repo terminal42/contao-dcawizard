@@ -1,0 +1,34 @@
+<div id="ctrl_<?php echo $this->strId; ?>" class="dcawizard">
+    <div class="selector_container">
+        <?php if ($this->hasListCallback): ?>
+            <?php echo $this->listCallbackContent; ?>
+        <?php else: ?>
+        <table class="tl_listing showColumns">
+            <thead>
+                <?php foreach ($this->headerFields as $field): ?>
+                <td class="tl_folder_tlist"><?php echo $field; ?></td>
+                <?php endforeach; ?>
+            </thead>
+            <tbody>
+                <?php foreach ($this->rows as $row): ?>
+                <tr>
+                    <?php foreach ($row as $field): ?>
+                    <td class="tl_file_list"><?php echo $field; ?></td>
+                    <?php endforeach; ?>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
+
+        <p style="margin-top:9px;">
+            <a href="<?php echo $this->buttonHref; ?>"
+               class="tl_submit"
+               data-options="<?php echo $this->dcaWizardOptions; ?>"
+               onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute('data-options')));return false"
+             >
+                <?php echo $this->buttonLabel; ?>
+            </a>
+        </p>
+    </div>
+</div>
