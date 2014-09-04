@@ -65,7 +65,6 @@ class DcaWizard extends \Widget
             case 'value':
                 $this->varValue = $varValue;
                 break;
-
             case 'mandatory':
                 $this->arrConfiguration[$strKey] = $varValue ? true : false;
                 break;
