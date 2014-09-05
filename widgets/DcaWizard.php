@@ -215,8 +215,7 @@ class DcaWizard extends \Widget
         // Add the key as CSS class
         if (strpos($attributes, 'class="') !== false) {
             $attributes = str_replace('class="', 'class="' . $operation . ' ', $attributes);
-        }
-        else {
+        } else {
             $attributes = ' class="' . $operation . '"' . $attributes;
         }
 
