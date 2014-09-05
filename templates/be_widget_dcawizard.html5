@@ -9,6 +9,9 @@
                 <?php foreach ($this->headerFields as $field): ?>
                 <td class="tl_folder_tlist"><?php echo $field; ?></td>
                 <?php endforeach; ?>
+                <?php if ($this->showOperations): ?>
+                <td class="tl_folder_tlist"></td>
+                <?php endif; ?>
             </thead>
             <tbody>
                 <?php foreach ($this->rows as $row): ?>
@@ -16,6 +19,14 @@
                     <?php foreach ($row as $field): ?>
                     <td class="tl_file_list"><?php echo $field; ?></td>
                     <?php endforeach; ?>
+
+                    <?php if ($this->showOperations): ?>
+                    <td class="tl_file_list tl_right_nowrap">
+                        <?php foreach ($this->operations as $operation): ?>
+                        <?php echo $this->generateOperation($operation, $row); ?>
+                        <?php endforeach; ?>
+                    </td>
+                    <?php endif; ?>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
