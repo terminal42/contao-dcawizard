@@ -44,9 +44,9 @@ class DcaWizard extends \Widget
         // Load the table from callback
         $varCallback = $this->foreignTableCallback;
         if (is_array($varCallback) && !empty($varCallback)) {
-            $this->foreignTable = \System::importStatic($varCallback[0])->{$varCallback[1]}();
+            $this->foreignTable = \System::importStatic($varCallback[0])->{$varCallback[1]}($this);
         } elseif (is_callable($varCallback)) {
-            $this->foreignTable = $varCallback();
+            $this->foreignTable = $varCallback($this);
         }
 
         if ($this->foreignTable != '') {
