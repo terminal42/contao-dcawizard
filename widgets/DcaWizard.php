@@ -42,9 +42,11 @@ class DcaWizard extends \Widget
         parent::__construct($arrAttributes);
 
         // Load the table from callback
-        if (is_array($this->foreignTableCallback) && count($this->foreignTableCallback)) {
-            $objCallback = \System::importStatic($this->foreignTableCallback[0]);
-            $this->foreignTable = $objCallback->{$this->foreignTableCallback[1]}();
+        $varCallback = $this->foreignTableCallback;
+        if (is_array($varCallback) && !empty($varCallback)) {
+            $this->foreignTable = \System::importStatic($varCallback[0])->{$varCallback[1]}();
+        } elseif (is_callable($varCallback)) {
+            $this->foreignTable = $varCallback();
         }
 
         if ($this->foreignTable != '') {
