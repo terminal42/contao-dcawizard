@@ -16,8 +16,8 @@
             <tbody>
                 <?php foreach ($this->rows as $row): ?>
                 <tr>
-                    <?php foreach ($row as $field): ?>
-                    <td class="tl_file_list"><?php echo $field; ?></td>
+                    <?php foreach ($this->fields as $field): ?>
+                    <td class="tl_file_list"><?php echo $row[$field]; ?></td>
                     <?php endforeach; ?>
 
                     <?php if ($this->showOperations): ?>

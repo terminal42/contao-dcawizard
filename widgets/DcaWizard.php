@@ -160,10 +160,13 @@ class DcaWizard extends \Widget
             $objTemplate->headerFields = $this->getHeaderFields();
             $objTemplate->hasRows = !empty($arrRows);
             $objTemplate->rows = $arrRows;
+            $objTemplate->fields = $this->fields;
             $objTemplate->showOperations = $blnShowOperations;
+
             if ($blnShowOperations) {
                 $objTemplate->operations = $this->getActiveRowOperations();
             }
+
             $objTemplate->generateOperation = function($operation, $row) use ($widget) {
                 return $widget->generateRowOperation($operation, $row);
             };
@@ -258,12 +261,15 @@ class DcaWizard extends \Widget
         }
 
         $arrRows = array();
+        $objRecords->reset();
 
         while ($objRecords->next()) {
-            $arrField = array();
+            $arrField = $objRecords->row();
+
             foreach ($this->fields as $field) {
                 $arrField[$field] = Format::dcaValue($this->foreignTable, $field, $objRecords->$field);
             }
+
             $arrRows[] = $arrField;
         }
 
