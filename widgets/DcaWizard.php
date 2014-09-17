@@ -325,8 +325,8 @@ class DcaWizard extends \Widget
             'rt'        => REQUEST_TOKEN,
         );
 
-        // Merge params
-        if (!empty($this->params) && is_array($this->params)) {
+        // Merge
+        if (is_array($this->params)) {
             $arrParams = array_merge($arrParams, $this->params);
         }
 
