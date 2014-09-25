@@ -118,6 +118,20 @@ class DcaWizard extends \Widget
         }
     }
 
+    /**
+     * magic getters are not called when checking with empty or isset. call magic getter first and then check
+     *
+     * @param string $strKey
+     *
+     * @return bool
+     */
+    public function __isset($strKey)
+    {
+        // first call __get to retrieve value...
+        $value = $this->{$strKey};
+        // ...then check if isset
+        return isset($value);
+    }
 
     /**
      * Validate input
