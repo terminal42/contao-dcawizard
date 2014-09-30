@@ -10,8 +10,6 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
  */
 
-namespace Contao;
-
 use \Haste\Util\Format;
 
 
@@ -44,9 +42,11 @@ class DcaWizard extends \Widget
         parent::__construct($arrAttributes);
 
         // Load the table from callback
-        if (is_array($this->foreignTableCallback) && count($this->foreignTableCallback)) {
-            $objCallback = \System::importStatic($this->foreignTableCallback[0]);
-            $this->foreignTable = $objCallback->{$this->foreignTableCallback[1]}();
+        $varCallback = $this->foreignTableCallback;
+        if (is_array($varCallback) && !empty($varCallback)) {
+            $this->foreignTable = \System::importStatic($varCallback[0])->{$varCallback[1]}($this);
+        } elseif (is_callable($varCallback)) {
+            $this->foreignTable = $varCallback($this);
         }
 
         if ($this->foreignTable != '') {
@@ -57,17 +57,16 @@ class DcaWizard extends \Widget
 
 
     /**
-    * Add specific attributes
-    * @param string
-    * @param mixed
-    */
+     * Add specific attributes
+     * @param string
+     * @param mixed
+     */
     public function __set($strKey, $varValue)
     {
         switch($strKey) {
             case 'value':
                 $this->varValue = $varValue;
                 break;
-
             case 'mandatory':
                 $this->arrConfiguration[$strKey] = $varValue ? true : false;
                 break;
@@ -143,69 +142,179 @@ class DcaWizard extends \Widget
     public function generate()
     {
         $varCallback = $this->listCallback;
-        $arrHeaderFields = $this->headerFields;
-        $strOrderBy = '';
-        $orderFields = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'];
-
-        if ($this->orderField) {
-            $strOrderBy = ' ORDER BY ' . $this->orderField;
-        } elseif (!empty($orderFields) && is_array($orderFields)) {
-            $strOrderBy = ' ORDER BY ' . implode(',', $orderFields);
-        }
-
-        $strReturn = '<div id="ctrl_' . $this->strId . '" class="dcawizard">
-<div class="selector_container">';
+        $blnShowOperations = $this->showOperations;
+        $widget = $this;
 
         // Add assets
         $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
 
+
+        $objTemplate = new BackendTemplate('be_widget_dcawizard');
+        $objTemplate->strId = $this->strId;
+
         // Get the available records
-        $objRecords = \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $strOrderBy);
+        $objRecords = $this->getRecords();
 
-        // Automatically get the header fields
-        if (null === $varCallback && (!is_array($arrHeaderFields) || empty($arrHeaderFields))) {
-            foreach ($this->fields as $field) {
-                if ($field == 'id') {
-                    $arrHeaderFields[] = 'ID';
-                    continue;
-                }
+        if ($varCallback === null) {
+            $arrRows = $this->getRows($objRecords);
 
-                $arrHeaderFields[] = Format::dcaLabel($this->foreignTable, $field);
+            $objTemplate->hasListCallback = false;
+            $objTemplate->headerFields = $this->getHeaderFields();
+            $objTemplate->hasRows = !empty($arrRows);
+            $objTemplate->rows = $arrRows;
+            $objTemplate->fields = $this->fields;
+            $objTemplate->showOperations = $blnShowOperations;
+
+            if ($blnShowOperations) {
+                $objTemplate->operations = $this->getActiveRowOperations();
             }
-        }
 
-        if ($objRecords->numRows) {
-            // Use the callback to generate the list
+            $objTemplate->generateOperation = function($operation, $row) use ($widget) {
+                return $widget->generateRowOperation($operation, $row);
+            };
+
+        } else {
+            $strCallback = '';
             if (is_array($varCallback)) {
-                $strReturn .= \System::importStatic($varCallback[0])->{$varCallback[1]}($objRecords, $this->strId);
+                $strCallback = \System::importStatic($varCallback[0])->{$varCallback[1]}($objRecords, $this->strId, $this);
             } elseif (is_callable($varCallback)) {
-                $strReturn .= $varCallback($objRecords, $this->strId);
-
-            } else {
-                $strReturn .= '<table class="tl_listing showColumns"><thead>';
-
-                // Add header fields
-                foreach ($arrHeaderFields as $field) {
-                    $strReturn .= '<td class="tl_folder_tlist">' . $field . '</td>';
-                }
-
-                $strReturn .='</thead><tbody>';
-
-                // Generate the records
-                while ($objRecords->next()) {
-                    $strReturn .= '<tr>';
-
-                    foreach ($this->fields as $field) {
-                        $strReturn .= '<td class="tl_file_list">' . Format::dcaValue($this->foreignTable, $field, $objRecords->$field) . '</td>';
-                    }
-
-                    $strReturn .= '</tr>';
-                }
-
-                $strReturn .= '</tbody></table>';
+                $strCallback = $varCallback($objRecords, $this->strId, $this);
             }
+
+            $objTemplate->hasListCallback = true;
+            $objTemplate->listCallbackContent = $strCallback;
         }
 
+        $objTemplate->buttonHref        = ampersand($this->getButtonHref());
+        $objTemplate->dcaWizardOptions  = specialchars(json_encode($this->getDcaWizardOptions()));
+        $objTemplate->buttonLabel       = $this->getButtonLabel();
+
+        return $objTemplate->parse();
+    }
+
+
+    /**
+     * Generate a row operation
+     * @param   string operation name
+     * @param   array Db row
+     * @return  string
+     */
+    public function generateRowOperation($operation, $row)
+    {
+        // Load the button definition from the subtable
+        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation];
+
+        $id = specialchars(rawurldecode($row['id']));
+        $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'];
+
+        $label = $def['label'][0] ?: $operation;
+        $title = sprintf($def['label'][1] ?: $operation, $id);
+        $attributes = ($def['attributes'] != '') ? ' ' . ltrim(sprintf($def['attributes'], $id, $id)) : '';
+
+        // Dca wizard specific
+        $arrBaseOptions = $this->getDcaWizardOptions();
+        $arrBaseOptions['url'] = $buttonHref;
+        $attributes .= ' data-options="' . specialchars(json_encode($arrBaseOptions)) . '"';
+        $attributes .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
+
+        // Add the key as CSS class
+        if (strpos($attributes, 'class="') !== false) {
+            $attributes = str_replace('class="', 'class="' . $operation . ' ', $attributes);
+        } else {
+            $attributes = ' class="' . $operation . '"' . $attributes;
+        }
+
+        // Call a custom function instead of using the default button
+        if (is_array($def['button_callback']))  {
+            return \System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'], $label, $title, $def['icon'], $attributes);
+        } elseif (is_callable($def['button_callback'])) {
+            return $def['button_callback']($row, $def['href'], $label, $title, $def['icon'], $attributes);
+        }
+
+        return sprintf(
+            '<a href="%s" title="%s"%s>%s</a> ',
+            $buttonHref,
+            specialchars($title),
+            $attributes,
+            \Image::getHtml($def['icon'], $label)
+        );
+    }
+
+
+    /**
+     * Get active row operations
+     * @return  array
+     */
+    public function getActiveRowOperations()
+    {
+        return (array) ($this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']));
+    }
+
+
+    /**
+     * Get rows
+     * @param \Database_Result
+     * @return array
+     */
+    public function getRows($objRecords)
+    {
+        if (!$objRecords->numRows) {
+            return array();
+        }
+
+        $arrRows = array();
+        $objRecords->reset();
+
+        while ($objRecords->next()) {
+            $arrField = $objRecords->row();
+
+            foreach ($this->fields as $field) {
+                $arrField[$field] = Format::dcaValue($this->foreignTable, $field, $objRecords->$field);
+            }
+
+            $arrRows[] = $arrField;
+        }
+
+        return $arrRows;
+    }
+
+
+    /**
+     * Get dca wizard javascript options
+     * @return array
+     */
+    public function getDcaWizardOptions()
+    {
+        return array
+        (
+            'width'         => 765,
+            'title'         => specialchars($this->strLabel),
+            'url'           => $this->getButtonHref(),
+            'id'            => $this->strId,
+            'applyLabel'    => specialchars($this->applyButtonLabel)
+        );
+    }
+
+
+    /**
+     * Get button href
+     * @return string
+     */
+    public function getButtonHref()
+    {
+        return \Environment::get('base')
+            . \Environment::get('script')
+            . '?'
+            . http_build_query($this->getButtonParams());
+    }
+
+
+    /**
+     * Get button params
+     * @return array
+     */
+    public function getButtonParams()
+    {
         $arrParams = array
         (
             'do'        => \Input::get('do'),
@@ -216,28 +325,86 @@ class DcaWizard extends \Widget
             'rt'        => REQUEST_TOKEN,
         );
 
-        // Merge params
-        if (!empty($this->params) && is_array($this->params)) {
+        // Merge
+        if (is_array($this->params)) {
             $arrParams = array_merge($arrParams, $this->params);
         }
 
-        $arrOptions = array
-        (
-            'width'         => 765,
-            'title'         => "'" . specialchars($this->strLabel) . "'",
-            'url'           => 'this.href',
-            'id'            => "'" . $this->strId . "'",
-            'applyLabel'    => "'" . specialchars($this->applyButtonLabel) . "'"
-        );
+        return $arrParams;
+    }
 
-        $strOptions = implode(', ', array_map(function ($v, $k) { return sprintf("'%s':%s", $k, $v); }, $arrOptions, array_keys($arrOptions)));
 
-        return $strReturn . '
-<p style="margin-top:9px;">
-<a href="contao/main.php?' . ampersand(http_build_query($arrParams)) . '" class="tl_submit" onclick="Backend.getScrollOffset();DcaWizard.openModalWindow({' . $strOptions . '});return false">'.($this->editButtonLabel ? $this->editButtonLabel : $this->strLabel).'</a>
-</p>
-</div>
-</div>';
+    /**
+     * Get button label
+     * @return string
+     */
+    public function getButtonLabel()
+    {
+        return specialchars($this->editButtonLabel ? $this->editButtonLabel : $this->strLabel);
+    }
+
+
+    /**
+     * Get records
+     * @return \Database_Result
+     */
+    public function getRecords()
+    {
+        return \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $this->getOrderBy());
+    }
+
+
+    /**
+     * Get header fields
+     * @return array()
+     */
+    public function getHeaderFields()
+    {
+        $arrHeaderFields = $this->headerFields;
+
+        if (!is_array($arrHeaderFields) || empty($arrHeaderFields)) {
+            foreach ($this->fields as $field) {
+                if ($field == 'id') {
+                    $arrHeaderFields[] = 'ID';
+                    continue;
+                }
+
+                $arrHeaderFields[] = Format::dcaLabel($this->foreignTable, $field);
+            }
+        }
+
+        return $arrHeaderFields;
+    }
+
+
+    /**
+     * Get ORDER BY statement
+     * @return string
+     */
+    public function getOrderBy()
+    {
+        $strOrderBy = '';
+        $orderFields = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'];
+
+        if ($this->orderField) {
+            $strOrderBy = ' ORDER BY ' . $this->orderField;
+        } elseif (!empty($orderFields) && is_array($orderFields)) {
+            $strOrderBy = ' ORDER BY ' . implode(',', $orderFields);
+        }
+
+        return $strOrderBy;
+    }
+
+
+    /**
+     * Return SQL WHERE condition for foreign table
+     * @return string
+     */
+    public function getForeignTableCondition()
+    {
+        $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
+
+        return "{$this->foreignField}={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
     }
 
 
@@ -278,7 +445,7 @@ class DcaWizard extends \Widget
                 }
 
                 $objRow = \Database::getInstance()->prepare("SELECT id FROM " . $dc->table . " WHERE id=?")
-                                                  ->execute($intId);
+                    ->execute($intId);
 
                 // The record does not exist
                 if ($objRow->numRows < 1) {
@@ -296,16 +463,5 @@ class DcaWizard extends \Widget
             echo $objWidget->generate();
             exit;
         }
-    }
-
-    /**
-     * Return SQL WHERE condition for foreign table
-     * @return string
-     */
-    private function getForeignTableCondition()
-    {
-        $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
-
-        return "{$this->foreignField}={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
     }
 }

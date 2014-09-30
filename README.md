@@ -48,6 +48,13 @@ How to use:
         // Order records by a particular field
         'orderField' => 'name DESC',
 
+        // Show operations next to every row (disabled by default)
+        'showOperations' => true,
+
+        // Define which operations you want to list
+        // If this one is not defined, are all listed
+        'operations' => array('edit', 'delete'),
+
         // Use the callback to generate the list
         'listCallback' => array('Isotope\tl_iso_prices', 'generateWizardList'),
     ),

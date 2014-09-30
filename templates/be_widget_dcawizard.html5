@@ -1,0 +1,47 @@
+<div id="ctrl_<?php echo $this->strId; ?>" class="dcawizard">
+    <div class="selector_container">
+        <?php if ($this->hasListCallback): ?>
+            <?php echo $this->listCallbackContent; ?>
+        <?php else: ?>
+        <?php if ($this->hasRows): ?>
+        <table class="tl_listing showColumns">
+            <thead>
+                <?php foreach ($this->headerFields as $field): ?>
+                <td class="tl_folder_tlist"><?php echo $field; ?></td>
+                <?php endforeach; ?>
+                <?php if ($this->showOperations): ?>
+                <td class="tl_folder_tlist"></td>
+                <?php endif; ?>
+            </thead>
+            <tbody>
+                <?php foreach ($this->rows as $row): ?>
+                <tr>
+                    <?php foreach ($this->fields as $field): ?>
+                    <td class="tl_file_list"><?php echo $row[$field]; ?></td>
+                    <?php endforeach; ?>
+
+                    <?php if ($this->showOperations): ?>
+                    <td class="tl_file_list tl_right_nowrap">
+                        <?php foreach ($this->operations as $operation): ?>
+                        <?php echo $this->generateOperation($operation, $row); ?>
+                        <?php endforeach; ?>
+                    </td>
+                    <?php endif; ?>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php endif; ?>
+        <?php endif; ?>
+
+        <p style="margin-top:9px;">
+            <a href="<?php echo $this->buttonHref; ?>"
+               class="tl_submit"
+               data-options="<?php echo $this->dcaWizardOptions; ?>"
+               onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute('data-options')));return false"
+             >
+                <?php echo $this->buttonLabel; ?>
+            </a>
+        </p>
+    </div>
+</div>

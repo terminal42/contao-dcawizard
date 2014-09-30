@@ -16,5 +16,13 @@
  */
 ClassLoader::addClasses(array
 (
-    'Contao\DcaWizard' => 'system/modules/dcawizard/widgets/DcaWizard.php'
+    'DcaWizard' => 'system/modules/dcawizard/widgets/DcaWizard.php'
+));
+
+/**
+ * Register the templates
+ */
+TemplateLoader::addFiles(array
+(
+    'be_widget_dcawizard' => 'system/modules/dcawizard/templates'
 ));
