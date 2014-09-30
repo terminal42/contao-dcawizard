@@ -42,9 +42,11 @@ class DcaWizard extends \Widget
         parent::__construct($arrAttributes);
 
         // Load the table from callback
-        if (is_array($this->foreignTableCallback) && count($this->foreignTableCallback)) {
-            $objCallback = \System::importStatic($this->foreignTableCallback[0]);
-            $this->foreignTable = $objCallback->{$this->foreignTableCallback[1]}();
+        $varCallback = $this->foreignTableCallback;
+        if (is_array($varCallback) && !empty($varCallback)) {
+            $this->foreignTable = \System::importStatic($varCallback[0])->{$varCallback[1]}($this);
+        } elseif (is_callable($varCallback)) {
+            $this->foreignTable = $varCallback($this);
         }
 
         if ($this->foreignTable != '') {
@@ -160,10 +162,13 @@ class DcaWizard extends \Widget
             $objTemplate->headerFields = $this->getHeaderFields();
             $objTemplate->hasRows = !empty($arrRows);
             $objTemplate->rows = $arrRows;
+            $objTemplate->fields = $this->fields;
             $objTemplate->showOperations = $blnShowOperations;
+
             if ($blnShowOperations) {
                 $objTemplate->operations = $this->getActiveRowOperations();
             }
+
             $objTemplate->generateOperation = function($operation, $row) use ($widget) {
                 return $widget->generateRowOperation($operation, $row);
             };
@@ -258,12 +263,15 @@ class DcaWizard extends \Widget
         }
 
         $arrRows = array();
+        $objRecords->reset();
 
         while ($objRecords->next()) {
-            $arrField = array();
+            $arrField = $objRecords->row();
+
             foreach ($this->fields as $field) {
                 $arrField[$field] = Format::dcaValue($this->foreignTable, $field, $objRecords->$field);
             }
+
             $arrRows[] = $arrField;
         }
 
@@ -317,8 +325,8 @@ class DcaWizard extends \Widget
             'rt'        => REQUEST_TOKEN,
         );
 
-        // Merge params
-        if (!empty($this->params) && is_array($this->params)) {
+        // Merge
+        if (is_array($this->params)) {
             $arrParams = array_merge($arrParams, $this->params);
         }
 
