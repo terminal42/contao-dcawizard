@@ -1,9 +1,9 @@
 dcawizard Contao Extension
 ==========================
 
-This extension provides a widget to handle the external table records.
+This extension provides a widget to handle external table records in the edit mode of the parent record.
 
-How to use:
+## How to use
 
 ```php
 // DCA defnition
