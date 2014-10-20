@@ -16,7 +16,8 @@
  */
 ClassLoader::addClasses(array
 (
-    'DcaWizard' => 'system/modules/dcawizard/widgets/DcaWizard.php'
+    'DcaWizard'             => 'system/modules/dcawizard/widgets/DcaWizard.php',
+    'DcaWizardMultilingual' => 'system/modules/dcawizard/widgets/DcaWizardMultilingual.php',
 ));
 
 /**

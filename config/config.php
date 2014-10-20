@@ -14,7 +14,8 @@
 /**
  * Backend form fields
  */
-$GLOBALS['BE_FFL']['dcaWizard'] = 'DcaWizard';
+$GLOBALS['BE_FFL']['dcaWizard']             = 'DcaWizard';
+$GLOBALS['BE_FFL']['dcaWizardMultilingual'] = 'DcaWizardMultilingual';
 
 
 /**
