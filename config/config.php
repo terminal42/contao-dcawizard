@@ -19,5 +19,5 @@ $GLOBALS['BE_FFL']['dcaWizardMultilingual'] = 'DcaWizardMultilingual';
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['executePostActions'][] = array('DcaWizard', 'handleAjaxActions');
+$GLOBALS['TL_HOOKS']['executePostActions'][] = array('DcaWizardHelper', 'handleAjaxActions');
 
