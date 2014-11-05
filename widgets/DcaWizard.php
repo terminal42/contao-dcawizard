@@ -1,27 +1,22 @@
 <?php
 
 /**
- * Isotope eCommerce for Contao Open Source CMS
+ * dcawizard extension for Contao Open Source CMS
  *
- * Copyright (C) 2009-2012 Isotope eCommerce Workgroup
- *
- * @package    Isotope
- * @link       http://www.isotopeecommerce.com
+ * @copyright  Copyright (c) 2014, terminal42 gmbh
+ * @author     terminal42 gmbh <info@terminal42.ch>
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
+ * @link       https://github.com/terminal42/contao-dcawizard
  */
 
 use \Haste\Util\Format;
 
-
 /**
  * Class DcaWizard
  *
- * Back end widget "dca wizard".
- * @copyright  Isotope eCommerce Workgroup 2009-2012
+ * Provides the back end widget "dcaWizard"
+ *
  * @author     Yanick Witschi <yanick.witschi@terminal42.ch>
- * @author     Andreas Schempp <andreas.schempp@terminal42.ch>
- * @author     Christian de la Haye <service@delahaye.de>
- * @author     Kamil Kuzminski <kamil.kuzminski@codefog.pl>
  */
 class DcaWizard extends \Widget
 {
