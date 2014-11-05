@@ -66,6 +66,23 @@ class DcaWizardHelper
             }
 
             $strClass = $GLOBALS['BE_FFL']['dcaWizard'];
+
+            // Support classes extending DcaWizard
+            if ($ajaxClass = \Input::post('class')) {
+                $ajaxClass = base64_decode($ajaxClass);
+
+                if (in_array($ajaxClass, $GLOBALS['BE_FFL'])) {
+                    try {
+                        $reflection = new ReflectionClass($ajaxClass);
+                        if ($reflection->isSubclassOf('DcaWizard')) {
+                            $strClass = $ajaxClass;
+                        }
+                    } catch (\Exception $e) {
+                        // silent fallback to default class
+                    }
+                }
+            }
+
             $arrData = $GLOBALS['TL_DCA'][$dc->table]['fields'][$strField];
             $objWidget = new $strClass($strClass::getAttributesFromDca($arrData, $strFieldName, null, $strField, $dc->table, $dc));
 

@@ -1,13 +1,3 @@
-/**
- * Isotope eCommerce for Contao Open Source CMS
- *
- * Copyright (C) 2009-2012 Isotope eCommerce Workgroup
- *
- * @package    Isotope
- * @link       http://www.isotopeecommerce.com
- * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
- */
-
 var DcaWizard =
 {
 
@@ -55,7 +45,12 @@ var DcaWizard =
                     json.javascript && Browser.exec(json.javascript);
                     AjaxRequest.hideBox();
                 }
-            }).post({'action':'reloadDcaWizard', 'name':opt.id, 'REQUEST_TOKEN':Contao.request_token});
+            }).post({
+                    'action': 'reloadDcaWizard',
+                    'name': opt.id,
+                    'REQUEST_TOKEN': Contao.request_token,
+                    'class': opt.class
+                });
             this.hide();
         });
         M.show({
