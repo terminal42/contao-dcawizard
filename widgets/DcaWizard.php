@@ -346,7 +346,15 @@ class DcaWizard extends \Widget
      */
     public function getRecords()
     {
-        return \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $this->getOrderBy());
+        return \Database::getInstance()->execute(
+            "SELECT *
+            FROM {$this->foreignTable}
+            WHERE
+                " . $this->getForeignTableCondition() . "
+                AND tstamp>0" .
+                ($this->whereCondition ? (' AND ' . $this->whereCondition) : '') .
+            $this->getOrderBy()
+        );
     }
 
 
