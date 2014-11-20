@@ -20,6 +20,7 @@ class DcaWizardMultilingual extends DcaWizard
 {
     /**
      * Return SQL WHERE condition for foreign table
+     *
      * @return string
      */
     public function getForeignTableCondition()

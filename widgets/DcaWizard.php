@@ -30,7 +30,8 @@ class DcaWizard extends \Widget
 
     /**
      * Initialize the object
-     * @param array
+     *
+     * @param array $arrAttributes
      */
     public function __construct($arrAttributes = false)
     {
@@ -50,11 +51,11 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Add specific attributes
-     * @param string
-     * @param mixed
+     *
+     * @param string $strKey
+     * @param mixed  $varValue
      */
     public function __set($strKey, $varValue)
     {
@@ -77,11 +78,10 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Return a parameter
-     * @return string
-     * @throws Exception
+     *
+     * @return string $strKey
      */
     public function __get($strKey)
     {
@@ -112,7 +112,6 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Validate input
      */
@@ -129,9 +128,9 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Generate the widget
+     *
      * @return string
      */
     public function generate()
@@ -187,12 +186,13 @@ class DcaWizard extends \Widget
         return $objTemplate->parse();
     }
 
-
     /**
      * Generate a row operation
-     * @param   string operation name
-     * @param   array Db row
-     * @return  string
+     *
+     * @param string $operation operation name
+     * @param array  $row       Db row
+     *
+     * @return string
      */
     public function generateRowOperation($operation, $row)
     {
@@ -238,17 +238,19 @@ class DcaWizard extends \Widget
 
     /**
      * Get active row operations
-     * @return  array
+     *
+     * @return array
      */
     public function getActiveRowOperations()
     {
         return (array) ($this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']));
     }
 
-
     /**
      * Get rows
-     * @param \Database_Result
+     *
+     * @param \Database_Result $objRecords
+     *
      * @return array
      */
     public function getRows($objRecords)
@@ -273,9 +275,9 @@ class DcaWizard extends \Widget
         return $arrRows;
     }
 
-
     /**
      * Get dca wizard javascript options
+     *
      * @return array
      */
     public function getDcaWizardOptions()
@@ -291,9 +293,9 @@ class DcaWizard extends \Widget
         );
     }
 
-
     /**
      * Get button href
+     *
      * @return string
      */
     public function getButtonHref()
@@ -304,9 +306,9 @@ class DcaWizard extends \Widget
             . http_build_query($this->getButtonParams());
     }
 
-
     /**
      * Get button params
+     *
      * @return array
      */
     public function getButtonParams()
@@ -329,9 +331,9 @@ class DcaWizard extends \Widget
         return $arrParams;
     }
 
-
     /**
      * Get button label
+     *
      * @return string
      */
     public function getButtonLabel()
@@ -339,9 +341,9 @@ class DcaWizard extends \Widget
         return specialchars($this->editButtonLabel ? $this->editButtonLabel : $this->strLabel);
     }
 
-
     /**
      * Get records
+     *
      * @return \Database_Result
      */
     public function getRecords()
@@ -353,10 +355,10 @@ class DcaWizard extends \Widget
         );
     }
 
-
     /**
      * Get header fields
-     * @return array()
+     *
+     * @return array
      */
     public function getHeaderFields()
     {
@@ -392,9 +394,9 @@ class DcaWizard extends \Widget
         return $strWhere;
     }
 
-
     /**
      * Get ORDER BY statement
+     *
      * @return string
      */
     public function getOrderBy()
@@ -411,9 +413,9 @@ class DcaWizard extends \Widget
         return $strOrderBy;
     }
 
-
     /**
      * Return SQL WHERE condition for foreign table
+     *
      * @return string
      */
     public function getForeignTableCondition()
