@@ -347,12 +347,8 @@ class DcaWizard extends \Widget
     public function getRecords()
     {
         return \Database::getInstance()->execute(
-            "SELECT *
-            FROM {$this->foreignTable}
-            WHERE
-                " . $this->getForeignTableCondition() . "
-                AND tstamp>0" .
-                ($this->whereCondition ? (' AND ' . $this->whereCondition) : '') .
+            "SELECT * FROM {$this->foreignTable}" .
+            $this->getWhereCondition() .
             $this->getOrderBy()
         );
     }
@@ -378,6 +374,22 @@ class DcaWizard extends \Widget
         }
 
         return $arrHeaderFields;
+    }
+
+    /**
+     * Get WHERE statement
+     *
+     * @return string
+     */
+    public function getWhereCondition()
+    {
+        $strWhere = ' WHERE tstamp>0 AND ' . $this->getForeignTableCondition();
+
+        if ($this->whereCondition) {
+            $strWhere .= ' AND ' . $this->whereCondition;
+        }
+
+        return $strWhere;
     }
 
 
