@@ -1,27 +1,22 @@
 <?php
 
 /**
- * Isotope eCommerce for Contao Open Source CMS
+ * dcawizard extension for Contao Open Source CMS
  *
- * Copyright (C) 2009-2012 Isotope eCommerce Workgroup
- *
- * @package    Isotope
- * @link       http://www.isotopeecommerce.com
+ * @copyright  Copyright (c) 2014, terminal42 gmbh
+ * @author     terminal42 gmbh <info@terminal42.ch>
  * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
+ * @link       https://github.com/terminal42/contao-dcawizard
  */
 
 use \Haste\Util\Format;
 
-
 /**
  * Class DcaWizard
  *
- * Back end widget "dca wizard".
- * @copyright  Isotope eCommerce Workgroup 2009-2012
+ * Provides the back end widget "dcaWizard"
+ *
  * @author     Yanick Witschi <yanick.witschi@terminal42.ch>
- * @author     Andreas Schempp <andreas.schempp@terminal42.ch>
- * @author     Christian de la Haye <service@delahaye.de>
- * @author     Kamil Kuzminski <kamil.kuzminski@codefog.pl>
  */
 class DcaWizard extends \Widget
 {
@@ -35,7 +30,8 @@ class DcaWizard extends \Widget
 
     /**
      * Initialize the object
-     * @param array
+     *
+     * @param array $arrAttributes
      */
     public function __construct($arrAttributes = false)
     {
@@ -55,11 +51,11 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Add specific attributes
-     * @param string
-     * @param mixed
+     *
+     * @param string $strKey
+     * @param mixed  $varValue
      */
     public function __set($strKey, $varValue)
     {
@@ -82,11 +78,10 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Return a parameter
-     * @return string
-     * @throws Exception
+     *
+     * @return string $strKey
      */
     public function __get($strKey)
     {
@@ -117,7 +112,6 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Validate input
      */
@@ -134,9 +128,9 @@ class DcaWizard extends \Widget
         }
     }
 
-
     /**
      * Generate the widget
+     *
      * @return string
      */
     public function generate()
@@ -192,12 +186,13 @@ class DcaWizard extends \Widget
         return $objTemplate->parse();
     }
 
-
     /**
      * Generate a row operation
-     * @param   string operation name
-     * @param   array Db row
-     * @return  string
+     *
+     * @param string $operation operation name
+     * @param array  $row       Db row
+     *
+     * @return string
      */
     public function generateRowOperation($operation, $row)
     {
@@ -243,17 +238,19 @@ class DcaWizard extends \Widget
 
     /**
      * Get active row operations
-     * @return  array
+     *
+     * @return array
      */
     public function getActiveRowOperations()
     {
         return (array) ($this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']));
     }
 
-
     /**
      * Get rows
-     * @param \Database_Result
+     *
+     * @param \Database_Result $objRecords
+     *
      * @return array
      */
     public function getRows($objRecords)
@@ -278,9 +275,9 @@ class DcaWizard extends \Widget
         return $arrRows;
     }
 
-
     /**
      * Get dca wizard javascript options
+     *
      * @return array
      */
     public function getDcaWizardOptions()
@@ -291,13 +288,14 @@ class DcaWizard extends \Widget
             'title'         => specialchars($this->strLabel),
             'url'           => $this->getButtonHref(),
             'id'            => $this->strId,
-            'applyLabel'    => specialchars($this->applyButtonLabel)
+            'applyLabel'    => specialchars($this->applyButtonLabel),
+            'class'         => base64_encode(get_class($this))
         );
     }
 
-
     /**
      * Get button href
+     *
      * @return string
      */
     public function getButtonHref()
@@ -308,9 +306,9 @@ class DcaWizard extends \Widget
             . http_build_query($this->getButtonParams());
     }
 
-
     /**
      * Get button params
+     *
      * @return array
      */
     public function getButtonParams()
@@ -333,9 +331,9 @@ class DcaWizard extends \Widget
         return $arrParams;
     }
 
-
     /**
      * Get button label
+     *
      * @return string
      */
     public function getButtonLabel()
@@ -343,20 +341,24 @@ class DcaWizard extends \Widget
         return specialchars($this->editButtonLabel ? $this->editButtonLabel : $this->strLabel);
     }
 
-
     /**
      * Get records
+     *
      * @return \Database_Result
      */
     public function getRecords()
     {
-        return \Database::getInstance()->execute("SELECT * FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition() . " AND tstamp>0" . $this->getOrderBy());
+        return \Database::getInstance()->execute(
+            "SELECT * FROM {$this->foreignTable}" .
+            $this->getWhereCondition() .
+            $this->getOrderBy()
+        );
     }
-
 
     /**
      * Get header fields
-     * @return array()
+     *
+     * @return array
      */
     public function getHeaderFields()
     {
@@ -376,9 +378,25 @@ class DcaWizard extends \Widget
         return $arrHeaderFields;
     }
 
+    /**
+     * Get WHERE statement
+     *
+     * @return string
+     */
+    public function getWhereCondition()
+    {
+        $strWhere = ' WHERE tstamp>0 AND ' . $this->getForeignTableCondition();
+
+        if ($this->whereCondition) {
+            $strWhere .= ' AND ' . $this->whereCondition;
+        }
+
+        return $strWhere;
+    }
 
     /**
      * Get ORDER BY statement
+     *
      * @return string
      */
     public function getOrderBy()
@@ -395,9 +413,9 @@ class DcaWizard extends \Widget
         return $strOrderBy;
     }
 
-
     /**
      * Return SQL WHERE condition for foreign table
+     *
      * @return string
      */
     public function getForeignTableCondition()
@@ -405,63 +423,5 @@ class DcaWizard extends \Widget
         $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
 
         return "{$this->foreignField}={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
-    }
-
-
-    /**
-     * Handle the AJAX actions
-     * @param string
-     * @param \DataContainer
-     */
-    public function handleAjaxActions($strAction, \DataContainer $dc)
-    {
-        if ($strAction == 'reloadDcaWizard') {
-            $intId = \Input::get('id');
-            $strField = $strFieldName = \Input::post('name');
-
-            // Handle the keys in "edit multiple" mode
-            if (\Input::get('act') == 'editAll') {
-                $intId = preg_replace('/.*_([0-9a-zA-Z]+)$/', '$1', $strField);
-                $strField = preg_replace('/(.*)_[0-9a-zA-Z]+$/', '$1', $strField);
-            }
-
-            // Validate the request data
-            if ($GLOBALS['TL_DCA'][$dc->table]['config']['dataContainer'] == 'File') {
-
-                // The field does not exist
-                if (!array_key_exists($strField, $GLOBALS['TL_CONFIG'])) {
-                    $this->log('Field "' . $strField . '" does not exist in the global configuration', 'Ajax executePostActions()', TL_ERROR);
-                    header('HTTP/1.1 400 Bad Request');
-                    die('Bad Request');
-                }
-
-            } elseif (\Database::getInstance()->tableExists($dc->table)) {
-
-                // The field does not exist
-                if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$strField])) {
-                    $this->log('Field "' . $strField . '" does not exist in table "' . $dc->table . '"', 'Ajax executePostActions()', TL_ERROR);
-                    header('HTTP/1.1 400 Bad Request');
-                    die('Bad Request');
-                }
-
-                $objRow = \Database::getInstance()->prepare("SELECT id FROM " . $dc->table . " WHERE id=?")
-                    ->execute($intId);
-
-                // The record does not exist
-                if ($objRow->numRows < 1) {
-                    $this->log('A record with the ID "' . $intId . '" does not exist in table "' . $dc->table . '"', 'Ajax executePostActions()', TL_ERROR);
-                    header('HTTP/1.1 400 Bad Request');
-                    die('Bad Request');
-                }
-            }
-
-            $strClass = $GLOBALS['BE_FFL']['dcaWizard'];
-            $arrData = $GLOBALS['TL_DCA'][$dc->table]['fields'][$strField];
-            $objWidget = new $strClass($strClass::getAttributesFromDca($arrData, $strFieldName, null, $strField, $dc->table, $dc));
-
-            header('Content-Type: text/html; charset=' . $GLOBALS['TL_CONFIG']['characterSet']);
-            echo $objWidget->generate();
-            exit;
-        }
     }
 }
