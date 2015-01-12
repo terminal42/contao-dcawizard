@@ -321,6 +321,7 @@ class DcaWizard extends \Widget
             'id'        => $this->currentRecord,
             'popup'     => 1,
             'rt'        => REQUEST_TOKEN,
+            'dcawizard' => $this->foreignTable . ':' . $this->currentRecord,
         );
 
         // Merge
