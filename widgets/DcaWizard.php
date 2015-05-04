@@ -301,7 +301,7 @@ class DcaWizard extends \Widget
     public function getButtonHref()
     {
         return \Environment::get('base')
-            . \Environment::get('script')
+            . TL_SCRIPT
             . '?'
             . http_build_query($this->getButtonParams());
     }
