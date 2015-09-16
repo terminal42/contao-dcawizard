@@ -301,7 +301,7 @@ class DcaWizard extends \Widget
     public function getButtonHref()
     {
         return \Environment::get('base')
-            . \Environment::get('script')
+            . TL_SCRIPT
             . '?'
             . http_build_query($this->getButtonParams());
     }
@@ -321,6 +321,7 @@ class DcaWizard extends \Widget
             'id'        => $this->currentRecord,
             'popup'     => 1,
             'rt'        => REQUEST_TOKEN,
+            'dcawizard' => $this->foreignTable . ':' . $this->currentRecord,
         );
 
         // Merge
