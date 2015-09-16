@@ -91,4 +91,29 @@ class DcaWizardHelper
             exit;
         }
     }
+
+    /**
+     * Load the data container
+     *
+     * @param string $table
+     */
+    public function loadDataContainer($dcaTable)
+    {
+        if (!\Input::get('dcawizard')) {
+            return;
+        }
+
+        list($table, $id) = explode(':', \Input::get('dcawizard'));
+
+        // Provide a fix to the popup referer (see #15)
+        if ($table == $dcaTable && \Input::get('act') == 'edit') {
+            $session = \Session::getInstance()->get('popupReferer');
+            $last = end($session);
+
+            // Replace the last referer value with the correct link
+            $session[key($session)]['current'] = preg_replace('/id=[0-9]+/', 'id=' . $id, $last['current']);
+
+            \Session::getInstance()->set('popupReferer', $session);
+        }
+    }
 }
