@@ -108,6 +108,11 @@ class DcaWizardHelper
         // Provide a fix to the popup referer (see #15)
         if ($table == $dcaTable && \Input::get('act') == 'edit') {
             $session = \Session::getInstance()->get('popupReferer');
+
+            if (!is_array($session)) {
+                return;
+            }
+
             $last = end($session);
 
             // Replace the last referer value with the correct link
