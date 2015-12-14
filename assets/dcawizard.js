@@ -33,10 +33,7 @@ var DcaWizard =
                 alert('Could not find the SimpleModal frame');
                 return;
             }
-            if (frm.document.location.href.indexOf('contao/main.php') == -1) {
-                alert(Contao.lang.picker);
-                return; // see #5704
-            }
+
             new Request.Contao({
                 evalScripts: false,
                 onRequest: AjaxRequest.displayBox(Contao.lang.loading + ' …'),
