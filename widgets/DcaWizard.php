@@ -179,7 +179,7 @@ class DcaWizard extends \Widget
             $objTemplate->listCallbackContent = $strCallback;
         }
 
-        $objTemplate->buttonHref        = ampersand($this->getButtonHref());
+        $objTemplate->buttonHref        = $this->getButtonHref();
         $objTemplate->dcaWizardOptions  = specialchars(json_encode($this->getDcaWizardOptions()));
         $objTemplate->buttonLabel       = $this->getButtonLabel();
 
@@ -300,10 +300,10 @@ class DcaWizard extends \Widget
      */
     public function getButtonHref()
     {
-        return \Environment::get('base')
+        return ampersand(\Environment::get('base')
             . TL_SCRIPT
             . '?'
-            . http_build_query($this->getButtonParams());
+            . http_build_query($this->getButtonParams()));
     }
 
     /**
