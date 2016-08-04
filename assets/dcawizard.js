@@ -12,6 +12,7 @@ var DcaWizard =
         var label = opt.applyLabel ? opt.applyLabel : Contao.lang.close;
         if (!opt.height || opt.height > max) opt.height = max;
         var M = new SimpleModal({
+            'keyEsc': false, // see https://github.com/terminal42/contao-notification_center/issues/99
             'width': opt.width,
             'btn_ok': label,
             'draggable': false,
