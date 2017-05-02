@@ -113,6 +113,20 @@ class DcaWizard extends \Widget
     }
 
     /**
+     * Fix isset and empty problems with magic class variables
+     *
+     * @param $strKey
+     * @return bool
+     */
+    public function __isset($strKey)
+    {
+        $strValue = $this->__get($strKey);
+
+        return isset($strValue);
+    }
+
+
+    /**
      * Validate input
      */
     public function validate()
