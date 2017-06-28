@@ -87,7 +87,7 @@ class DcaWizard extends \Widget
     {
         switch($strKey) {
             case 'currentRecord':
-                return \Input::get('id');
+                return \Input::get('id') ?: $this->objDca->id;
 
             case 'params':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'];
