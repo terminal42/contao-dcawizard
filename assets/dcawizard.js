@@ -51,6 +51,8 @@ var DcaWizard =
                 });
             this.hide();
         });
+        // see #19
+        M.buttons[0].addClass = function () {};
         M.show({
             'title': opt.title,
             'contents': '<iframe src="' + opt.url + '" name="simple-modal-iframe" width="100%" height="' + opt.height + '" frameborder="0"></iframe>',
