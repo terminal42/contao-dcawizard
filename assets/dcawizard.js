@@ -21,7 +21,7 @@ var DcaWizard =
             'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
             'onHide': function() { document.body.setStyle('overflow', 'auto'); }
         });
-        M.addButton(label, 'btn primary', function() {
+        M.addButton(label, 'btn', function() {
             var frm = null,
                 frms = window.frames;
             for (var i=0; i<frms.length; i++) {
@@ -51,8 +51,6 @@ var DcaWizard =
                 });
             this.hide();
         });
-        // see #19
-        M.buttons[0].addClass = function () {};
         M.show({
             'title': opt.title,
             'contents': '<iframe src="' + opt.url + '" name="simple-modal-iframe" width="100%" height="' + opt.height + '" frameborder="0"></iframe>',
