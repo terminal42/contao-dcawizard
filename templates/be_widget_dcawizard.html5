@@ -31,9 +31,12 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        <?php elseif ($this->emptyLabel): ?>
+        <p><?= $this->emptyLabel ?></p>
         <?php endif; ?>
         <?php endif; ?>
 
+        <?php if (!$this->hideButton): ?>
         <p style="margin-top:9px;">
             <a href="<?php echo $this->buttonHref; ?>"
                class="tl_submit"
@@ -43,5 +46,6 @@
                 <?php echo $this->buttonLabel; ?>
             </a>
         </p>
+        <?php endif; ?>
     </div>
 </div>

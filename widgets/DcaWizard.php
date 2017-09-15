@@ -158,6 +158,8 @@ class DcaWizard extends \Widget
             $objTemplate->rows = $arrRows;
             $objTemplate->fields = $this->fields;
             $objTemplate->showOperations = $blnShowOperations;
+            $objTemplate->hideButton = $this->hideButton;
+            $objTemplate->emptyLabel = $this->emptyLabel;
 
             if ($blnShowOperations) {
                 $objTemplate->operations = $this->getActiveRowOperations();
