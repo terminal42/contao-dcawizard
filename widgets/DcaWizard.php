@@ -145,6 +145,8 @@ class DcaWizard extends \Widget
 
         $objTemplate = new BackendTemplate('be_widget_dcawizard');
         $objTemplate->strId = $this->strId;
+        $objTemplate->strTable = $this->strTable;
+        $objTemplate->foreignTable = $this->foreignTable;
 
         // Get the available records
         $objRecords = $this->getRecords();
@@ -257,24 +259,7 @@ class DcaWizard extends \Widget
      */
     public function getRows($objRecords)
     {
-        if (!$objRecords->numRows) {
-            return array();
-        }
-
-        $arrRows = array();
-        $objRecords->reset();
-
-        while ($objRecords->next()) {
-            $arrField = $objRecords->row();
-
-            foreach ($this->fields as $field) {
-                $arrField[$field] = Format::dcaValue($this->foreignTable, $field, $objRecords->$field);
-            }
-
-            $arrRows[] = $arrField;
-        }
-
-        return $arrRows;
+        return $objRecords->fetchAllAssoc();
     }
 
     /**
@@ -374,7 +359,7 @@ class DcaWizard extends \Widget
                     continue;
                 }
 
-                $arrHeaderFields[] = Format::dcaLabel($this->foreignTable, $field);
+                $arrHeaderFields[] = $field;
             }
         }
 
