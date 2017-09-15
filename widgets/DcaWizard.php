@@ -12,11 +12,9 @@
 use \Haste\Util\Format;
 
 /**
- * Class DcaWizard
- *
  * Provides the back end widget "dcaWizard"
  *
- * @author     Yanick Witschi <yanick.witschi@terminal42.ch>
+ * @author Yanick Witschi <yanick.witschi@terminal42.ch>
  */
 class DcaWizard extends \Widget
 {

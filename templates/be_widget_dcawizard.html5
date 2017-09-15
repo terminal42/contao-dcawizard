@@ -1,7 +1,7 @@
-<div id="ctrl_<?php echo $this->strId; ?>" class="dcawizard">
+<div id="ctrl_<?= $this->strId ?>" class="dcawizard">
     <div class="selector_container">
         <?php if ($this->hasListCallback): ?>
-            <?php echo $this->listCallbackContent; ?>
+            <?= $this->listCallbackContent ?>
         <?php else: ?>
         <?php if ($this->hasRows): ?>
         <table class="tl_listing showColumns">
@@ -23,7 +23,7 @@
                     <?php if ($this->showOperations): ?>
                     <td class="tl_file_list tl_right_nowrap">
                         <?php foreach ($this->operations as $operation): ?>
-                        <?php echo $this->generateOperation($operation, $row); ?>
+                        <?= $this->generateOperation($operation, $row) ?>
                         <?php endforeach; ?>
                     </td>
                     <?php endif; ?>
@@ -38,12 +38,12 @@
 
         <?php if (!$this->hideButton): ?>
         <p style="margin-top:9px;">
-            <a href="<?php echo $this->buttonHref; ?>"
+            <a href="<?= $this->buttonHref ?>"
                class="tl_submit"
-               data-options="<?php echo $this->dcaWizardOptions; ?>"
+               data-options="<?= $this->dcaWizardOptions; ?>"
                onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute('data-options')));return false"
              >
-                <?php echo $this->buttonLabel; ?>
+                <?= $this->buttonLabel ?>
             </a>
         </p>
         <?php endif; ?>
