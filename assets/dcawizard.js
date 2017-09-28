@@ -1,16 +1,19 @@
 var DcaWizard =
 {
-
     /**
      * Open a modal window
-     * @param object
+     *
+     * @param {Object} options
      */
     openModalWindow: function(options)
     {
-        var opt = options || {};
-        var max = (window.getSize().y-180).toInt();
-        var label = opt.applyLabel ? opt.applyLabel : Contao.lang.close;
-        if (!opt.height || opt.height > max) opt.height = max;
+        var opt = options || {},
+            maxWidth = (window.getSize().x - 20).toInt(),
+            maxHeight = (window.getSize().y - 137).toInt(),
+            label = opt.applyLabel ? opt.applyLabel : Contao.lang.close;
+        if (!opt.width || opt.width > maxWidth) opt.width = Math.min(maxWidth, 900);
+        if (!opt.height || opt.height > maxHeight) opt.height = maxHeight;
+
         var M = new SimpleModal({
             'keyEsc': false, // see https://github.com/terminal42/contao-notification_center/issues/99
             'width': opt.width,
@@ -25,7 +28,7 @@ var DcaWizard =
             var frm = null,
                 frms = window.frames;
             for (var i=0; i<frms.length; i++) {
-                if (frms[i].name == 'simple-modal-iframe') {
+                if (frms[i].name === 'simple-modal-iframe') {
                     frm = frms[i];
                     break;
                 }
@@ -57,4 +60,4 @@ var DcaWizard =
             'model': 'modal'
         });
     }
-}
+};

@@ -267,15 +267,20 @@ class DcaWizard extends \Widget
      */
     public function getDcaWizardOptions()
     {
-        return array
+        $options = array
         (
-            'width'         => 765,
             'title'         => specialchars($this->strLabel),
             'url'           => $this->getButtonHref(),
             'id'            => $this->strId,
             'applyLabel'    => specialchars($this->applyButtonLabel),
             'class'         => base64_encode(get_class($this))
         );
+
+        if (version_compare(VERSION, '4.0', '<')) {
+            $options['width'] = 765;
+        }
+
+        return $options;
     }
 
     /**
