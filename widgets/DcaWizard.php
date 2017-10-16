@@ -47,6 +47,9 @@ class DcaWizard extends \Widget
             $this->loadDataContainer($this->foreignTable);
             \System::loadLanguageFile($this->foreignTable);
         }
+
+        // Set the referer
+        \Session::getInstance()->set('dcaWizardReferer', \Environment::get('request'));
     }
 
     /**
