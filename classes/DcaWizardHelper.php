@@ -113,6 +113,30 @@ class DcaWizardHelper
     }
 
     /**
+     * On delete callback. Fix the popup referer when deleting the records directly
+     * inside the edit form of the source table.
+     */
+    public function onDeleteCallback()
+    {
+        if (!\Input::get('dcawizard')) {
+            return;
+        }
+
+        $session = \Session::getInstance()->get('popupReferer');
+        $referer = \Session::getInstance()->get('dcaWizardReferer');
+
+        if (!is_array($session) || !$referer) {
+            return;
+        }
+
+        // Replace the last referer value with the correct link
+        end($session);
+        $session[key($session)]['current'] = $referer;
+
+        \Session::getInstance()->set('popupReferer', $session);
+    }
+
+    /**
      * Load the data container
      *
      * @param string $dcaTable
@@ -139,6 +163,11 @@ class DcaWizardHelper
             $session[key($session)]['current'] = preg_replace('/id=\d+/', 'id=' . $id, $last['current']);
 
             \Session::getInstance()->set('popupReferer', $session);
+        }
+
+        // Register a delete callback
+        if ($table === $dcaTable) {
+            $GLOBALS['TL_DCA'][$table]['config']['ondelete_callback'][] = ['DcaWizardHelper', 'onDeleteCallback'];
         }
     }
 }
