@@ -113,12 +113,40 @@ class DcaWizardHelper
     }
 
     /**
+     * On load callback. Provide a fix to the popup referer (see #15)
+     */
+    public function onLoadCallback()
+    {
+        if (!\Input::get('dcawizard') || 'edit' !== \Input::get('act')) {
+            return;
+        }
+
+        $session = \Session::getInstance()->get('popupReferer');
+
+        if (!is_array($session)) {
+            return;
+        }
+
+        list($table, $id) = explode(':', \Input::get('dcawizard'));
+
+        // Use the current URL without (act and id parameters) as referefer
+        $url = \Haste\Util\Url::removeQueryString(['act', 'id'], \Environment::get('request'));
+        $url = \Haste\Util\Url::addQueryString('id=' . $id, $url);
+
+        // Replace the last referer value with the correct link
+        end($session);
+        $session[key($session)]['current'] = $url;
+
+        \Session::getInstance()->set('popupReferer', $session);
+    }
+
+    /**
      * On delete callback. Fix the popup referer when deleting the records directly
      * inside the edit form of the source table.
      */
     public function onDeleteCallback()
     {
-        if (!\Input::get('dcawizard')) {
+        if (!\Input::get('dcawizard_operation')) {
             return;
         }
 
@@ -147,26 +175,11 @@ class DcaWizardHelper
             return;
         }
 
-        list($table, $id) = explode(':', \Input::get('dcawizard'));
-
-        // Provide a fix to the popup referer (see #15)
-        if ($table === $dcaTable && 'edit' === \Input::get('act')) {
-            $session = \Session::getInstance()->get('popupReferer');
-
-            if (!is_array($session)) {
-                return;
-            }
-
-            $last = end($session);
-
-            // Replace the last referer value with the correct link
-            $session[key($session)]['current'] = preg_replace('/id=\d+/', 'id=' . $id, $last['current']);
-
-            \Session::getInstance()->set('popupReferer', $session);
-        }
+        list($table) = explode(':', \Input::get('dcawizard'));
 
         // Register a delete callback
         if ($table === $dcaTable) {
+            $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = ['DcaWizardHelper', 'onLoadCallback'];
             $GLOBALS['TL_DCA'][$table]['config']['ondelete_callback'][] = ['DcaWizardHelper', 'onDeleteCallback'];
         }
     }
