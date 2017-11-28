@@ -205,7 +205,7 @@ class DcaWizard extends \Widget
         $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation];
 
         $id = specialchars(rawurldecode($row['id']));
-        $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'];
+        $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'] . '&amp;dcawizard_operation=1';
 
         $label = $def['label'][0] ?: $operation;
         $title = sprintf($def['label'][1] ?: $operation, $id);
