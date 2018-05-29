@@ -140,9 +140,6 @@ class DcaWizard extends \Widget
         $blnShowOperations = $this->showOperations;
         $widget = $this;
 
-        // Add assets
-        $GLOBALS['TL_JAVASCRIPT']['dcawizard'] = sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min'));
-
 
         $objTemplate = new BackendTemplate('be_widget_dcawizard');
         $objTemplate->strId = $this->strId;
