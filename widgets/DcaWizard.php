@@ -223,9 +223,9 @@ class DcaWizard extends \Widget
 
         // Call a custom function instead of using the default button
         if (is_array($def['button_callback']))  {
-            return \System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'], $label, $title, $def['icon'], $attributes);
+            return \System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'], $label, $title, $def['icon'], $attributes, $this->foreignTable);
         } elseif (is_callable($def['button_callback'])) {
-            return $def['button_callback']($row, $def['href'], $label, $title, $def['icon'], $attributes);
+            return $def['button_callback']($row, $def['href'], $label, $title, $def['icon'], $attributes, $this->foreignTable);
         }
 
         return sprintf(
