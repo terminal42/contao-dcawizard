@@ -145,6 +145,7 @@ class DcaWizard extends \Widget
         $objTemplate->strId = $this->strId;
         $objTemplate->strTable = $this->strTable;
         $objTemplate->foreignTable = $this->foreignTable;
+        $objTemplate->dataContainer = $this->objDca;
 
         // Get the available records
         $objRecords = $this->getRecords();
