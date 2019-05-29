@@ -123,6 +123,10 @@ class DcaWizardHelper
 
         $session = \Session::getInstance()->get('popupReferer');
 
+        if (!is_array($session) && version_compare(VERSION, '4.0', '>')) {
+            $session = \System::getContainer()->get('session')->getBag('contao_backend')->get('popupReferer');
+        }
+
         if (!is_array($session)) {
             return;
         }
@@ -151,6 +155,11 @@ class DcaWizardHelper
         }
 
         $session = \Session::getInstance()->get('popupReferer');
+
+        if (!is_array($session) && version_compare(VERSION, '4.0', '>')) {
+            $session = \System::getContainer()->get('session')->getBag('contao_backend')->get('popupReferer');
+        }
+
         $referer = \Session::getInstance()->get('dcaWizardReferer');
 
         if (!is_array($session) || !$referer) {
