@@ -86,7 +86,7 @@ class DcaWizardHelper
             $arrData = $GLOBALS['TL_DCA'][$dc->table]['fields'][$strField];
 
             // Support classes extending DcaWizard
-            if ($ajaxClass = \Input::post('class')) {
+            if ($ajaxClass = \Input::post('class', true)) {
                 $ajaxClass = base64_decode($ajaxClass);
 
                 if (in_array($ajaxClass, $GLOBALS['BE_FFL'], true)) {
