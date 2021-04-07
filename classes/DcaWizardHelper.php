@@ -121,7 +121,11 @@ class DcaWizardHelper
             return;
         }
 
-        $session = \Session::getInstance()->get('popupReferer');
+        if (version_compare(VERSION, '4.0', '>')) {
+            $session = \System::getContainer()->get('session')->getBag('contao_backend')->get('popupReferer');
+        } else {
+            $session = \Session::getInstance()->get('popupReferer');
+        }
 
         if (!is_array($session)) {
             return;
@@ -150,7 +154,12 @@ class DcaWizardHelper
             return;
         }
 
-        $session = \Session::getInstance()->get('popupReferer');
+        if (version_compare(VERSION, '4.0', '>')) {
+            $session = \System::getContainer()->get('session')->getBag('contao_backend')->get('popupReferer');
+        } else {
+            $session = \Session::getInstance()->get('popupReferer');
+        }
+
         $referer = \Session::getInstance()->get('dcaWizardReferer');
 
         if (!is_array($session) || !$referer) {
