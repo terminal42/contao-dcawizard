@@ -91,13 +91,18 @@ class DcaWizard extends \Widget
                 return \Input::get('id') ?: $this->objDca->id;
 
             case 'params':
+                if (!isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'])) {
+                    return null;
+                }
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'];
 
             case 'foreignTable':
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'];
 
             case 'foreignField':
-                $foreignField = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'];
+                if (isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'])) {
+                    $foreignField = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'];
+                }
 
                 if (empty($foreignField)) {
                     $foreignField = 'pid';
@@ -106,6 +111,9 @@ class DcaWizard extends \Widget
                 return $foreignField;
 
             case 'foreignTableCallback':
+                if (!isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback'])) {
+                    return null;
+                }
                 return $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback'];
 
             default:
@@ -207,7 +215,7 @@ class DcaWizard extends \Widget
 
         $label = $def['label'][0] ?: $operation;
         $title = sprintf($def['label'][1] ?: $operation, $id);
-        $attributes = ($def['attributes'] != '') ? ' ' . ltrim(sprintf($def['attributes'], $id, $id)) : '';
+        $attributes = (isset($def['attributes']) && $def['attributes'] != '') ? ' ' . ltrim(sprintf($def['attributes'], $id, $id)) : '';
 
         // Dca wizard specific
         $arrBaseOptions = $this->getDcaWizardOptions();
@@ -223,9 +231,9 @@ class DcaWizard extends \Widget
         }
 
         // Call a custom function instead of using the default button
-        if (is_array($def['button_callback']))  {
+        if (isset($def['button_callback']) && is_array($def['button_callback']))  {
             return \System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'] . '&amp;' . http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
-        } elseif (is_callable($def['button_callback'])) {
+        } elseif (isset($def['button_callback']) && is_callable($def['button_callback'])) {
             return $def['button_callback']($row, $def['href'] . '&amp;' . http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
         }
 
@@ -412,7 +420,10 @@ class DcaWizard extends \Widget
      */
     public function getForeignTableCondition()
     {
-        $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
+        $blnDynamicPtable = false;
+        if (isset($GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'])) {
+            $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
+        }
 
         return "{$this->foreignField}={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
     }
