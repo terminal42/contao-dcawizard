@@ -213,8 +213,12 @@ class DcaWizard extends \Widget
         $id = specialchars(rawurldecode($row['id']));
         $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'] . '&amp;dcawizard_operation=1';
 
-        $label = $def['label'][0] ?: $operation;
-        $title = sprintf($def['label'][1] ?: $operation, $id);
+        if (is_array($def['label'])) {
+            $label = $def['label'][0] ?: $operation;
+            $title = sprintf($def['label'][1] ?: $operation, $id);
+        } else {
+            $label = $title = sprintf($def['label'] ?: $operation, $id);
+        }
         $attributes = (isset($def['attributes']) && $def['attributes'] != '') ? ' ' . ltrim(sprintf($def['attributes'], $id, $id)) : '';
 
         // Dca wizard specific
