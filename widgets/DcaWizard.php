@@ -154,6 +154,7 @@ class DcaWizard extends \Widget
         $objTemplate->strTable = $this->strTable;
         $objTemplate->foreignTable = $this->foreignTable;
         $objTemplate->dataContainer = $this->objDca;
+        $objTemplate->hideButton = $this->hideButton;
 
         // Get the available records
         $objRecords = $this->getRecords();
@@ -167,7 +168,6 @@ class DcaWizard extends \Widget
             $objTemplate->rows = $arrRows;
             $objTemplate->fields = $this->fields;
             $objTemplate->showOperations = $blnShowOperations;
-            $objTemplate->hideButton = $this->hideButton;
             $objTemplate->emptyLabel = $this->emptyLabel;
 
             if ($blnShowOperations) {
