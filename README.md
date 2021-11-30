@@ -61,7 +61,7 @@ This extension provides a widget to handle external table records in the edit mo
         // If this one is not defined, are all listed
         'operations' => array('edit', 'delete'),
 
-        // Use an own template
+        // Use your own custom template
         'customTpl' => 'be_widget_dcawizard_mytemplate',
 
         // Use the callback to generate the list
