@@ -148,8 +148,7 @@ class DcaWizard extends \Widget
         $blnShowOperations = $this->showOperations;
         $widget = $this;
 
-
-        $objTemplate = new BackendTemplate('be_widget_dcawizard');
+        $objTemplate = new BackendTemplate($this->customTpl ?: 'be_widget_dcawizard');
         $objTemplate->strId = $this->strId;
         $objTemplate->strTable = $this->strTable;
         $objTemplate->foreignTable = $this->foreignTable;
