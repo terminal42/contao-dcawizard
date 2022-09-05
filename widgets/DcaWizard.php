@@ -9,14 +9,21 @@
  * @link       https://github.com/terminal42/contao-dcawizard
  */
 
-use \Haste\Util\Format;
+use Contao\BackendTemplate;
+use Contao\Database;
+use Contao\Environment;
+use Contao\Image;
+use Contao\Input;
+use Contao\StringUtil;
+use Contao\System;
+use Contao\Widget;
 
 /**
  * Provides the back end widget "dcaWizard"
  *
  * @author Yanick Witschi <yanick.witschi@terminal42.ch>
  */
-class DcaWizard extends \Widget
+class DcaWizard extends Widget
 {
 
     /**
@@ -38,18 +45,18 @@ class DcaWizard extends \Widget
         // Load the table from callback
         $varCallback = $this->foreignTableCallback;
         if (is_array($varCallback) && !empty($varCallback)) {
-            $this->foreignTable = \System::importStatic($varCallback[0])->{$varCallback[1]}($this);
+            $this->foreignTable = System::importStatic($varCallback[0])->{$varCallback[1]}($this);
         } elseif (is_callable($varCallback)) {
             $this->foreignTable = $varCallback($this);
         }
 
         if ($this->foreignTable != '') {
             $this->loadDataContainer($this->foreignTable);
-            \System::loadLanguageFile($this->foreignTable);
+            System::loadLanguageFile($this->foreignTable);
         }
 
         // Set the referer
-        \Session::getInstance()->set('dcaWizardReferer', \Environment::get('request'));
+        System::getContainer()->get('session')->getBag('contao_backend')->set('dcaWizardReferer', Environment::get('request'));
     }
 
     /**
@@ -88,7 +95,7 @@ class DcaWizard extends \Widget
     {
         switch($strKey) {
             case 'currentRecord':
-                return \Input::get('id') ?: $this->objDca->id;
+                return Input::get('id') ?: $this->objDca->id;
 
             case 'params':
                 if (!isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'])) {
@@ -127,7 +134,7 @@ class DcaWizard extends \Widget
     public function validate()
     {
         if ($this->mandatory) {
-            $objRecords = \Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition());
+            $objRecords = Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition());
 
             if (!$objRecords->numRows && $this->strLabel == '') {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -180,7 +187,7 @@ class DcaWizard extends \Widget
         } else {
             $strCallback = '';
             if (is_array($varCallback)) {
-                $strCallback = \System::importStatic($varCallback[0])->{$varCallback[1]}($objRecords, $this->strId, $this);
+                $strCallback = System::importStatic($varCallback[0])->{$varCallback[1]}($objRecords, $this->strId, $this);
             } elseif (is_callable($varCallback)) {
                 $strCallback = $varCallback($objRecords, $this->strId, $this);
             }
@@ -190,7 +197,7 @@ class DcaWizard extends \Widget
         }
 
         $objTemplate->buttonHref        = $this->getButtonHref();
-        $objTemplate->dcaWizardOptions  = specialchars(json_encode($this->getDcaWizardOptions()));
+        $objTemplate->dcaWizardOptions  = StringUtil::specialchars(json_encode($this->getDcaWizardOptions()));
         $objTemplate->buttonLabel       = $this->getButtonLabel();
 
         return $objTemplate->parse();
@@ -209,7 +216,7 @@ class DcaWizard extends \Widget
         // Load the button definition from the subtable
         $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation];
 
-        $id = specialchars(rawurldecode($row['id']));
+        $id = StringUtil::specialchars(rawurldecode($row['id']));
         $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'] . '&amp;dcawizard_operation=1';
 
         if (is_array($def['label'])) {
@@ -223,7 +230,7 @@ class DcaWizard extends \Widget
         // Dca wizard specific
         $arrBaseOptions = $this->getDcaWizardOptions();
         $arrBaseOptions['url'] = $buttonHref;
-        $attributes .= ' data-options="' . specialchars(json_encode($arrBaseOptions)) . '"';
+        $attributes .= ' data-options="' . StringUtil::specialchars(json_encode($arrBaseOptions)) . '"';
         $attributes .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
 
         // Add the key as CSS class
@@ -235,7 +242,7 @@ class DcaWizard extends \Widget
 
         // Call a custom function instead of using the default button
         if (isset($def['button_callback']) && is_array($def['button_callback']))  {
-            return \System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'] . '&amp;' . http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
+            return System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'] . '&amp;' . http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
         } elseif (isset($def['button_callback']) && is_callable($def['button_callback'])) {
             return $def['button_callback']($row, $def['href'] . '&amp;' . http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
         }
@@ -243,9 +250,9 @@ class DcaWizard extends \Widget
         return sprintf(
             '<a href="%s" title="%s"%s>%s</a> ',
             $buttonHref,
-            specialchars($title),
+            StringUtil::specialchars($title),
             $attributes,
-            \Image::getHtml($def['icon'], $label)
+            Image::getHtml($def['icon'], $label)
         );
     }
 
@@ -262,10 +269,6 @@ class DcaWizard extends \Widget
 
     /**
      * Get rows
-     *
-     * @param \Database_Result $objRecords
-     *
-     * @return array
      */
     public function getRows($objRecords)
     {
@@ -281,10 +284,10 @@ class DcaWizard extends \Widget
     {
         $options = array
         (
-            'title'         => specialchars($this->strLabel),
+            'title'         => StringUtil::specialchars($this->strLabel),
             'url'           => $this->getButtonHref(),
             'id'            => $this->strId,
-            'applyLabel'    => specialchars($this->applyButtonLabel),
+            'applyLabel'    => StringUtil::specialchars($this->applyButtonLabel),
             'class'         => base64_encode(get_class($this))
         );
 
@@ -302,8 +305,9 @@ class DcaWizard extends \Widget
      */
     public function getButtonHref()
     {
-        return ampersand(\Environment::get('base')
-            . TL_SCRIPT
+        return StringUtil::ampersand(Environment::get('base')
+            // TODO
+            //. TL_SCRIPT
             . '?'
             . http_build_query($this->getButtonParams()));
     }
@@ -317,12 +321,13 @@ class DcaWizard extends \Widget
     {
         $arrParams = array
         (
-            'do'        => \Input::get('do'),
+            'do'        => Input::get('do'),
             'table'     => $this->foreignTable,
             'field'     => $this->strField,
             'id'        => $this->currentRecord,
             'popup'     => 1,
-            'rt'        => REQUEST_TOKEN,
+            // TODO
+            //'rt'        => REQUEST_TOKEN,
             'dcawizard' => $this->foreignTable . ':' . $this->currentRecord,
         );
 
@@ -341,17 +346,15 @@ class DcaWizard extends \Widget
      */
     public function getButtonLabel()
     {
-        return specialchars($this->editButtonLabel ? $this->editButtonLabel : $this->strLabel);
+        return StringUtil::specialchars($this->editButtonLabel ?: $this->strLabel);
     }
 
     /**
      * Get records
-     *
-     * @return \Database_Result
      */
     public function getRecords()
     {
-        return \Database::getInstance()->execute(
+        return Database::getInstance()->execute(
             "SELECT * FROM {$this->foreignTable}" .
             $this->getWhereCondition() .
             $this->getOrderBy()
