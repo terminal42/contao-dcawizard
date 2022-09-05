@@ -16,7 +16,7 @@
         "codefog/contao-haste": "5.x-dev@dev"
     },
     "autoload": {
-        "classmap": ["widgets"]
+        "classmap": ["classes", "widgets"]
     },
     "replace": {
         "contao-legacy/dcawizard": "self.version"
