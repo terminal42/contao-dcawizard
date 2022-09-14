@@ -282,20 +282,13 @@ class DcaWizard extends Widget
      */
     public function getDcaWizardOptions()
     {
-        $options = array
-        (
+        return [
             'title'         => StringUtil::specialchars($this->strLabel),
             'url'           => $this->getButtonHref(),
             'id'            => $this->strId,
             'applyLabel'    => StringUtil::specialchars($this->applyButtonLabel),
             'class'         => base64_encode(get_class($this))
-        );
-
-        if (version_compare(VERSION, '4.0', '<')) {
-            $options['width'] = 765;
-        }
-
-        return $options;
+        ];
     }
 
     /**
@@ -306,9 +299,7 @@ class DcaWizard extends Widget
     public function getButtonHref()
     {
         return StringUtil::ampersand(Environment::get('base')
-            // TODO
-            //. TL_SCRIPT
-            . '?'
+            . 'contao?'
             . http_build_query($this->getButtonParams()));
     }
 

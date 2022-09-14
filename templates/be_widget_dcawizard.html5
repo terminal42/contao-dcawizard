@@ -53,6 +53,6 @@
 <script>
     var script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
-    script.setAttribute('src', '<?= sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min')) ?>');
+    script.setAttribute('src', '<?= sprintf('system/modules/dcawizard/assets/dcawizard.min.js') ?>');
     document.getElementsByTagName('head').item(0).appendChild(script);
 </script>
