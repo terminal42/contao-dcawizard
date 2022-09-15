@@ -55,8 +55,12 @@ class DcaWizard extends Widget
             System::loadLanguageFile($this->foreignTable);
         }
 
+        $request = System::getContainer()->get('request_stack')->getCurrentRequest();
+
         // Set the referer
-        System::getContainer()->get('session')->getBag('contao_backend')->set('dcaWizardReferer', Environment::get('request'));
+        if ($request !== null) {
+            $request->getSession()->getBag('contao_backend')->set('dcaWizardReferer', Environment::get('request'));
+        }
     }
 
     /**
