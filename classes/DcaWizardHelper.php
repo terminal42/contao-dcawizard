@@ -108,7 +108,14 @@ class DcaWizardHelper
             return;
         }
 
-        $session = System::getContainer()->get('session')->getBag('contao_backend')->get('popupReferer');
+        $request = System::getContainer()->get('request_stack')->getCurrentRequest();
+
+        if ($request === null) {
+            return;
+        }
+
+        $sessionBag = $request->getSession()->getBag('contao_backend');
+        $session = $sessionBag->get('popupReferer');
 
         if (!is_array($session)) {
             return;
@@ -124,7 +131,7 @@ class DcaWizardHelper
         end($session);
         $session[key($session)]['current'] = $url;
 
-        System::getContainer()->get('session')->getBag('contao_backend')->set('popupReferer', $session);
+        $sessionBag->set('popupReferer', $session);
     }
 
     /**
@@ -137,8 +144,15 @@ class DcaWizardHelper
             return;
         }
 
-        $session = System::getContainer()->get('session')->getBag('contao_backend')->get('popupReferer');
-        $referer = System::getContainer()->get('session')->getBag('contao_backend')->get('dcaWizardReferer');
+        $request = System::getContainer()->get('request_stack')->getCurrentRequest();
+
+        if ($request === null) {
+            return;
+        }
+
+        $sessionBag = $request->getSession()->getBag('contao_backend');
+        $session = $sessionBag->get('popupReferer');
+        $referer = $sessionBag->get('dcaWizardReferer');
 
         if (!is_array($session) || !$referer) {
             return;
@@ -148,7 +162,7 @@ class DcaWizardHelper
         end($session);
         $session[key($session)]['current'] = $referer;
 
-        System::getContainer()->get('session')->getBag('contao_backend')->set('popupReferer', $session);
+        $sessionBag->set('popupReferer', $session);
     }
 
     /**
