@@ -93,7 +93,7 @@ class DcaWizardHelper
                 $strClass::getAttributesFromDca($arrData, $strFieldName, null, $strField, $dc->table, $dc)
             );
 
-            header('Content-Type: text/html; charset=' . $GLOBALS['TL_CONFIG']['characterSet']);
+            header('Content-Type: text/html; charset=' . \Contao\Config::get('characterSet'));
             echo $objWidget->generate();
             exit;
         }
