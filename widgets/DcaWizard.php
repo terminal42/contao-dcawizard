@@ -322,6 +322,7 @@ class DcaWizard extends \Widget
             'field'     => $this->strField,
             'id'        => $this->currentRecord,
             'popup'     => 1,
+            'nb'        => 1,
             'rt'        => REQUEST_TOKEN,
             'dcawizard' => $this->foreignTable . ':' . $this->currentRecord,
         );
