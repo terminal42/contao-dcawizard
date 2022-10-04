@@ -9,12 +9,9 @@
  * @link       https://github.com/terminal42/contao-dcawizard
  */
 
-use Codefog\HasteBundle\UrlParser;
 use Contao\Database;
 use Contao\DataContainer;
-use Contao\Environment;
 use Contao\Input;
-use Contao\System;
 use Contao\Widget;
 
 /**
