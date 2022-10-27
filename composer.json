@@ -11,13 +11,14 @@
         }
     ],
     "require": {
-        "php": "^5.3.2 || ^7.0 || ^8.0",
-        "contao/core-bundle": "~3.2 || ~4.1",
+        "php": "^7.0 || ^8.0",
+        "ext-json": "*",
+        "contao/core-bundle": "^4.13 || ^5.0",
         "contao-community-alliance/composer-plugin": "~2.4 || ~3.0",
-        "codefog/contao-haste": "4.*"
+        "codefog/contao-haste": "^5.0"
     },
     "autoload": {
-        "classmap": ["widgets"]
+        "classmap": ["classes", "widgets"]
     },
     "replace": {
         "contao-legacy/dcawizard": "self.version"

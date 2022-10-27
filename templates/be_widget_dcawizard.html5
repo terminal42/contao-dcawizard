@@ -7,7 +7,7 @@
         <table class="tl_listing showColumns">
             <thead>
                 <?php foreach ($this->headerFields as $field): ?>
-                <td class="tl_folder_tlist"><?= \Haste\Util\Format::dcaLabel($this->foreignTable, $field) ?></td>
+                <td class="tl_folder_tlist"><?= \Contao\System::getContainer()->get(\Codefog\HasteBundle\Formatter::class)->dcaLabel($this->foreignTable, $field) ?></td>
                 <?php endforeach; ?>
                 <?php if ($this->showOperations): ?>
                 <td class="tl_folder_tlist"></td>
@@ -17,7 +17,7 @@
                 <?php foreach ($this->rows as $row): ?>
                 <tr>
                     <?php foreach ($this->fields as $field): ?>
-                    <td class="tl_file_list"><?= \Haste\Util\Format::dcaValue($this->foreignTable, $field, $row[$field], $this->dataContainer) ?></td>
+                    <td class="tl_file_list"><?= \Contao\System::getContainer()->get(\Codefog\HasteBundle\Formatter::class)->dcaValue($this->foreignTable, $field, $row[$field], $this->dataContainer) ?></td>
                     <?php endforeach; ?>
 
                     <?php if ($this->showOperations): ?>
@@ -53,6 +53,6 @@
 <script>
     var script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
-    script.setAttribute('src', '<?= sprintf('system/modules/dcawizard/assets/dcawizard%s.js', (($GLOBALS['TL_CONFIG']['debugMode']) ? '' : '.min')) ?>');
+    script.setAttribute('src', '<?= sprintf('system/modules/dcawizard/assets/dcawizard.min.js') ?>');
     document.getElementsByTagName('head').item(0).appendChild(script);
 </script>
