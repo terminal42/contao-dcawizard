@@ -9,10 +9,12 @@
  * @link       https://github.com/terminal42/contao-dcawizard
  */
 
+use Contao\CoreBundle\Exception\ResponseException;
 use Contao\Database;
 use Contao\DataContainer;
 use Contao\Input;
 use Contao\Widget;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Provides helper methods for the DcaWizard widget
@@ -40,15 +42,13 @@ class DcaWizardHelper
             if ('File' === $GLOBALS['TL_DCA'][$dc->table]['config']['dataContainer']) {
                 // The field does not exist
                 if (!array_key_exists($strField, $GLOBALS['TL_CONFIG'])) {
-                    header('HTTP/1.1 400 Bad Request');
-                    die('Bad Request');
+                    throw new ResponseException(new Response(Response::$statusTexts[Response::HTTP_BAD_REQUEST], Response::HTTP_BAD_REQUEST));
                 }
 
             } elseif (Database::getInstance()->tableExists($dc->table)) {
                 // The field does not exist
                 if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$strField])) {
-                    header('HTTP/1.1 400 Bad Request');
-                    die('Bad Request');
+                    throw new ResponseException(new Response(Response::$statusTexts[Response::HTTP_BAD_REQUEST], Response::HTTP_BAD_REQUEST));
                 }
 
                 $objRow = Database::getInstance()
@@ -58,8 +58,7 @@ class DcaWizardHelper
 
                 // The record does not exist
                 if (!$objRow->numRows) {
-                    header('HTTP/1.1 400 Bad Request');
-                    die('Bad Request');
+                    throw new ResponseException(new Response(Response::$statusTexts[Response::HTTP_BAD_REQUEST], Response::HTTP_BAD_REQUEST));
                 }
 
                 $dc->intId = (int) $objRow->id;
@@ -90,9 +89,7 @@ class DcaWizardHelper
                 $strClass::getAttributesFromDca($arrData, $strFieldName, null, $strField, $dc->table, $dc)
             );
 
-            header('Content-Type: text/html; charset=' . \Contao\Config::get('characterSet'));
-            echo $objWidget->generate();
-            exit;
+            throw new ResponseException(new Response($objWidget->generate()));
         }
     }
 }
