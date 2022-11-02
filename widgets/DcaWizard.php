@@ -17,6 +17,7 @@ use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Provides the back end widget "dcaWizard"
@@ -302,9 +303,7 @@ class DcaWizard extends Widget
      */
     public function getButtonHref()
     {
-        return StringUtil::ampersand(Environment::get('base')
-            . 'contao?'
-            . http_build_query($this->getButtonParams()));
+        return StringUtil::ampersand(System::getContainer()->get('router')->generate('contao_backend', $this->getButtonParams(), RouterInterface::ABSOLUTE_URL));
     }
 
     /**
