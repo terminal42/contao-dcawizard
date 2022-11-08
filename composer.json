@@ -1,17 +1,32 @@
 {
     "name": "terminal42/dcawizard",
+    "type": "contao-module",
     "description": "dcaWizard extension for Contao Open Source CMS",
     "keywords": ["dca", "wizard", "dcawizard", "contao"],
-    "type": "contao-module",
     "license": "LGPL-3.0+",
     "authors": [
         {
             "name": "terminal42 gmbh",
-            "homepage": "http://terminal42.ch"
+            "homepage": "https://www.terminal42.ch"
         }
     ],
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/terminal42"
+        },
+        {
+            "type": "other",
+            "url": "https://ko-fi.com/terminal42"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/terminal42/contao-dcawizard/issues",
+        "forum": "https://community.contao.org",
+        "source": "https://github.com/terminal42/contao-dcawizard"
+    },
     "require": {
-        "php": "^7.0 || ^8.0",
+        "php": "^7.1 || ^8.0",
         "ext-json": "*",
         "contao/core-bundle": "^4.13 || ^5.0",
         "contao-community-alliance/composer-plugin": "~2.4 || ~3.0",
@@ -19,9 +34,6 @@
     },
     "autoload": {
         "classmap": ["classes", "widgets"]
-    },
-    "replace": {
-        "contao-legacy/dcawizard": "self.version"
     },
     "extra": {
         "contao": {
