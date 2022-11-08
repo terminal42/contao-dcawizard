@@ -139,7 +139,15 @@ class DcaWizard extends Widget
     public function validate()
     {
         if ($this->mandatory) {
-            $objRecords = Database::getInstance()->execute("SELECT id FROM {$this->foreignTable} WHERE " . $this->getForeignTableCondition());
+            $where = $this->getForeignTableCondition();
+            $values = [];
+
+            if (\is_array($where)) {
+                $values = $where[1];
+                $where = $where[0];
+            }
+
+            $objRecords = Database::getInstance()->prepare("SELECT id FROM {$this->foreignTable} WHERE " . $where)->execute(...$values);
 
             if (!$objRecords->numRows && $this->strLabel == '') {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['mdtryNoLabel']);
@@ -366,11 +374,19 @@ class DcaWizard extends Widget
      */
     public function getRecords()
     {
-        return Database::getInstance()->execute(
+        $where = $this->getWhereCondition();
+        $values = [];
+
+        if (\is_array($where)) {
+            $values = $where[1];
+            $where = $where[0];
+        }
+
+        return Database::getInstance()->prepare(
             "SELECT * FROM {$this->foreignTable}" .
-            $this->getWhereCondition() .
+            $where .
             $this->getOrderBy()
-        );
+        )->execute(...$values);
     }
 
     /**
@@ -399,17 +415,25 @@ class DcaWizard extends Widget
     /**
      * Get WHERE statement
      *
-     * @return string
+     * @return array|string
      */
     public function getWhereCondition()
     {
-        $strWhere = ' WHERE tstamp>0 AND ' . $this->getForeignTableCondition();
+        $foreignTableCondition = $this->getForeignTableCondition();
+        $values = [];
+
+        if (\is_array($foreignTableCondition)) {
+            $values = $foreignTableCondition[1];
+            $foreignTableCondition = $foreignTableCondition[0];
+        }
+
+        $strWhere = ' WHERE tstamp>0 AND ' . $foreignTableCondition;
 
         if ($this->whereCondition) {
             $strWhere .= ' AND ' . $this->whereCondition;
         }
 
-        return $strWhere;
+        return [$strWhere, $values];
     }
 
     /**
@@ -434,15 +458,18 @@ class DcaWizard extends Widget
     /**
      * Return SQL WHERE condition for foreign table
      *
-     * @return string
+     * @return array|string
      */
     public function getForeignTableCondition()
     {
-        $blnDynamicPtable = false;
+        $where = "$this->foreignField=?";
+        $values = [$this->currentRecord];
+
         if (isset($GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'])) {
-            $blnDynamicPtable = (bool) $GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'];
+            $where .= ' AND ptable=?';
+            $values[] = $this->strTable;
         }
 
-        return "{$this->foreignField}={$this->currentRecord}" . ($blnDynamicPtable ? " AND ptable='{$this->strTable}'" : '');
+        return [$where, $values];
     }
 }
