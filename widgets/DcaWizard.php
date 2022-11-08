@@ -158,14 +158,32 @@ class DcaWizard extends Widget
     {
         $varCallback = $this->listCallback;
         $blnShowOperations = $this->showOperations;
-        $widget = $this;
 
         $objTemplate = new BackendTemplate($this->customTpl ?: 'be_widget_dcawizard');
         $objTemplate->strId = $this->strId;
-        $objTemplate->strTable = $this->strTable;
-        $objTemplate->foreignTable = $this->foreignTable;
-        $objTemplate->dataContainer = $this->objDca;
         $objTemplate->hideButton = $this->hideButton;
+
+        $objTemplate->dcaLabel = function ($field) {
+            if (\class_exists(\Codefog\HasteBundle\Formatter::class)) {
+                return \Contao\System::getContainer()
+                    ->get(\Codefog\HasteBundle\Formatter::class)
+                    ->dcaLabel($this->foreignTable, $field)
+                ;
+            }
+
+            return \Haste\Util\Format::dcaLabel($this->foreignTable, $field);
+        };
+
+        $objTemplate->dcaValue = function ($field, $value) {
+            if (\class_exists(\Codefog\HasteBundle\Formatter::class)) {
+                return \Contao\System::getContainer()
+                    ->get(\Codefog\HasteBundle\Formatter::class)
+                    ->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
+                ;
+            }
+
+            return \Haste\Util\Format::dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
+        };
 
         // Get the available records
         $objRecords = $this->getRecords();
@@ -185,8 +203,8 @@ class DcaWizard extends Widget
                 $objTemplate->operations = $this->getActiveRowOperations();
             }
 
-            $objTemplate->generateOperation = function($operation, $row) use ($widget) {
-                return $widget->generateRowOperation($operation, $row);
+            $objTemplate->generateOperation = function ($operation, $row) {
+                return $this->generateRowOperation($operation, $row);
             };
 
         } else {
