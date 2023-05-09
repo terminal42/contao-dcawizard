@@ -17,7 +17,7 @@
                 <?php foreach ($this->rows as $row): ?>
                 <tr>
                     <?php foreach ($this->fields as $field): ?>
-                    <td class="tl_file_list"><?= $this->dcaValue($field, $row[$field]) ?></td>
+                    <td class="tl_file_list"><?= $this->dcaValue($field, $row[$field]) ?: '-' ?></td>
                     <?php endforeach; ?>
 
                     <?php if ($this->showOperations): ?>
