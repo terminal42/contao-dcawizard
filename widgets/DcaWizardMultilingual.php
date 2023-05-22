@@ -28,7 +28,7 @@ class DcaWizardMultilingual extends DcaWizard
         $langColumn = $this->langColumn ?: 'language';
 
         $condition = parent::getForeignTableCondition();
-        $condition .= " AND {$langColumn}=''";
+        $condition[0] .= " AND {$langColumn}=''";
 
         return $condition;
     }
