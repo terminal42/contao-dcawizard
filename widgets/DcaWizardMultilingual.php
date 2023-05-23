@@ -21,15 +21,14 @@ class DcaWizardMultilingual extends DcaWizard
     /**
      * Return SQL WHERE condition for foreign table
      *
-     * @return string
+     * @return array
      */
     public function getForeignTableCondition()
     {
         $langColumn = $this->langColumn ?: 'language';
 
         $condition = parent::getForeignTableCondition();
-        $condition = is_array($condition) ?: $condition[0];
-        $condition .= " AND {$langColumn}=''";
+        $condition[0] .= " AND {$langColumn}=''";
 
         return $condition;
     }

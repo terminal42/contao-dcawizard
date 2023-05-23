@@ -458,7 +458,7 @@ class DcaWizard extends Widget
     /**
      * Return SQL WHERE condition for foreign table
      *
-     * @return array|string
+     * @return array
      */
     public function getForeignTableCondition()
     {
