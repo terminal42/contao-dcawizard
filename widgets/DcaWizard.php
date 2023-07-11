@@ -329,7 +329,7 @@ class DcaWizard extends Widget
      */
     public function getButtonHref()
     {
-        return StringUtil::ampersand(System::getContainer()->get('router')->generate('contao_backend', $this->getButtonParams(), RouterInterface::ABSOLUTE_URL));
+        return System::getContainer()->get('router')->generate('contao_backend', $this->getButtonParams(), RouterInterface::ABSOLUTE_URL);
     }
 
     /**
