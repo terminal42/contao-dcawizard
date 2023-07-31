@@ -347,7 +347,7 @@ class DcaWizard extends Widget
             'id'        => $this->currentRecord,
             'popup'     => 1,
             'nb'        => 1,
-            'rt'        => Input::get('rt'),
+            'rt'        => System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue(),
             'dcawizard' => $this->foreignTable . ':' . $this->currentRecord,
         );
 
