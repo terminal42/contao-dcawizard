@@ -347,6 +347,7 @@ class DcaWizard extends Widget
             'id'        => $this->currentRecord,
             'popup'     => 1,
             'nb'        => 1,
+            'ref'       => Input::get('ref'),
             'rt'        => Input::get('rt'),
             'dcawizard' => $this->foreignTable . ':' . $this->currentRecord,
         );
