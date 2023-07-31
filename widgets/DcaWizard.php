@@ -9,7 +9,9 @@
  * @link       https://github.com/terminal42/contao-dcawizard
  */
 
+use Codefog\HasteBundle\Formatter;
 use Contao\BackendTemplate;
+use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
 use Contao\Database;
 use Contao\Environment;
 use Contao\Image;
@@ -172,9 +174,9 @@ class DcaWizard extends Widget
         $objTemplate->hideButton = $this->hideButton;
 
         $objTemplate->dcaLabel = function ($field) {
-            if (\class_exists(\Codefog\HasteBundle\Formatter::class)) {
-                return \Contao\System::getContainer()
-                    ->get(\Codefog\HasteBundle\Formatter::class)
+            if (\class_exists(Formatter::class)) {
+                return System::getContainer()
+                    ->get(Formatter::class)
                     ->dcaLabel($this->foreignTable, $field)
                 ;
             }
@@ -183,9 +185,9 @@ class DcaWizard extends Widget
         };
 
         $objTemplate->dcaValue = function ($field, $value) {
-            if (\class_exists(\Codefog\HasteBundle\Formatter::class)) {
-                return \Contao\System::getContainer()
-                    ->get(\Codefog\HasteBundle\Formatter::class)
+            if (\class_exists(Formatter::class)) {
+                return System::getContainer()
+                    ->get(Formatter::class)
                     ->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
                 ;
             }
@@ -348,7 +350,7 @@ class DcaWizard extends Widget
             'popup'     => 1,
             'nb'        => 1,
             'ref'       => Input::get('ref'),
-            'rt'        => Input::get('rt'),
+            'rt'        => $this->getRequestToken(),
             'dcawizard' => $this->foreignTable . ':' . $this->currentRecord,
         );
 
@@ -472,5 +474,17 @@ class DcaWizard extends Widget
         }
 
         return [$where, $values];
+    }
+
+    private function getRequestToken(): string
+    {
+        if (
+            \method_exists(ContaoCsrfTokenManager::class, 'getDefaultTokenValue')
+            && System::getContainer()->has('contao.csrf.token_manager')
+        ) {
+            return System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue();
+        }
+
+        return Input::get('rt');
     }
 }
