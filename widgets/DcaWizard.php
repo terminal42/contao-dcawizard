@@ -242,14 +242,14 @@ class DcaWizard extends Widget
 
     public function generateGlobalOperation($operation): string
     {
-        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$operation];
+        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$operation] ?? null;
 
         // Cannot edit all in DcaWizard
         if ('all' === $operation) {
             return '';
         }
 
-        if (empty($def) && 'new' === $operation) {
+        if (null === $def && 'new' === $operation) {
             if (
                 ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null)
                 || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)
@@ -262,6 +262,10 @@ class DcaWizard extends Widget
                 'icon' => 'new.svg',
                 'label' => $GLOBALS['TL_LANG'][$this->foreignTable]['new'] ?? $GLOBALS['TL_LANG']['DCA']['new'],
             ];
+        }
+
+        if (null === $def) {
+            return '';
         }
 
         $def = \is_array($def) ? $def : array($def);
@@ -326,9 +330,9 @@ class DcaWizard extends Widget
     public function generateRowOperation($operation, $row)
     {
         // Load the button definition from the subtable
-        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation];
+        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation] ?? null;
 
-        if (empty($def) && 'new' === $operation) {
+        if (null === $def && 'new' === $operation) {
             if (
                 ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null)
                 || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)
@@ -341,6 +345,10 @@ class DcaWizard extends Widget
                 'href' => 'act=create&amp;mode=1&amp;pid='.$row['id'],
                 'icon' => 'new.svg',
             ];
+        }
+
+        if (null === $def) {
+            return '';
         }
 
         $id = StringUtil::specialchars(rawurldecode($row['id']));
