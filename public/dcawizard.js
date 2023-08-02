@@ -1,12 +1,10 @@
-var DcaWizard =
-{
+var DcaWizard = {
     /**
      * Open a modal window
      *
      * @param {Object} options
      */
-    openModalWindow: function(options)
-    {
+    openModalWindow: function (options) {
         var opt = options || {},
             maxWidth = (window.getSize().x - 20).toInt(),
             maxHeight = (window.getSize().y - 137).toInt();
@@ -19,7 +17,7 @@ var DcaWizard =
             'draggable': false,
             'hideFooter': true,
             'overlayOpacity': .5,
-            'onShow': function() {
+            'onShow': function () {
                 document.body.setStyle('overflow', 'hidden');
 
                 window.addEventListener('message', function (message) {
@@ -28,14 +26,14 @@ var DcaWizard =
                     }
                 });
             },
-            'onHide': function() {
+            'onHide': function () {
                 document.body.setStyle('overflow', 'auto');
 
                 new Request.Contao({
                     evalScripts: false,
                     onRequest: AjaxRequest.displayBox(Contao.lang.loading + ' …'),
-                    onSuccess: function(txt, json) {
-                        $('ctrl_'+opt.id).set('html', json.content);
+                    onSuccess: function (txt, json) {
+                        $('ctrl_' + opt.id).set('html', json.content);
                         json.javascript && Browser.exec(json.javascript);
                         AjaxRequest.hideBox();
                     }

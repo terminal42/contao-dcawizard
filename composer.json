@@ -1,6 +1,6 @@
 {
     "name": "terminal42/dcawizard",
-    "type": "contao-module",
+    "type": "contao-bundle",
     "description": "dcaWizard extension for Contao Open Source CMS",
     "keywords": ["dca", "wizard", "dcawizard", "contao"],
     "license": "LGPL-3.0+",
@@ -26,20 +26,27 @@
         "source": "https://github.com/terminal42/contao-dcawizard"
     },
     "require": {
-        "php": "^7.1 || ^8.0",
+        "php": "^8.1",
         "ext-json": "*",
-        "contao/core-bundle": "^4.4 || ^5.0",
-        "contao-community-alliance/composer-plugin": "~2.4 || ~3.0",
-        "codefog/contao-haste": "^4.0 || ^5.0"
+        "contao/core-bundle": "^4.13 || ^5.0",
+        "codefog/contao-haste": "^5.0",
+        "doctrine/dbal": "^3"
+    },
+    "require-dev": {
+        "contao/manager-plugin": "^2.0",
+        "terminal42/contao-build-tools": "dev-main"
     },
     "autoload": {
-        "classmap": ["classes", "widgets"]
+        "psr-4": {
+            "Terminal42\\DcawizardBundle\\": "src/"
+        }
     },
     "extra": {
-        "contao": {
-            "sources": {
-                "": "system/modules/dcawizard"
-            }
+        "contao-manager-plugin": "Terminal42\\DcawizardBundle\\ContaoManager\\Plugin"
+    },
+    "config": {
+        "allow-plugins": {
+            "terminal42/contao-build-tools": true
         }
     }
 }

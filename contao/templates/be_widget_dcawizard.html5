@@ -1,0 +1,56 @@
+<div id="ctrl_<?= $this->strId ?>" class="dcawizard">
+  <?php if ($this->globalOperations): ?>
+    <div id="tl_buttons" style="margin-top:-28px">
+      <?php foreach ($this->globalOperations as $operation): ?>
+        <?= $this->generateGlobalOperation($operation); ?>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+  <div class="selector_container">
+    <?php if ($this->hasListCallback): ?>
+      <?= $this->listCallbackContent ?>
+    <?php elseif ($this->hasRows): ?>
+      <table class="tl_listing showColumns">
+        <thead>
+        <?php foreach ($this->headerFields as $field): ?>
+          <td class="tl_folder_tlist"><?= $this->dcaLabel($field) ?></td>
+        <?php endforeach; ?>
+        <?php if ($this->showOperations): ?>
+          <td class="tl_folder_tlist"></td>
+        <?php endif; ?>
+        </thead>
+        <tbody>
+        <?php foreach ($this->rows as $row): ?>
+          <tr>
+            <?php foreach ($this->fields as $field): ?>
+              <td class="tl_file_list"><?= $this->dcaValue($field, $row[$field]) ?: '-' ?></td>
+            <?php endforeach; ?>
+
+            <?php if ($this->showOperations): ?>
+              <td class="tl_file_list tl_right_nowrap">
+                <?php foreach ($this->operations as $operation): ?>
+                  <?= $this->generateOperation($operation, $row) ?><?php endforeach; ?>
+              </td>
+            <?php endif; ?>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    <?php elseif ($this->emptyLabel): ?>
+      <p><?= $this->emptyLabel ?></p>
+    <?php endif; ?>
+
+    <?php if (!$this->hideButton): ?>
+      <p style="margin-top:9px;">
+        <a href="<?= $this->buttonHref ?>"
+           class="tl_submit"
+           data-options="<?= $this->dcaWizardOptions; ?>"
+           onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute('data-options')));return false"
+        >
+          <?= $this->buttonLabel ?>
+        </a>
+      </p>
+    <?php endif; ?>
+  </div>
+</div>
+<script src="<?= $this->asset('dcawizard.js', 'terminal42_dcawizard') ?>"></script>
