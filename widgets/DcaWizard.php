@@ -11,6 +11,7 @@
 
 use Codefog\HasteBundle\Formatter;
 use Contao\BackendTemplate;
+use Contao\Controller;
 use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
 use Contao\Database;
 use Contao\Environment;
@@ -23,8 +24,6 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Provides the back end widget "dcaWizard"
- *
- * @author Yanick Witschi <yanick.witschi@terminal42.ch>
  */
 class DcaWizard extends Widget
 {
@@ -195,6 +194,10 @@ class DcaWizard extends Widget
             return \Haste\Util\Format::dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
         };
 
+        $objTemplate->generateGlobalOperation = function ($operation) {
+            return $this->generateGlobalOperation($operation);
+        };
+
         // Get the available records
         $objRecords = $this->getRecords();
 
@@ -229,11 +232,87 @@ class DcaWizard extends Widget
             $objTemplate->listCallbackContent = $strCallback;
         }
 
-        $objTemplate->buttonHref        = $this->getButtonHref();
-        $objTemplate->dcaWizardOptions  = StringUtil::specialchars(json_encode($this->getDcaWizardOptions()));
-        $objTemplate->buttonLabel       = $this->getButtonLabel();
+        $objTemplate->globalOperations = $this->global_operations;
+        $objTemplate->buttonHref = $this->getButtonHref();
+        $objTemplate->dcaWizardOptions = StringUtil::specialchars(json_encode($this->getDcaWizardOptions()));
+        $objTemplate->buttonLabel = $this->getButtonLabel();
 
         return $objTemplate->parse();
+    }
+
+    public function generateGlobalOperation($operation): string
+    {
+        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$operation];
+
+        // Cannot edit all in DcaWizard
+        if ('all' === $operation) {
+            return '';
+        }
+
+        if (empty($def) && 'new' === $operation) {
+            if (
+                ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null)
+                || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)
+            ) {
+                return '';
+            }
+
+            $def = [
+                'href' => 'act=create&amp;mode=2&amp;pid='.$this->currentRecord,
+                'icon' => 'new.svg',
+                'label' => $GLOBALS['TL_LANG'][$this->foreignTable]['new'] ?? $GLOBALS['TL_LANG']['DCA']['new'],
+            ];
+        }
+
+        $def = \is_array($def) ? $def : array($def);
+        $title = $label = $operation;
+
+        if (isset($def['label'])) {
+            $label = \is_array($def['label']) ? $def['label'][0] : $def['label'];
+            $title = \is_array($def['label']) ? ($def['label'][1] ?? null) : $def['label'];
+        }
+
+        $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;dcawizard_operation=1';
+
+        $attributes = !empty($def['attributes']) ? ' '.ltrim($def['attributes']) : '';
+
+        // Custom icon (see #5541)
+        if ($def['icon'] ?? null) {
+            $def['class'] = trim(($def['class'] ?? '').' header_icon');
+
+            // Add the theme path if only the file name is given
+            if (strpos($def['icon'], '/') === false) {
+                $def['icon'] = Image::getPath($def['icon']);
+            }
+
+            $attributes = sprintf(' style="background-image:url(\'%s\')"', Controller::addAssetsUrlTo($def['icon'])).$attributes;
+        }
+
+        // Dca wizard specific
+        $arrBaseOptions = $this->getDcaWizardOptions();
+        $arrBaseOptions['url'] = $buttonHref;
+        $attributes .= ' data-options="' . StringUtil::specialchars(json_encode($arrBaseOptions)) . '"';
+        $attributes .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
+
+        if (!$label) {
+            $label = $operation;
+        }
+
+        if (!$title) {
+            $title = $label;
+        }
+
+        // Call a custom function instead of using the default button
+        if (\is_array($def['button_callback'] ?? null)) {
+            $this->import($def['button_callback'][0]);
+            return $this->{$def['button_callback'][0]}->{$def['button_callback'][1]}($def['href'] ?? '', $label, $title, $def['class'], $attributes, $this->strTable, $this->root);
+        }
+
+        if (\is_callable($def['button_callback'] ?? null)) {
+            return $def['button_callback']($def['href'] ?? null, $label, $title, $def['class'] ?? null, $attributes, $this->strTable, $this->root);
+        }
+
+        return '<a href="' . $buttonHref . '" class="' . $def['class'] . '" title="' . StringUtil::specialchars($title) . '"' . $attributes . '>' . $label . '</a> ';
     }
 
     /**
@@ -248,6 +327,21 @@ class DcaWizard extends Widget
     {
         // Load the button definition from the subtable
         $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation];
+
+        if (empty($def) && 'new' === $operation) {
+            if (
+                ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null)
+                || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)
+                || 'sorting' !== ($GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'][0] ?? null)
+            ) {
+                return '';
+            }
+
+            $def = [
+                'href' => 'act=create&amp;mode=1&amp;pid='.$row['id'],
+                'icon' => 'new.svg',
+            ];
+        }
 
         $id = StringUtil::specialchars(rawurldecode($row['id']));
         $buttonHref = $this->getButtonHref() . '&amp;' . $def['href'] . '&amp;id='.$row['id'] . '&amp;dcawizard_operation=1';
@@ -276,7 +370,9 @@ class DcaWizard extends Widget
         // Call a custom function instead of using the default button
         if (isset($def['button_callback']) && is_array($def['button_callback']))  {
             return System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, $def['href'] . '&amp;' . http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
-        } elseif (isset($def['button_callback']) && is_callable($def['button_callback'])) {
+        }
+
+        if (isset($def['button_callback']) && is_callable($def['button_callback'])) {
             return $def['button_callback']($row, $def['href'] . '&amp;' . http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
         }
 
