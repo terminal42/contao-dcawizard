@@ -22,36 +22,26 @@ var DcaWizard =
             'closeButton': false,
             'overlayOpacity': .5,
             'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
-            'onHide': function() { document.body.setStyle('overflow', 'auto'); }
-        });
-        M.addButton(label, 'btn', function() {
-            var frm = null,
-                frms = window.frames;
-            for (var i=0; i<frms.length; i++) {
-                if (frms[i].name === 'simple-modal-iframe') {
-                    frm = frms[i];
-                    break;
-                }
-            }
-            if (frm === null) {
-                alert('Could not find the SimpleModal frame');
-                return;
-            }
+            'onHide': function() {
+                document.body.setStyle('overflow', 'auto');
 
-            new Request.Contao({
-                evalScripts: false,
-                onRequest: AjaxRequest.displayBox(Contao.lang.loading + ' …'),
-                onSuccess: function(txt, json) {
-                    $('ctrl_'+opt.id).set('html', json.content);
-                    json.javascript && Browser.exec(json.javascript);
-                    AjaxRequest.hideBox();
-                }
-            }).post({
+                new Request.Contao({
+                    evalScripts: false,
+                    onRequest: AjaxRequest.displayBox(Contao.lang.loading + ' …'),
+                    onSuccess: function(txt, json) {
+                        $('ctrl_'+opt.id).set('html', json.content);
+                        json.javascript && Browser.exec(json.javascript);
+                        AjaxRequest.hideBox();
+                    }
+                }).post({
                     'action': 'reloadDcaWizard',
                     'name': opt.id,
                     'REQUEST_TOKEN': Contao.request_token,
                     'class': opt.class
                 });
+            }
+        });
+        M.addButton(label, 'btn', function() {
             this.hide();
         });
         M.show({

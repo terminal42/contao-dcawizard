@@ -53,6 +53,6 @@
 <script>
     var script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
-    script.setAttribute('src', 'system/modules/dcawizard/assets/dcawizard.min.js');
+    script.setAttribute('src', 'system/modules/dcawizard/assets/dcawizard.js');
     document.getElementsByTagName('head').item(0).appendChild(script);
 </script>
