@@ -9,12 +9,17 @@
  * @link       https://github.com/terminal42/contao-dcawizard
  */
 
+use Codefog\HasteBundle\UrlParser;
 use Contao\CoreBundle\Exception\ResponseException;
 use Contao\Database;
 use Contao\DataContainer;
+use Contao\Environment;
 use Contao\Input;
+use Contao\System;
 use Contao\Widget;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Provides helper methods for the DcaWizard widget
@@ -90,6 +95,103 @@ class DcaWizardHelper
             );
 
             throw new ResponseException(new Response($objWidget->generate()));
+        }
+    }
+
+    /**
+     * On load callback. Provide a fix to the popup referer (see #15)
+     */
+    public function onLoadCallback(): void
+    {
+        if (!Input::get('dcawizard') || 'edit' !== Input::get('act')) {
+            return;
+        }
+
+        /** @var RequestStack $requestStack */
+        $requestStack = System::getContainer()->get('request_stack');
+
+        if (($request = $requestStack->getCurrentRequest()) === null) {
+            return;
+        }
+
+        $session = $request->getSession();
+        $referer = $session->get('popupReferer');
+
+        if (!is_array($referer)) {
+            return;
+        }
+
+        [, $id] = explode(':', Input::get('dcawizard'));
+
+        // Use the current URL without (act and id parameters) as referer
+        if (class_exists(UrlParser::class)) {
+            /** @var UrlParser $urlParser */
+            $urlParser = System::getContainer()->get(UrlParser::class);
+
+            $url = $urlParser->removeQueryString(['act', 'id'], Environment::get('request'));
+            $url = $urlParser->addQueryString('id=' . $id, $url);
+        } else {
+            $url = \Haste\Util\Url::removeQueryString(['act', 'id'], Environment::get('request'));
+            $url = \Haste\Util\Url::addQueryString('id=' . $id, $url);
+        }
+
+        // Replace the last referer value with the correct link
+        end($referer);
+        $referer[key($referer)]['current'] = $url;
+
+        $session->set('popupReferer', $referer);
+    }
+
+    /**
+     * On delete callback. Fix the popup referer when deleting the records directly
+     * inside the edit form of the source table.
+     */
+    public function onDeleteCallback(): void
+    {
+        if (!Input::get('dcawizard_operation')) {
+            return;
+        }
+
+        /** @var RequestStack $requestStack */
+        $requestStack = System::getContainer()->get('request_stack');
+
+        if (($request = $requestStack->getCurrentRequest()) === null) {
+            return;
+        }
+
+        $session = $request->getSession();
+        $referer = $session->get('popupReferer');
+
+        /** @var Session $sessionBag */
+        $sessionBag = $session->getBag('contao_backend');
+        $dcaWizardReferer = $sessionBag->get('dcaWizardReferer');
+
+        if (!is_array($referer) || !$dcaWizardReferer) {
+            return;
+        }
+
+        // Replace the last referer value with the correct link
+        end($referer);
+        $referer[key($referer)]['current'] = $dcaWizardReferer;
+
+        $session->set('popupReferer', $referer);
+    }
+
+    /**
+     * Load the data container
+     */
+    public function loadDataContainer(string $dcaTable): void
+    {
+        if (!Input::get('dcawizard')) {
+            return;
+        }
+
+        [$table] = explode(':', Input::get('dcawizard'));
+
+        // Register a delete callback
+        if ($table === $dcaTable) {
+            $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [self::class, 'onLoadCallback'];
+            $GLOBALS['TL_DCA'][$table]['config']['ondelete_callback'][] = [self::class, 'onDeleteCallback'];
         }
     }
 }
