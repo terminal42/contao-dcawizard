@@ -17,11 +17,18 @@ var DcaWizard =
         var M = new SimpleModal({
             'keyEsc': false, // see https://github.com/terminal42/contao-notification_center/issues/99
             'width': opt.width,
-            'btn_ok': label,
             'draggable': false,
-            'closeButton': false,
+            'hideFooter': true,
             'overlayOpacity': .5,
-            'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
+            'onShow': function() {
+                document.body.setStyle('overflow', 'hidden');
+
+                window.addEventListener('message', function (message) {
+                    if (message.data === 'closeModal') {
+                        M.hide();
+                    }
+                });
+            },
             'onHide': function() {
                 document.body.setStyle('overflow', 'auto');
 
@@ -40,9 +47,6 @@ var DcaWizard =
                     'class': opt.class
                 });
             }
-        });
-        M.addButton(label, 'btn', function() {
-            this.hide();
         });
         M.show({
             'title': opt.title,

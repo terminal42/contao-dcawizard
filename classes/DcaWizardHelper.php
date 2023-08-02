@@ -103,6 +103,10 @@ class DcaWizardHelper
      */
     public function onLoadCallback(): void
     {
+        if (Input::get('dcawizard_operation') && !Input::get('act')) {
+            throw new ResponseException(new Response("<script>window.top.postMessage('closeModal', '*')</script>"));
+        }
+
         if (!Input::get('dcawizard') || 'edit' !== Input::get('act')) {
             return;
         }
@@ -177,6 +181,20 @@ class DcaWizardHelper
         $session->set('popupReferer', $referer);
     }
 
+    public function onButtonCallback(array $buttons, DataContainer $dc): array
+    {
+        if (!Input::get('dcawizard_operation')) {
+            return $buttons;
+        }
+
+        if (isset($buttons['saveNclose'])) {
+            unset($buttons['saveNclose']);
+            $buttons['saveNclosemodal'] = '<button type="submit" name="saveNback" id="saveNback" class="tl_submit" accesskey="c">' . $GLOBALS['TL_LANG']['MSC']['saveNclose'] . '</button>';
+        }
+
+        return $buttons;
+    }
+
     /**
      * Load the data container
      */
@@ -192,6 +210,7 @@ class DcaWizardHelper
         if ($table === $dcaTable) {
             $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [self::class, 'onLoadCallback'];
             $GLOBALS['TL_DCA'][$table]['config']['ondelete_callback'][] = [self::class, 'onDeleteCallback'];
+            $GLOBALS['TL_DCA'][$table]['edit']['buttons_callback'][] = [self::class, 'onButtonCallback'];
         }
     }
 }
