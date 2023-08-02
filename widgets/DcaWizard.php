@@ -423,7 +423,6 @@ class DcaWizard extends Widget
             'title'         => StringUtil::specialchars($this->strLabel),
             'url'           => $this->getButtonHref(),
             'id'            => $this->strId,
-            'applyLabel'    => StringUtil::specialchars($this->applyButtonLabel),
             'class'         => base64_encode(get_class($this))
         ];
     }

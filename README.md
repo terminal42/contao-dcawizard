@@ -42,9 +42,6 @@ This extension provides a widget to handle external table records in the edit mo
         // Use a custom label for the edit button
         'editButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_edit_button'],
 
-        // Use a custom label for the apply button
-        'applyButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_apply_button'],
-        
         // Set a label if no records are found
         'emptyLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_empty_label'],
 

@@ -9,8 +9,7 @@ var DcaWizard =
     {
         var opt = options || {},
             maxWidth = (window.getSize().x - 20).toInt(),
-            maxHeight = (window.getSize().y - 137).toInt(),
-            label = opt.applyLabel ? opt.applyLabel : Contao.lang.close;
+            maxHeight = (window.getSize().y - 137).toInt();
         if (!opt.width || opt.width > maxWidth) opt.width = Math.min(maxWidth, 900);
         if (!opt.height || opt.height > maxHeight) opt.height = maxHeight;
 
