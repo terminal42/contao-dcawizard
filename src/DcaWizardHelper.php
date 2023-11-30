@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Terminal42\DcaWizardBundle;
 
 use Codefog\HasteBundle\UrlParser;
@@ -15,16 +17,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
- * Provides helper methods for the DcaWizard widget
+ * Provides helper methods for the DcaWizard widget.
  *
  * @author Yanick Witschi <yanick.witschi@terminal42.ch>
  */
 class DcaWizardHelper
 {
     /**
-     * Handle the AJAX actions
+     * Handle the AJAX actions.
      */
-    public function handleAjaxActions($strAction, DataContainer $dc)
+    public function handleAjaxActions($strAction, DataContainer $dc): void
     {
         if ('reloadDcaWizard' === $strAction) {
             $intId = Input::get('id');
@@ -39,10 +41,9 @@ class DcaWizardHelper
             // Validate the request data
             if ('File' === $GLOBALS['TL_DCA'][$dc->table]['config']['dataContainer']) {
                 // The field does not exist
-                if (!array_key_exists($strField, $GLOBALS['TL_CONFIG'])) {
+                if (!\array_key_exists($strField, $GLOBALS['TL_CONFIG'])) {
                     throw new ResponseException(new Response(Response::$statusTexts[Response::HTTP_BAD_REQUEST], Response::HTTP_BAD_REQUEST));
                 }
-
             } elseif (Database::getInstance()->tableExists($dc->table)) {
                 // The field does not exist
                 if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$strField])) {
@@ -51,14 +52,15 @@ class DcaWizardHelper
 
                 $objRow = Database::getInstance()
                     ->prepare('SELECT id FROM '.$dc->table.' WHERE id=?')
-                    ->execute($intId);
+                    ->execute($intId)
+                ;
 
                 // The record does not exist
                 if (!$objRow->numRows) {
                     throw new ResponseException(new Response(Response::$statusTexts[Response::HTTP_BAD_REQUEST], Response::HTTP_BAD_REQUEST));
                 }
 
-                $dc->intId = (int)$objRow->id;
+                $dc->intId = (int) $objRow->id;
             }
 
             /** @var Widget $strClass */
@@ -67,11 +69,12 @@ class DcaWizardHelper
 
             // Support classes extending DcaWizard
             if ($ajaxClass = Input::post('class', true)) {
-                $ajaxClass = base64_decode($ajaxClass);
+                $ajaxClass = base64_decode($ajaxClass, true);
 
-                if (in_array($ajaxClass, $GLOBALS['BE_FFL'], true)) {
+                if (\in_array($ajaxClass, $GLOBALS['BE_FFL'], true)) {
                     try {
                         $reflection = new ReflectionClass($ajaxClass);
+
                         if ($reflection->isSubclassOf('DcaWizard')) {
                             $strClass = $ajaxClass;
                         }
@@ -91,7 +94,7 @@ class DcaWizardHelper
     }
 
     /**
-     * On load callback. Provide a fix to the popup referer (see #15)
+     * On load callback. Provide a fix to the popup referer (see #15).
      */
     public function onLoadCallback(): void
     {
@@ -113,7 +116,7 @@ class DcaWizardHelper
         $session = $request->getSession();
         $referer = $session->get('popupReferer');
 
-        if (!is_array($referer)) {
+        if (!\is_array($referer)) {
             return;
         }
 
@@ -157,7 +160,7 @@ class DcaWizardHelper
         $sessionBag = $session->getBag('contao_backend');
         $dcaWizardReferer = $sessionBag->get('dcaWizardReferer');
 
-        if (!is_array($referer) || !$dcaWizardReferer) {
+        if (!\is_array($referer) || !$dcaWizardReferer) {
             return;
         }
 
@@ -183,7 +186,7 @@ class DcaWizardHelper
     }
 
     /**
-     * Load the data container
+     * Load the data container.
      */
     public function loadDataContainer(string $dcaTable): void
     {

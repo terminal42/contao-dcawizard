@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Terminal42\DcaWizardBundle\Widget;
 
 /**
- * Class DcaWizardMultilingual
+ * Class DcaWizardMultilingual.
  *
  * Extends the dcaWizard for DC_Multilingual so translated entries don't get listed multiple times
  *
