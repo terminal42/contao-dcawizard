@@ -1,79 +1,109 @@
-tablelookupwizard Contao Extension
+dcawizard Contao Extension
 ==========================
 
-This widget allows you to lookup a foreign table and select records from it. Its primary advantage is that not all database records are listed, so it is very useful if you have a large set of records.
+This extension provides a widget to handle external table records in the edit mode of the parent record.
 
-How to use:
+## How to use
 
 ```php
-// DCA definition
-'fieldname' => array
+// DCA defnition
+'prices' => array
 (
-    'label'                   => &$GLOBALS['TL_LANG']['tl_tablename']['fieldname'],
-    'inputType'               => 'tableLookup',
+    'label'                 => &$GLOBALS['TL_LANG']['tl_iso_products']['prices'],
+    'inputType'             => 'dcaWizard',
 
-    'eval'                    => array
+    // Define the foreign table
+    'foreignTable'          => 'tl_iso_prices',
+
+    // Define the foreign field (e.g. fid instead of pid)
+    'foreignField'          => 'fid',
+
+    // Use the callback to determine the foreign table
+    'foreignTableCallback'  => array('tl_iso_prices', 'getTableName'),
+
+    // Add special params to the link of the button
+    'params'                  => array
     (
-        // The foreign table you want to search in
-        'foreignTable'        => 'tl_foreign_tablename',
+        // Change the do parameter
+        'do'                  => 'member',
 
-        // Define "checkbox" for multi selects and "radio" for single selects
-        'fieldType'           => 'checkbox',
-
-        // A list of fields to be displayed in the table
-        'listFields'          => array('field1', 'field2', 'tl_my_superb_join_table.field1'),
-
-        // Custom labels to be displayed in the table header
-        'customLabels'        => array('Label 1', 'Label 2', 'Label 3'),
-
-        // Fields that can be searched for the keyword
-        'searchFields'        => array('field1', 'tl_my_superb_join_table.field1'),
-
-        // Adds multiple left joins to the sql statement (optional)
-        'joins'               => array
-        (
-            // Defines the join table
-            'tl_my_superb_join_table' => array
-            (
-                // Join type (e.g. INNER JOIN, LEFT JOIN, RIGHT JOIN)
-                'type' => 'LEFT JOIN',
-
-                // Key of the join table
-                'jkey' => 'pid',
-
-                // Key of the foreign table
-                'fkey' => 'id'
-            )
-        ),
-
-        // Find every given keyword
-        'matchAllKeywords'    => true
-
-        // Custom additional WHERE conditions
-        'sqlWhere'            => 'someother=condition',
-
-        // Custom ORDER BY - note that when you use "enableSorting" you cannot set this value!
-        'sqlOrderBy'            => 'someColumn',
-
-        // Adds a "GROUP BY" to the sql statement (optional)
-        'sqlGroupBy'          => 'tl_my_superb_join_table.fid',
-        
-        // Adds a "LIMIT" statement to the query
-        'sqlLimit'            => 100, // default is 30
-
-        // The search button label
-        'searchLabel'         => 'Search my table now!',
-
-        // Enables drag n drop sorting of chosen values
-        'enableSorting'       => true,
-        
-        // Custom templates, so you don't need to have your own widget for
-        // smaller adjustments
-        'customTpl' => 'be_widget_tablelookupwizard_content_custom', // Default be_widget_tablelookupwizard
-        'customContentTpl' => 'be_widget_tablelookupwizard_content_custom', // Default be_widget_tablelookupwizard_content
+        // Add new parameter, for example to filter the list
+        'filterField'         => 'group',
     ),
 
-    // SQL field definition
-    'sql'                     => "blob NULL"
-);
+    'eval'                  => array
+    (
+        // A list of fields to be displayed in the table
+        'fields' => array('id', 'name', 'alias'),
+
+        // Header fields of the table (leave empty to use labels)
+        'headerFields' => array('ID', 'Name', 'Alias'),
+
+        // Use a custom label for the edit button
+        'editButtonLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_edit_button'],
+
+        // Set a label if no records are found
+        'emptyLabel' => $GLOBALS['TL_LANG']['tl_iso_products']['prices_empty_label'],
+
+        // Order records by a particular field
+        'orderField' => 'name DESC',
+
+        // Hide the popup button (record list functionality only)
+        'hideButton' => true,
+        
+        // Show operations next to every row (disabled by default)
+        'showOperations' => true,
+
+        // Define which operations you want to list
+        // If this one is not defined, are all listed
+        'operations' => array('edit', 'delete', 'new' /* for tables with sorting like tl_content */),
+        
+        // Define which global operations you want to add
+        'global_operations' => array('new'),
+
+        // Use your own custom template
+        'customTpl' => 'be_widget_dcawizard_mytemplate',
+
+        // Use the callback to generate the list
+        'listCallback' => array('Isotope\tl_iso_prices', 'generateWizardList'),
+    ),
+),
+
+// Example list callback:
+/**
+ * Generate a list of prices for a wizard in products
+ * @param object
+ * @param string
+ * @return string
+ */
+public function generateWizardList($objRecords, $strId)
+{
+    $strReturn = '';
+
+    while ($objRecords->next()) {
+        $strReturn .= '<li>' . $objRecords->name . ' (ID: ' . $objRecords->id . ')' . '</li>';
+    }
+
+    return '<ul id="sort_' . $strId . '">' . $strReturn . '</ul>';
+}
+```
+
+## Using the dcaWizard together with DC_Multilingual
+
+If you want to use the dcaWizard to manage a foreign table that is generated by [DC_Multilingual](https://github.com/terminal42/contao-DC_Multilingual) you can simply use
+
+```php
+    'inputType'             => 'dcaWizardMultilingual',
+```
+
+so the translated entries will not be listed.
+
+If you do not use the `language` database column to separate entries (see `langColumn` setting in `DC_Multilingual`, you can specify the matching column name in the `eval` section as well:
+
+```php
+    'eval' => array
+    (
+        'langColumn' => 'language_column_name',
+    ),
+)
 ```
