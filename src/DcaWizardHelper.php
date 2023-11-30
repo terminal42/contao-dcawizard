@@ -1,13 +1,6 @@
 <?php
 
-/**
- * dcawizard extension for Contao Open Source CMS
- *
- * @copyright  Copyright (c) 2014, terminal42 gmbh
- * @author     terminal42 gmbh <info@terminal42.ch>
- * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
- * @link       https://github.com/terminal42/contao-dcawizard
- */
+namespace Terminal42\DcaWizardBundle;
 
 use Codefog\HasteBundle\UrlParser;
 use Contao\CoreBundle\Exception\ResponseException;
@@ -34,12 +27,12 @@ class DcaWizardHelper
     public function handleAjaxActions($strAction, DataContainer $dc)
     {
         if ('reloadDcaWizard' === $strAction) {
-            $intId    = Input::get('id');
+            $intId = Input::get('id');
             $strField = $strFieldName = Input::post('name');
 
             // Handle the keys in "edit multiple" mode
             if ('editAll' === Input::get('act')) {
-                $intId    = preg_replace('/.*_([0-9a-zA-Z]+)$/', '$1', $strField);
+                $intId = preg_replace('/.*_([0-9a-zA-Z]+)$/', '$1', $strField);
                 $strField = preg_replace('/(.*)_[0-9a-zA-Z]+$/', '$1', $strField);
             }
 
@@ -57,16 +50,15 @@ class DcaWizardHelper
                 }
 
                 $objRow = Database::getInstance()
-                    ->prepare('SELECT id FROM ' . $dc->table . ' WHERE id=?')
-                    ->execute($intId)
-                ;
+                    ->prepare('SELECT id FROM '.$dc->table.' WHERE id=?')
+                    ->execute($intId);
 
                 // The record does not exist
                 if (!$objRow->numRows) {
                     throw new ResponseException(new Response(Response::$statusTexts[Response::HTTP_BAD_REQUEST], Response::HTTP_BAD_REQUEST));
                 }
 
-                $dc->intId = (int) $objRow->id;
+                $dc->intId = (int)$objRow->id;
             }
 
             /** @var Widget $strClass */
@@ -127,17 +119,12 @@ class DcaWizardHelper
 
         [, $id] = explode(':', Input::get('dcawizard'));
 
-        // Use the current URL without (act and id parameters) as referer
-        if (class_exists(UrlParser::class)) {
-            /** @var UrlParser $urlParser */
-            $urlParser = System::getContainer()->get(UrlParser::class);
+        /** @var UrlParser $urlParser */
+        $urlParser = System::getContainer()->get(UrlParser::class);
 
-            $url = $urlParser->removeQueryString(['act', 'id'], Environment::get('request'));
-            $url = $urlParser->addQueryString('id=' . $id, $url);
-        } else {
-            $url = \Haste\Util\Url::removeQueryString(['act', 'id'], Environment::get('request'));
-            $url = \Haste\Util\Url::addQueryString('id=' . $id, $url);
-        }
+        // Use the current URL without (act and id parameters) as referer
+        $url = $urlParser->removeQueryString(['act', 'id'], Environment::get('request'));
+        $url = $urlParser->addQueryString('id='.$id, $url);
 
         // Replace the last referer value with the correct link
         end($referer);
@@ -189,7 +176,7 @@ class DcaWizardHelper
 
         if (isset($buttons['saveNclose'])) {
             unset($buttons['saveNclose']);
-            $buttons['saveNclosemodal'] = '<button type="submit" name="saveNback" id="saveNback" class="tl_submit" accesskey="c">' . $GLOBALS['TL_LANG']['MSC']['saveNclose'] . '</button>';
+            $buttons['saveNclosemodal'] = '<button type="submit" name="saveNback" id="saveNback" class="tl_submit" accesskey="c">'.$GLOBALS['TL_LANG']['MSC']['saveNclose'].'</button>';
         }
 
         return $buttons;

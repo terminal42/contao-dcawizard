@@ -1,13 +1,6 @@
 <?php
 
-/**
- * dcawizard extension for Contao Open Source CMS
- *
- * @copyright  Copyright (c) 2014, terminal42 gmbh
- * @author     terminal42 gmbh <info@terminal42.ch>
- * @license    http://opensource.org/licenses/lgpl-3.0.html LGPL
- * @link       https://github.com/terminal42/contao-dcawizard
- */
+namespace Terminal42\DcaWizardBundle\Widget;
 
 use Codefog\HasteBundle\Formatter;
 use Contao\BackendTemplate;
@@ -22,9 +15,6 @@ use Contao\System;
 use Contao\Widget;
 use Symfony\Component\Routing\RouterInterface;
 
-/**
- * Provides the back end widget "dcaWizard"
- */
 class DcaWizard extends Widget
 {
 
@@ -173,25 +163,11 @@ class DcaWizard extends Widget
         $objTemplate->hideButton = $this->hideButton;
 
         $objTemplate->dcaLabel = function ($field) {
-            if (\class_exists(Formatter::class)) {
-                return System::getContainer()
-                    ->get(Formatter::class)
-                    ->dcaLabel($this->foreignTable, $field)
-                ;
-            }
-
-            return \Haste\Util\Format::dcaLabel($this->foreignTable, $field);
+            return System::getContainer()->get(Formatter::class)->dcaLabel($this->foreignTable, $field);
         };
 
         $objTemplate->dcaValue = function ($field, $value) {
-            if (\class_exists(Formatter::class)) {
-                return System::getContainer()
-                    ->get(Formatter::class)
-                    ->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
-                ;
-            }
-
-            return \Haste\Util\Format::dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
+            return System::getContainer()->get(Formatter::class)->dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
         };
 
         $objTemplate->generateGlobalOperation = function ($operation) {

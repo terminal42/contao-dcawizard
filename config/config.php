@@ -12,11 +12,11 @@
 /**
  * Backend form fields
  */
-$GLOBALS['BE_FFL']['dcaWizard']             = 'DcaWizard';
-$GLOBALS['BE_FFL']['dcaWizardMultilingual'] = 'DcaWizardMultilingual';
+$GLOBALS['BE_FFL']['dcaWizard']             = \Terminal42\DcaWizardBundle\Widget\DcaWizard::class;
+$GLOBALS['BE_FFL']['dcaWizardMultilingual'] = \Terminal42\DcaWizardBundle\Widget\DcaWizardMultilingual::class;
 
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['executePostActions'][] = array('DcaWizardHelper', 'handleAjaxActions');
-$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array('DcaWizardHelper', 'loadDataContainer');
+$GLOBALS['TL_HOOKS']['executePostActions'][] = array(\Terminal42\DcaWizardBundle\DcaWizardHelper::class, 'handleAjaxActions');
+$GLOBALS['TL_HOOKS']['loadDataContainer'][] = array(\Terminal42\DcaWizardBundle\DcaWizardHelper::class, 'loadDataContainer');
