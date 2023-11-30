@@ -14,7 +14,7 @@ class FixRefererListener
 {
     public function __construct(
         private readonly RequestStack $requestStack,
-        private readonly UrlParser $urlParser,
+        private readonly UrlParser|null $urlParser = null,
     ) {
     }
 
@@ -56,8 +56,13 @@ class FixRefererListener
         [, $id] = explode(':', $request->query->get('dcawizard')) + [null, null];
 
         // Use the current URL without (act and id parameters) as referer
-        $url = $this->urlParser->removeQueryString(['act', 'id'], $request->getRequestUri());
-        $url = $this->urlParser->addQueryString('id='.$id, $url);
+        if ($this->urlParser) {
+            $url = $this->urlParser->removeQueryString(['act', 'id'], $request->getRequestUri());
+            $url = $this->urlParser->addQueryString('id=' . $id, $url);
+        } else {
+            $url = \Haste\Util\Url::removeQueryString(['act', 'id'], $request->getRequestUri());
+            $url = \Haste\Util\Url::addQueryString('id=' . $id, $url);
+        }
 
         // Replace the last referer value with the correct link
         $referer[array_key_last($referer)]['current'] = $url;

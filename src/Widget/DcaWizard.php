@@ -126,7 +126,6 @@ class DcaWizard extends Widget
 
     public function generate(): string
     {
-        $formatter = System::getContainer()->get(Formatter::class);
         $varCallback = $this->listCallback;
         $blnShowOperations = $this->showOperations;
 
@@ -134,8 +133,29 @@ class DcaWizard extends Widget
         $objTemplate = new BackendTemplate($this->customTpl ?: 'be_widget_dcawizard');
         $objTemplate->strId = $this->strId;
         $objTemplate->hideButton = $this->hideButton;
-        $objTemplate->dcaLabel = fn ($field) => $formatter->dcaLabel($this->foreignTable, $field);
-        $objTemplate->dcaValue = fn ($field, $value) => $formatter->dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
+
+        $objTemplate->dcaLabel = function ($field) {
+            if (\class_exists(Formatter::class)) {
+                return System::getContainer()
+                    ->get(Formatter::class)
+                    ?->dcaLabel($this->foreignTable, $field)
+                ;
+            }
+
+            return \Haste\Util\Format::dcaLabel($this->foreignTable, $field);
+        };
+
+        $objTemplate->dcaValue = function ($field, $value) {
+            if (\class_exists(Formatter::class)) {
+                return System::getContainer()
+                    ->get(Formatter::class)
+                    ?->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
+                ;
+            }
+
+            return \Haste\Util\Format::dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
+        };
+
         $objTemplate->generateGlobalOperation = $this->generateGlobalOperation(...);
 
         // Get the available records
