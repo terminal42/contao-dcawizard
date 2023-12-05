@@ -53,4 +53,11 @@
     <?php endif; ?>
   </div>
 </div>
-<script src="<?= $this->asset('dcawizard.js', 'terminal42_dcawizard') ?>"></script>
+
+<?php // <script src="..."> would not be loaded when the widget is added in a subpalette ?>
+<script>
+  var script = document.createElement('script');
+  script.setAttribute('type', 'text/javascript');
+  script.setAttribute('src', '<?= $this->asset('dcawizard.js', 'terminal42_dcawizard') ?>');
+  document.getElementsByTagName('head').item(0).appendChild(script);
+</script>
