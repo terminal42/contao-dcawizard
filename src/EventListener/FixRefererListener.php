@@ -6,6 +6,7 @@ namespace Terminal42\DcawizardBundle\EventListener;
 
 use Codefog\HasteBundle\UrlParser;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
+use Haste\Util\Url;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -58,10 +59,10 @@ class FixRefererListener
         // Use the current URL without (act and id parameters) as referer
         if ($this->urlParser) {
             $url = $this->urlParser->removeQueryString(['act', 'id'], $request->getRequestUri());
-            $url = $this->urlParser->addQueryString('id=' . $id, $url);
+            $url = $this->urlParser->addQueryString('id='.$id, $url);
         } else {
-            $url = \Haste\Util\Url::removeQueryString(['act', 'id'], $request->getRequestUri());
-            $url = \Haste\Util\Url::addQueryString('id=' . $id, $url);
+            $url = Url::removeQueryString(['act', 'id'], $request->getRequestUri());
+            $url = Url::addQueryString('id='.$id, $url);
         }
 
         // Replace the last referer value with the correct link

@@ -54,7 +54,7 @@
   </div>
 </div>
 
-<?php // <script src="..."> would not be loaded when the widget is added in a subpalette ?>
+<?php // <script src="..."> would not be loaded when the widget is added in a subpalette?>
 <script>
   var script = document.createElement('script');
   script.setAttribute('type', 'text/javascript');

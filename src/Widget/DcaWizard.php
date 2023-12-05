@@ -13,27 +13,28 @@ use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
+use Haste\Util\Format;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Provides the back end widget "dcaWizard".
  *
- * @property string $foreignTable
- * @property string $foreignField
+ * @property string        $foreignTable
+ * @property string        $foreignField
  * @property callable|null $foreignTableCallback
- * @property array $headerFields
- * @property array $fields
+ * @property array         $headerFields
+ * @property array         $fields
  * @property callable|null $listCallback
- * @property string $editButtonLabel
- * @property string $emptyLabel
- * @property string|null $whereCondition
- * @property string|null $orderField
- * @property bool $showOperations
- * @property bool $hideButton
- * @property array|null $operations
- * @property array|null $global_operations
- * @property array|null $params
+ * @property string        $editButtonLabel
+ * @property string        $emptyLabel
+ * @property string|null   $whereCondition
+ * @property string|null   $orderField
+ * @property bool          $showOperations
+ * @property bool          $hideButton
+ * @property array|null    $operations
+ * @property array|null    $global_operations
+ * @property array|null    $params
  */
 class DcaWizard extends Widget
 {
@@ -135,25 +136,25 @@ class DcaWizard extends Widget
         $objTemplate->hideButton = $this->hideButton;
 
         $objTemplate->dcaLabel = function ($field) {
-            if (\class_exists(Formatter::class)) {
+            if (class_exists(Formatter::class)) {
                 return System::getContainer()
                     ->get(Formatter::class)
                     ?->dcaLabel($this->foreignTable, $field)
                 ;
             }
 
-            return \Haste\Util\Format::dcaLabel($this->foreignTable, $field);
+            return Format::dcaLabel($this->foreignTable, $field);
         };
 
         $objTemplate->dcaValue = function ($field, $value) {
-            if (\class_exists(Formatter::class)) {
+            if (class_exists(Formatter::class)) {
                 return System::getContainer()
                     ->get(Formatter::class)
                     ?->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
                 ;
             }
 
-            return \Haste\Util\Format::dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
+            return Format::dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
         };
 
         $objTemplate->generateGlobalOperation = $this->generateGlobalOperation(...);
@@ -343,7 +344,7 @@ class DcaWizard extends Widget
 
     public function getActiveRowOperations(): array
     {
-        return ($this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']));
+        return $this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']);
     }
 
     /**
