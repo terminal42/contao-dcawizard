@@ -22,10 +22,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  *
  * @property string        $foreignTable
  * @property string        $foreignField
- * @property callable|null $foreignTableCallback
+ * @property callable|null $foreignTable_callback
  * @property array         $headerFields
  * @property array         $fields
- * @property callable|null $listCallback
+ * @property callable|null $list_callback
  * @property string        $editButtonLabel
  * @property string        $emptyLabel
  * @property string|null   $whereCondition
@@ -45,7 +45,7 @@ class DcaWizard extends Widget
         parent::__construct($arrAttributes);
 
         // Load the table from callback
-        $varCallback = $this->foreignTableCallback;
+        $varCallback = $this->foreignTable_callback;
         if (!empty($varCallback) && \is_array($varCallback)) {
             $this->foreignTable = System::importStatic($varCallback[0])->{$varCallback[1]}($this);
         } elseif (\is_callable($varCallback)) {
@@ -100,7 +100,7 @@ class DcaWizard extends Widget
             'params' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params']),
             'foreignTable' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable']),
             'foreignField' => true,
-            'foreignTableCallback' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback']),
+            'foreignTable_callback' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable_callback']),
             default => parent::__get($strKey),
         };
     }
@@ -117,7 +117,7 @@ class DcaWizard extends Widget
             'params' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params'] ?? null,
             'foreignTable' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] ?? null,
             'foreignField' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] ?? 'pid',
-            'foreignTableCallback' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback'] ?? null,
+            'foreignTable_callback' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable_callback'] ?? null,
             default => parent::__get($strKey),
         };
     }
@@ -139,7 +139,7 @@ class DcaWizard extends Widget
 
     public function generate(): string
     {
-        $varCallback = $this->listCallback;
+        $varCallback = $this->list_callback;
         $blnShowOperations = $this->showOperations;
 
         /** @var BackendTemplate&\stdClass $objTemplate */

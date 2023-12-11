@@ -18,7 +18,7 @@ This extension provides a widget to handle external table records in the edit mo
     'foreignField' => 'fid',
 
     // Use the callback to determine the foreign table
-    'foreignTableCallback'  => array('tl_iso_prices', 'getTableName'),
+    'foreignTable_callback' => array('tl_iso_prices', 'getTableName'),
 
     // Add special params to the link of the button
     'params' => [
@@ -62,7 +62,7 @@ This extension provides a widget to handle external table records in the edit mo
         'customTpl' => 'be_widget_dcawizard_mytemplate',
 
         // Use the callback to generate the list
-        'listCallback' => ['Isotope\tl_iso_prices', 'generateWizardList'],
+        'list_callback' => ['Isotope\tl_iso_prices', 'generateWizardList'],
     ],
 ),
 
