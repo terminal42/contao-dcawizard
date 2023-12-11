@@ -93,6 +93,18 @@ class DcaWizard extends Widget
         }
     }
 
+    public function __isset($strKey)
+    {
+        return match ($strKey) {
+            'currentRecord' => Input::get('id') || $this->objDca->id,
+            'params' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['params']),
+            'foreignTable' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable']),
+            'foreignField' => true,
+            'foreignTableCallback' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTableCallback']),
+            default => parent::__get($strKey),
+        };
+    }
+
     /**
      * Return a parameter.
      *
