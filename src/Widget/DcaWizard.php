@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Terminal42\DcawizardBundle\Widget;
 
 use Codefog\HasteBundle\Formatter;
+use Contao\Backend;
 use Contao\BackendTemplate;
 use Contao\Controller;
+use Contao\CoreBundle\DataContainer\DataContainerOperation;
+use Contao\CoreBundle\Security\ContaoCorePermissions;
+use Contao\DataContainer;
 use Contao\Image;
 use Contao\Input;
 use Contao\StringUtil;
@@ -312,45 +316,139 @@ class DcaWizard extends Widget
             return '';
         }
 
-        $id = StringUtil::specialchars(rawurldecode((string) $row['id']));
-        $buttonHref = $this->getButtonHref().(isset($def['href']) ? '&amp;'.$def['href'] : '').'&amp;id='.$row['id'].'&amp;dcawizard_operation=1';
+        $def = \is_array($def) ? $def : array($def);
 
-        if (\is_array($def['label'] ?? null)) {
-            $label = $def['label'][0] ?: $operation;
-            $title = sprintf($def['label'][1] ?: $operation, $id);
+        if (\class_exists(DataContainerOperation::class)) {
+            if (!$this->objDca instanceof DataContainer) {
+                throw new \RuntimeException('DcaWizard does not have a DataContainer object');
+            }
+
+            $config = new DataContainerOperation($operation, $def, $row, $this->objDca);
         } else {
-            $label = $title = sprintf($def['label'] ?? $operation, $id);
-        }
-        $attributes = isset($def['attributes']) && '' !== $def['attributes'] ? ' '.ltrim(sprintf($def['attributes'], $id, $id)) : '';
+            $id = StringUtil::specialchars(rawurldecode((string) $row['id']));
 
-        // Dca wizard specific
-        $arrBaseOptions = $this->getDcaWizardOptions();
-        $arrBaseOptions['url'] = $buttonHref;
-        $attributes .= ' data-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
-        $attributes .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
+            // Dereference pointer to $GLOBALS['TL_LANG']
+            $config = \method_exists(StringUtil::class, 'resolveReferences') ? StringUtil::resolveReferences($def) : $def;
 
-        // Add the key as CSS class
-        if (str_contains($attributes, 'class="')) {
-            $attributes = str_replace('class="', 'class="'.$operation.' ', $attributes);
-        } else {
-            $attributes = ' class="'.$operation.'"'.$attributes;
+            if (isset($config['label'])) {
+                if (\is_array($config['label'])) {
+                    $config['title'] = sprintf($config['label'][1] ?? '', $id);
+                    $config['label'] = $config['label'][0] ?? $operation;
+                } else {
+                    $config['label'] = $config['title'] = sprintf($config['label'], $id);
+                }
+            } else {
+                $config['label'] = $config['title'] = $operation;
+            }
+
+            $attributes = !empty($config['attributes']) ? ' '.ltrim(sprintf($config['attributes'], $id, $id)) : '';
+
+            // Add the key as CSS class
+            if (str_contains($attributes, 'class="')) {
+                $attributes = str_replace('class="', 'class="'.$operation.' ', $attributes);
+            } else {
+                $attributes = ' class="'.$operation.'" '.$attributes;
+            }
+
+            $config['attributes'] = $attributes;
         }
 
         // Call a custom function instead of using the default button
-        if (isset($def['button_callback']) && \is_array($def['button_callback'])) {
-            return System::importStatic($def['button_callback'][0])->{$def['button_callback'][1]}($row, (isset($def['href']) ? $def['href'].'&amp;' : '').http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
+        if (\is_array($config['button_callback'] ?? null)) {
+            $callback = System::importStatic($config['button_callback'][0]);
+            $ref = new \ReflectionMethod($callback, $config['button_callback'][1]);
+
+            if ($ref->getNumberOfParameters() === 1 && ($type = $ref->getParameters()[0]->getType()) && $type->getName() === DataContainerOperation::class) {
+                $callback->{$config['button_callback'][1]}($config);
+            } else {
+                return $callback->{$config['button_callback'][1]}($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $strTable, $arrRootIds, $arrChildRecordIds, $blnCircularReference, $strPrevious, $strNext, $this);
+            }
+        } elseif (\is_callable($config['button_callback'] ?? null)) {
+            $ref = new \ReflectionFunction($config['button_callback']);
+
+            if ($ref->getNumberOfParameters() === 1 && ($type = $ref->getParameters()[0]->getType()) && $type->getName() === DataContainerOperation::class) {
+                $config['button_callback']($config);
+            } else {
+                return $config['button_callback']($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $strTable, $arrRootIds, $arrChildRecordIds, $blnCircularReference, $strPrevious, $strNext, $this);
+            }
         }
 
-        if (isset($def['button_callback']) && \is_callable($def['button_callback'])) {
-            return $def['button_callback']($row, $def['href'].'&amp;'.http_build_query($this->getButtonParams(), '', '&amp;'), $label, $title, $def['icon'], $attributes, $this->foreignTable);
+        if ($config instanceof DataContainerOperation && ($html = $config->getHtml()) !== null) {
+            return $html;
+        }
+
+        if (!isset($config['href'])) {
+            return Image::getHtml($config['icon'], $config['label']).' ';
+        }
+
+        // Dca wizard specific
+        $href = $this->getButtonHref().'&amp;'.$config['href'].'&amp;id='.$row['id'].'&amp;dcawizard_operation=1';
+        $arrBaseOptions = $this->getDcaWizardOptions();
+        $arrBaseOptions['url'] = $href;
+        $config['attributes'] .= ' data-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
+        $config['attributes'] .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
+
+        parse_str(StringUtil::decodeEntities($config['href'] ?? ''), $params);
+
+        if (($params['act'] ?? null) === 'toggle' && isset($params['field'])) {
+            // Hide the toggle icon if the user does not have access to the field
+            if (
+                (
+                    ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['toggle'] ?? false) !== true
+                    && ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['reverseToggle'] ?? false) !== true
+                ) || (
+                    (!\method_exists(DataContainer::class, 'isFieldExcluded') || DataContainer::isFieldExcluded($this->foreignTable, $params['field']))
+                    && !System::getContainer()->get('security.helper')->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $this->foreignTable.'::'.$params['field'])
+                )
+            ) {
+                return '';
+            }
+
+            $icon = $config['icon'];
+            $_icon = pathinfo($config['icon'], PATHINFO_FILENAME).'_.'.pathinfo($config['icon'], PATHINFO_EXTENSION);
+
+            if (str_contains($config['icon'], '/')) {
+                $_icon = \dirname($config['icon']).'/'.$_icon;
+            }
+
+            if ($icon === 'visible.svg') {
+                $_icon = 'invisible.svg';
+            }
+
+            if (!str_contains($icon, '/')) {
+                $icon = 'system/themes/'.Backend::getTheme().'/icons/'.$icon;
+                $_icon = 'system/themes/'.Backend::getTheme().'/icons/'.$_icon;
+            }
+
+            $state = $row[$params['field']] ? 1 : 0;
+
+            if (($config['reverse'] ?? false) || ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['reverseToggle'] ?? false)) {
+                $state = $row[$params['field']] ? 0 : 1;
+            }
+
+            if (isset($config['titleDisabled'])) {
+                $titleDisabled = $config['titleDisabled'];
+            } else {
+                $titleDisabled = (\is_array($config['label']) && isset($config['label'][2])) ? sprintf($config['label'][2], $row['id']) : $config['title'];
+            }
+
+            return sprintf(
+                '<a href="%s" title="%s" data-title="%s" data-title-disabled="%s" onclick="return AjaxRequest.toggleField(this,%s)">%s</a> ',
+                $href,
+                StringUtil::specialchars($state ? $config['title'] : $titleDisabled),
+                StringUtil::specialchars($config['title']),
+                StringUtil::specialchars($titleDisabled),
+                $icon === 'visible.svg' ? 'true' : 'false',
+                Image::getHtml($state ? $icon : $_icon, $config['label'], 'data-icon="'.$icon.'" data-icon-disabled="'.$_icon.'" data-state="'.$state.'"')
+            );
         }
 
         return sprintf(
             '<a href="%s" title="%s"%s>%s</a> ',
-            $buttonHref,
-            StringUtil::specialchars($title),
-            $attributes,
-            Image::getHtml($def['icon'], $label)
+            $href,
+            StringUtil::specialchars($config['title']),
+            $config['attributes'],
+            Image::getHtml($config['icon'], $config['label'])
         );
     }
 
