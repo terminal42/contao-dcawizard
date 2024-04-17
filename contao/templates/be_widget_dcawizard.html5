@@ -21,7 +21,7 @@
         </thead>
         <tbody>
         <?php foreach ($this->rows as $row): ?>
-          <tr>
+          <tr class="<?= '0' === (string) ($row['tstamp'] ?? null) ? 'draft ' : '' ?> hover-row">
             <?php foreach ($this->fields as $field): ?>
               <td class="tl_file_list"><?= $this->dcaValue($field, $row[$field]) ?: '-' ?></td>
             <?php endforeach; ?>
