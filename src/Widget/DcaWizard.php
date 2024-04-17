@@ -361,7 +361,7 @@ class DcaWizard extends Widget
             if ($ref->getNumberOfParameters() === 1 && ($type = $ref->getParameters()[0]->getType()) && $type->getName() === DataContainerOperation::class) {
                 $callback->{$config['button_callback'][1]}($config);
             } else {
-                return $callback->{$config['button_callback'][1]}($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $strTable, $arrRootIds, $arrChildRecordIds, $blnCircularReference, $strPrevious, $strNext, $this);
+                return $callback->{$config['button_callback'][1]}($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
             }
         } elseif (\is_callable($config['button_callback'] ?? null)) {
             $ref = new \ReflectionFunction($config['button_callback']);
@@ -369,7 +369,7 @@ class DcaWizard extends Widget
             if ($ref->getNumberOfParameters() === 1 && ($type = $ref->getParameters()[0]->getType()) && $type->getName() === DataContainerOperation::class) {
                 $config['button_callback']($config);
             } else {
-                return $config['button_callback']($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $strTable, $arrRootIds, $arrChildRecordIds, $blnCircularReference, $strPrevious, $strNext, $this);
+                return $config['button_callback']($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
             }
         }
 
