@@ -44,6 +44,9 @@ class DcaWizard extends Widget
 {
     protected $strTemplate = 'be_widget';
 
+    /**
+     * @param array<string, mixed> $arrAttributes
+     */
     public function __construct($arrAttributes = null)
     {
         parent::__construct($arrAttributes);
@@ -70,7 +73,6 @@ class DcaWizard extends Widget
      * Add specific attributes.
      *
      * @param string $strKey
-     * @param mixed  $varValue
      */
     public function __set($strKey, $varValue): void
     {
@@ -136,7 +138,7 @@ class DcaWizard extends Widget
             $id = $connection->fetchOne("SELECT id FROM {$this->foreignTable} WHERE ".$where, $values);
 
             if (false === $id) {
-                $this->addError('' === $this->strLabel ? $GLOBALS['TL_LANG']['ERR']['mdtryNoLabel'] : sprintf($GLOBALS['TL_LANG']['ERR']['mandatory'], $this->strLabel));
+                $this->addError('' === $this->strLabel ? $GLOBALS['TL_LANG']['ERR']['mdtryNoLabel'] : \sprintf($GLOBALS['TL_LANG']['ERR']['mandatory'], $this->strLabel));
             }
         }
     }
@@ -192,7 +194,6 @@ class DcaWizard extends Widget
             }
 
             $objTemplate->generateOperation = $this->generateRowOperation(...);
-
         } else {
             $strCallback = '';
             if (\is_array($varCallback)) {
@@ -213,6 +214,9 @@ class DcaWizard extends Widget
         return $objTemplate->parse();
     }
 
+    /**
+     * @param string $operation
+     */
     public function generateGlobalOperation($operation): string
     {
         $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$operation] ?? null;
@@ -261,7 +265,7 @@ class DcaWizard extends Widget
                 $def['icon'] = Image::getPath($def['icon']);
             }
 
-            $attributes = sprintf(' style="background-image:url(\'%s\')"', Controller::addAssetsUrlTo($def['icon'])).$attributes;
+            $attributes = \sprintf(' style="background-image:url(\'%s\')"', Controller::addAssetsUrlTo($def['icon'])).$attributes;
         }
 
         // Dca wizard specific
@@ -292,6 +296,9 @@ class DcaWizard extends Widget
         return '<a href="'.$buttonHref.'" class="'.$def['class'].'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.$label.'</a> ';
     }
 
+    /**
+     * @param array<string, mixed> $row
+     */
     public function generateRowOperation(string $operation, array $row): string
     {
         // Load the button definition from the subtable
@@ -316,9 +323,9 @@ class DcaWizard extends Widget
             return '';
         }
 
-        $def = \is_array($def) ? $def : array($def);
+        $def = \is_array($def) ? $def : [$def];
 
-        if (\class_exists(DataContainerOperation::class)) {
+        if (class_exists(DataContainerOperation::class)) {
             if (!$this->objDca instanceof DataContainer) {
                 throw new \RuntimeException('DcaWizard does not have a DataContainer object');
             }
@@ -328,20 +335,20 @@ class DcaWizard extends Widget
             $id = StringUtil::specialchars(rawurldecode((string) $row['id']));
 
             // Dereference pointer to $GLOBALS['TL_LANG']
-            $config = \method_exists(StringUtil::class, 'resolveReferences') ? StringUtil::resolveReferences($def) : $def;
+            $config = method_exists(StringUtil::class, 'resolveReferences') ? StringUtil::resolveReferences($def) : $def;
 
             if (isset($config['label'])) {
                 if (\is_array($config['label'])) {
-                    $config['title'] = sprintf($config['label'][1] ?? '', $id);
+                    $config['title'] = \sprintf($config['label'][1] ?? '', $id);
                     $config['label'] = $config['label'][0] ?? $operation;
                 } else {
-                    $config['label'] = $config['title'] = sprintf($config['label'], $id);
+                    $config['label'] = $config['title'] = \sprintf($config['label'], $id);
                 }
             } else {
                 $config['label'] = $config['title'] = $operation;
             }
 
-            $attributes = !empty($config['attributes']) ? ' '.ltrim(sprintf($config['attributes'], $id, $id)) : '';
+            $attributes = !empty($config['attributes']) ? ' '.ltrim(\sprintf($config['attributes'], $id, $id)) : '';
 
             // Add the key as CSS class
             if (str_contains($attributes, 'class="')) {
@@ -358,7 +365,7 @@ class DcaWizard extends Widget
             $callback = System::importStatic($config['button_callback'][0]);
             $ref = new \ReflectionMethod($callback, $config['button_callback'][1]);
 
-            if ($ref->getNumberOfParameters() === 1 && ($type = $ref->getParameters()[0]->getType()) && $type->getName() === DataContainerOperation::class) {
+            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && DataContainerOperation::class === $type->getName()) {
                 $callback->{$config['button_callback'][1]}($config);
             } else {
                 return $callback->{$config['button_callback'][1]}($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
@@ -366,7 +373,7 @@ class DcaWizard extends Widget
         } elseif (\is_callable($config['button_callback'] ?? null)) {
             $ref = new \ReflectionFunction($config['button_callback']);
 
-            if ($ref->getNumberOfParameters() === 1 && ($type = $ref->getParameters()[0]->getType()) && $type->getName() === DataContainerOperation::class) {
+            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && DataContainerOperation::class === $type->getName()) {
                 $config['button_callback']($config);
             } else {
                 return $config['button_callback']($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
@@ -397,7 +404,7 @@ class DcaWizard extends Widget
                     ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['toggle'] ?? false) !== true
                     && ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['reverseToggle'] ?? false) !== true
                 ) || (
-                    (!\method_exists(DataContainer::class, 'isFieldExcluded') || DataContainer::isFieldExcluded($this->foreignTable, $params['field']))
+                    (!method_exists(DataContainer::class, 'isFieldExcluded') || DataContainer::isFieldExcluded($this->foreignTable, $params['field']))
                     && !System::getContainer()->get('security.helper')->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $this->foreignTable.'::'.$params['field'])
                 )
             ) {
@@ -405,17 +412,17 @@ class DcaWizard extends Widget
             }
 
             $icon = $config['icon'];
-            $_icon = pathinfo($config['icon'], PATHINFO_FILENAME).'_.'.pathinfo($config['icon'], PATHINFO_EXTENSION);
+            $_icon = pathinfo((string) $config['icon'], PATHINFO_FILENAME).'_.'.pathinfo((string) $config['icon'], PATHINFO_EXTENSION);
 
-            if (str_contains($config['icon'], '/')) {
-                $_icon = \dirname($config['icon']).'/'.$_icon;
+            if (str_contains((string) $config['icon'], '/')) {
+                $_icon = \dirname((string) $config['icon']).'/'.$_icon;
             }
 
-            if ($icon === 'visible.svg') {
+            if ('visible.svg' === $icon) {
                 $_icon = 'invisible.svg';
             }
 
-            if (!str_contains($icon, '/')) {
+            if (!str_contains((string) $icon, '/')) {
                 $icon = 'system/themes/'.Backend::getTheme().'/icons/'.$icon;
                 $_icon = 'system/themes/'.Backend::getTheme().'/icons/'.$_icon;
             }
@@ -429,29 +436,32 @@ class DcaWizard extends Widget
             if (isset($config['titleDisabled'])) {
                 $titleDisabled = $config['titleDisabled'];
             } else {
-                $titleDisabled = (\is_array($config['label']) && isset($config['label'][2])) ? sprintf($config['label'][2], $row['id']) : $config['title'];
+                $titleDisabled = \is_array($config['label']) && isset($config['label'][2]) ? \sprintf($config['label'][2], $row['id']) : $config['title'];
             }
 
-            return sprintf(
+            return \sprintf(
                 '<a href="%s" title="%s" data-title="%s" data-title-disabled="%s" onclick="return AjaxRequest.toggleField(this,%s)">%s</a> ',
                 $href,
                 StringUtil::specialchars($state ? $config['title'] : $titleDisabled),
                 StringUtil::specialchars($config['title']),
                 StringUtil::specialchars($titleDisabled),
-                $icon === 'visible.svg' ? 'true' : 'false',
-                Image::getHtml($state ? $icon : $_icon, $config['label'], 'data-icon="'.$icon.'" data-icon-disabled="'.$_icon.'" data-state="'.$state.'"')
+                'visible.svg' === $icon ? 'true' : 'false',
+                Image::getHtml($state ? $icon : $_icon, $config['label'], 'data-icon="'.$icon.'" data-icon-disabled="'.$_icon.'" data-state="'.$state.'"'),
             );
         }
 
-        return sprintf(
+        return \sprintf(
             '<a href="%s" title="%s"%s>%s</a> ',
             $href,
             StringUtil::specialchars($config['title']),
             $config['attributes'],
-            Image::getHtml($config['icon'], $config['label'])
+            Image::getHtml($config['icon'], $config['label']),
         );
     }
 
+    /**
+     * @return array<string>
+     */
     public function getActiveRowOperations(): array
     {
         return $this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']);
@@ -459,6 +469,8 @@ class DcaWizard extends Widget
 
     /**
      * Get dca wizard javascript options.
+     *
+     * @return array<string, string>
      */
     public function getDcaWizardOptions(): array
     {
@@ -475,6 +487,9 @@ class DcaWizard extends Widget
         return System::getContainer()->get('router')?->generate('contao_backend', $this->getButtonParams(), UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
+    /**
+     * @return array<string, string|int>
+     */
     public function getButtonParams(): array
     {
         $arrParams = [
@@ -502,6 +517,9 @@ class DcaWizard extends Widget
         return StringUtil::specialchars($this->editButtonLabel ?: $this->strLabel);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getRecords(): array
     {
         /** @var Connection $connection */
@@ -511,10 +529,13 @@ class DcaWizard extends Widget
 
         return $connection->fetchAllAssociative(
             'SELECT * FROM '.$this->foreignTable.$where.$this->getOrderBy(),
-            $values
+            $values,
         );
     }
 
+    /**
+     * @return array<string>
+     */
     public function getHeaderFields(): array
     {
         $arrHeaderFields = $this->headerFields;
@@ -535,6 +556,8 @@ class DcaWizard extends Widget
 
     /**
      * Get WHERE statement.
+     *
+     * @return array{0: string, 1: array<string|int>}
      */
     public function getWhereCondition(): array
     {
@@ -568,6 +591,8 @@ class DcaWizard extends Widget
 
     /**
      * Return SQL WHERE condition for foreign table.
+     *
+     * @return array{0: string, 1: array<string|int>}
      */
     public function getForeignTableCondition(): array
     {

@@ -32,6 +32,11 @@ class CloseModalListener
         }
     }
 
+    /**
+     * @param array<string, string> $buttons
+     *
+     * @return array<string, string>
+     */
     private function replaceCloseButton(array $buttons): array
     {
         $request = $this->requestStack->getCurrentRequest();

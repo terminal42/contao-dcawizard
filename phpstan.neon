@@ -1,0 +1,4 @@
+parameters:
+    ignoreErrors:
+        - '#unknown class Haste\\Util\\Url#'
+        - '#unknown class Haste\\Util\\Format#'

@@ -59,7 +59,7 @@ class AjaxActionsListener
                 throw new BadRequestException();
             }
 
-            $dc->intId = (int) $id;
+            $dc->id = (int) $id;
         }
 
         /** @var Widget $strClass */
@@ -82,7 +82,7 @@ class AjaxActionsListener
         }
 
         $objWidget = new $strClass(
-            $strClass::getAttributesFromDca($arrData, $strFieldName, null, $strField, $dc->table, $dc)
+            $strClass::getAttributesFromDca($arrData, $strFieldName, null, $strField, $dc->table, $dc),
         );
 
         throw new ResponseException(new Response($objWidget->generate()));

@@ -30,7 +30,7 @@
         "ext-json": "*",
         "contao/core-bundle": "^4.13 || ^5.0",
         "codefog/contao-haste": "^4.0 || ^5.0",
-        "doctrine/dbal": "^3"
+        "doctrine/dbal": "^3 || ^4"
     },
     "require-dev": {
         "contao/manager-plugin": "^2.0",
@@ -49,7 +49,10 @@
     },
     "config": {
         "allow-plugins": {
-            "terminal42/contao-build-tools": true
+            "terminal42/contao-build-tools": true,
+            "contao-components/installer": false,
+            "php-http/discovery": false,
+            "contao/manager-plugin": false
         }
     }
 }
