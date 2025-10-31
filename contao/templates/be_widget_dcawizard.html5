@@ -12,12 +12,14 @@
     <?php elseif ($this->hasRows): ?>
       <table class="tl_listing showColumns">
         <thead>
-        <?php foreach ($this->headerFields as $field): ?>
-          <td class="tl_folder_tlist"><?= $this->dcaLabel($field) ?></td>
-        <?php endforeach; ?>
-        <?php if ($this->showOperations): ?>
-          <td class="tl_folder_tlist"></td>
-        <?php endif; ?>
+          <tr>
+            <?php foreach ($this->headerFields as $field): ?>
+              <th class="tl_folder_tlist"><?= $this->dcaLabel($field) ?></th>
+            <?php endforeach; ?>
+            <?php if ($this->showOperations): ?>
+              <th class="tl_folder_tlist"></th>
+            <?php endif; ?>
+          </tr>
         </thead>
         <tbody>
         <?php foreach ($this->rows as $row): ?>
