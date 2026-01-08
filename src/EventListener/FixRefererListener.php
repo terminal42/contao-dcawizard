@@ -6,7 +6,6 @@ namespace Terminal42\DcawizardBundle\EventListener;
 
 use Codefog\HasteBundle\UrlParser;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
-use Haste\Util\Url;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -15,7 +14,7 @@ class FixRefererListener
 {
     public function __construct(
         private readonly RequestStack $requestStack,
-        private readonly UrlParser|null $urlParser = null,
+        private readonly UrlParser $urlParser,
     ) {
     }
 
@@ -57,13 +56,8 @@ class FixRefererListener
         [, $id] = explode(':', $request->query->get('dcawizard')) + [null, null];
 
         // Use the current URL without (act and id parameters) as referer
-        if ($this->urlParser) {
-            $url = $this->urlParser->removeQueryString(['act', 'id'], $request->getRequestUri());
-            $url = $this->urlParser->addQueryString('id='.$id, $url);
-        } else {
-            $url = Url::removeQueryString(['act', 'id'], $request->getRequestUri());
-            $url = Url::addQueryString('id='.$id, $url);
-        }
+        $url = $this->urlParser->removeQueryString(['act', 'id'], $request->getRequestUri());
+        $url = $this->urlParser->addQueryString('id='.$id, $url);
 
         // Replace the last referer value with the correct link
         $referer[array_key_last($referer)]['current'] = $url;

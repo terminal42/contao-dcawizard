@@ -26,11 +26,11 @@
         "source": "https://github.com/terminal42/contao-dcawizard"
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "ext-json": "*",
-        "contao/core-bundle": "^4.13 || ^5.0",
-        "codefog/contao-haste": "^4.0 || ^5.0",
-        "doctrine/dbal": "^3 || ^4"
+        "contao/core-bundle": "^5.7",
+        "codefog/contao-haste": "^5.0",
+        "doctrine/dbal": "^3.7 || ^4.3"
     },
     "require-dev": {
         "contao/manager-plugin": "^2.0",
