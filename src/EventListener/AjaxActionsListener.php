@@ -8,6 +8,8 @@ use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\CoreBundle\Exception\BadRequestException;
 use Contao\CoreBundle\Exception\ResponseException;
 use Contao\DataContainer;
+use Contao\DC_File;
+use Contao\DC_Table;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -41,12 +43,12 @@ class AjaxActionsListener
         }
 
         // Validate the request data
-        if ('File' === $GLOBALS['TL_DCA'][$dc->table]['config']['dataContainer']) {
+        if ($dc instanceof DC_File) {
             // The field does not exist
             if (!\array_key_exists($strField, $GLOBALS['TL_CONFIG'])) {
                 throw new BadRequestException();
             }
-        } elseif ($this->connection->createSchemaManager()->tablesExist($dc->table)) {
+        } elseif ($dc instanceof DC_Table) {
             // The field does not exist
             if (!isset($GLOBALS['TL_DCA'][$dc->table]['fields'][$strField])) {
                 throw new BadRequestException();
