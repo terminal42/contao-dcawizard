@@ -1,0 +1,12 @@
+{
+  "entrypoints": {
+    "dcawizard": {
+      "css": [
+        "/bundles/terminal42dcawizard/dcawizard.7f8178d8.css"
+      ],
+      "js": [
+        "/bundles/terminal42dcawizard/dcawizard.670595a8.js"
+      ]
+    }
+  }
+}

@@ -28,7 +28,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * @property callable|null $foreignTable_callback
  * @property array         $headerFields
  * @property array         $fields
- * @property callable|null $list_callback
  * @property string        $editButtonLabel
  * @property string        $emptyLabel
  * @property string|null   $whereCondition
@@ -50,29 +49,21 @@ class DcaWizard extends Widget
     {
         parent::__construct($arrAttributes);
 
+        $foreignTableCallback = $this->foreignTable_callback;
+
         // Load the table from callback
-        $varCallback = $this->foreignTable_callback;
-        if (!empty($varCallback) && \is_array($varCallback)) {
-            $this->foreignTable = System::importStatic($varCallback[0])->{$varCallback[1]}($this);
-        } elseif (\is_callable($varCallback)) {
-            $this->foreignTable = $varCallback($this);
+        if (!empty($foreignTableCallback) && \is_array($foreignTableCallback)) {
+            $this->foreignTable = System::importStatic($foreignTableCallback[0])->{$foreignTableCallback[1]}($this);
+        } elseif (\is_callable($foreignTableCallback)) {
+            $this->foreignTable = $foreignTableCallback($this);
         }
 
         if (!empty($this->foreignTable)) {
             Controller::loadDataContainer($this->foreignTable);
             System::loadLanguageFile($this->foreignTable);
         }
-
-        /** @var Request|null $request */
-        $request = System::getContainer()->get('request_stack')?->getCurrentRequest();
-        $request?->getSession()->getBag('contao_backend')->set('dcaWizardReferer', $request->getRequestUri());
     }
 
-    /**
-     * Add specific attributes.
-     *
-     * @param string $strKey
-     */
     public function __set($strKey, $varValue): void
     {
         switch ($strKey) {
@@ -110,11 +101,6 @@ class DcaWizard extends Widget
         };
     }
 
-    /**
-     * Return a parameter.
-     *
-     * @return string
-     */
     public function __get($strKey)
     {
         return match ($strKey) {
@@ -144,140 +130,85 @@ class DcaWizard extends Widget
 
     public function generate(): string
     {
-        $varCallback = $this->list_callback;
-        $blnShowOperations = $this->showOperations;
+        $templateData = [
+            'id' => $this->strId,
+            'css_class' => $this->strClass,
+            'global_operations' => $this->getGlobalOperations(),
+            'header_fields' => $this->getHeaderFields(),
+            'has_record_operations' => $this->getAvailableRecordOperations() !== [],
+            'records' => $this->getRecords(),
+            'empty_label' => $this->emptyLabel,
+            'edit_button' => null,
+        ];
 
-        /** @var BackendTemplate&\stdClass $objTemplate */
-        $objTemplate = new BackendTemplate($this->customTpl ?: 'be_widget_dcawizard');
-        $objTemplate->strId = $this->strId;
-        $objTemplate->hideButton = $this->hideButton;
-        $objTemplate->dcaLabel = fn (string $field) => System::getContainer()->get(Formatter::class)->dcaLabel($this->foreignTable, $field);
-        $objTemplate->dcaValue = fn (string $field, mixed $value) => System::getContainer()->get(Formatter::class)->dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
-        $objTemplate->generateGlobalOperation = $this->generateGlobalOperation(...);
-
-        // Get the available records
-        $arrRows = $this->getRecords();
-
-        if (null === $varCallback) {
-            $objTemplate->hasListCallback = false;
-            $objTemplate->headerFields = $this->getHeaderFields();
-            $objTemplate->hasRows = !empty($arrRows);
-            $objTemplate->rows = $arrRows;
-            $objTemplate->fields = $this->fields;
-            $objTemplate->showOperations = $blnShowOperations;
-            $objTemplate->emptyLabel = $this->emptyLabel;
-
-            if ($blnShowOperations) {
-                $objTemplate->operations = $this->getActiveRowOperations();
-            }
-
-            $objTemplate->generateOperation = $this->generateRowOperation(...);
-        } else {
-            $strCallback = '';
-            if (\is_array($varCallback)) {
-                $strCallback = System::importStatic($varCallback[0])->{$varCallback[1]}($arrRows, $this->strId, $this);
-            } elseif (\is_callable($varCallback)) {
-                $strCallback = $varCallback($arrRows, $this->strId, $this);
-            }
-
-            $objTemplate->hasListCallback = true;
-            $objTemplate->listCallbackContent = $strCallback;
-        }
-
-        $objTemplate->globalOperations = $this->global_operations;
-        $objTemplate->buttonHref = $this->getButtonHref();
-        $objTemplate->dcaWizardOptions = StringUtil::specialchars(json_encode($this->getDcaWizardOptions(), JSON_THROW_ON_ERROR));
-        $objTemplate->buttonLabel = $this->getButtonLabel();
-
-        return $objTemplate->parse();
-    }
-
-    /**
-     * @param string $operation
-     */
-    public function generateGlobalOperation($operation): string
-    {
-        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$operation] ?? null;
-
-        // Cannot edit all in DcaWizard
-        if ('all' === $operation) {
-            return '';
-        }
-
-        if (null === $def && 'new' === $operation) {
-            if (
-                ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null)
-                || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)
-            ) {
-                return '';
-            }
-
-            $def = [
-                'href' => 'act=create&amp;mode=2&amp;pid='.$this->currentRecord,
-                'icon' => 'new.svg',
-                'label' => $GLOBALS['TL_LANG'][$this->foreignTable]['new'] ?? $GLOBALS['TL_LANG']['DCA']['new'],
+        if (!$this->hideButton) {
+            $templateData['edit_button'] = [
+                'url' => $this->getButtonUrl(),
+                'label' => StringUtil::specialchars($this->editButtonLabel ?: $this->strLabel),
+                'jsConfig' => $this->getModalOptions(),
             ];
         }
 
-        if (null === $def) {
-            return '';
+        return System::getContainer()->get('twig')->render($this->customTpl ?: '@Contao/backend/widget/dcawizard.html.twig', $templateData);
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getRecords(): array
+    {
+        if (($rawRecords = $this->fetchRecords()) === []) {
+            return [];
         }
 
-        $def = \is_array($def) ? $def : [$def];
-        $title = $label = $operation;
+        $records = [];
 
-        if (isset($def['label'])) {
-            $label = \is_array($def['label']) ? $def['label'][0] : $def['label'];
-            $title = \is_array($def['label']) ? ($def['label'][1] ?? null) : $def['label'];
+        /** @var Formatter $formatter */
+        $formatter = System::getContainer()->get(Formatter::class);
+
+        foreach ($rawRecords as $rawRecord) {
+            $records[] = [
+                'draft' => 0 === (int) ($rawRecord['tstamp'] ?? 0),
+                'fields' => array_map(fn (string $field) => $formatter->dcaValue($this->foreignTable, $field, $rawRecord[$field] ?? null), $this->fields),
+                'operations' => $this->getRecordOperations($rawRecord),
+                'raw' => $rawRecord,
+            ];
         }
 
-        $buttonHref = $this->getButtonHref().'&amp;'.$def['href'].'&amp;dcawizard_operation=1';
+        return $records;
+    }
 
-        $attributes = !empty($def['attributes']) ? ' '.ltrim((string) $def['attributes']) : '';
+    public function getRecordOperations(array $record): array
+    {
+        $operations = [];
 
-        if ($def['icon'] ?? null) {
-            $def['class'] = trim(($def['class'] ?? '').' header_icon');
-
-            // Add the theme path if only the file name is given
-            if (!str_contains((string) $def['icon'], '/')) {
-                $def['icon'] = Image::getPath($def['icon']);
-            }
-
-            $attributes = \sprintf(' style="background-image:url(\'%s\')"', Controller::addAssetsUrlTo($def['icon'])).$attributes;
+        foreach ($this->getAvailableRecordOperations() as $operation) {
+            $operations[$operation] = $this->getRecordOperation($operation, $record);
         }
 
-        // Dca wizard specific
-        $arrBaseOptions = $this->getDcaWizardOptions();
-        $arrBaseOptions['url'] = $buttonHref;
-        $attributes .= ' data-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
-        $attributes .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
+        return $operations;
+    }
 
-        if (!$label) {
-            $label = $operation;
+    /**
+     * @return array<string>
+     */
+    public function getAvailableRecordOperations(): array
+    {
+        if (!$this->showOperations) {
+            return [];
         }
 
-        if (!$title) {
-            $title = $label;
+        if (is_array($this->operations) && [] !== $this->operations) {
+            return $this->operations;
         }
 
-        // Call a custom function instead of using the default button
-        if (\is_array($def['button_callback'] ?? null)) {
-            $this->import($def['button_callback'][0]);
-
-            return $this->{$def['button_callback'][0]}->{$def['button_callback'][1]}($def['href'] ?? '', $label, $title, $def['class'], $attributes, $this->foreignTable);
-        }
-
-        if (\is_callable($def['button_callback'] ?? null)) {
-            return $def['button_callback']($def['href'] ?? null, $label, $title, $def['class'] ?? null, $attributes, $this->foreignTable);
-        }
-
-        return '<a href="'.$buttonHref.'" class="'.$def['class'].'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.$label.'</a> ';
+        return array_keys((array) $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']);
     }
 
     /**
      * @param array<string, mixed> $row
      */
-    public function generateRowOperation(string $operation, array $row): string
+    public function getRecordOperation(string $operation, array $row): string
     {
         // Load the button definition from the subtable
         $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation] ?? null;
@@ -367,11 +298,11 @@ class DcaWizard extends Widget
         }
 
         // Dca wizard specific
-        $href = $this->getButtonHref().'&amp;'.$config['href'].'&amp;id='.$row['id'].'&amp;dcawizard_operation=1';
-        $arrBaseOptions = $this->getDcaWizardOptions();
+        $href = $this->getButtonUrl().'&amp;'.$config['href'].'&amp;id='.$row['id'].'&amp;dcawizard_operation=1';
+        $arrBaseOptions = $this->getModalOptions();
         $arrBaseOptions['url'] = $href;
-        $config['attributes'] .= ' data-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
-        $config['attributes'] .= ' onclick="Backend.getScrollOffset();DcaWizard.openModalWindow(JSON.parse(this.getAttribute(\'data-options\')));return false"';
+        $config['attributes'] .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
+        $config['attributes'] .= ' data-action="click->terminal42--dcawizard#open:prevent"';
 
         parse_str(StringUtil::decodeEntities($config['href'] ?? ''), $params);
 
@@ -440,27 +371,111 @@ class DcaWizard extends Widget
     /**
      * @return array<string>
      */
-    public function getActiveRowOperations(): array
+    public function getGlobalOperations(): array
     {
-        return $this->operations ?: array_keys($GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']);
+        if (empty($this->global_operations)) {
+            return [];
+        }
+
+        $globalOperations = [];
+
+        foreach ($this->global_operations as $globalOperation) {
+            $globalOperations[$globalOperation] = $this->getGlobalOperation($globalOperation);
+        }
+
+        return $globalOperations;
+    }
+
+    public function getGlobalOperation(string $operation): string
+    {
+        $definition = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$operation] ?? null;
+
+        // Cannot edit all here
+        if ('all' === $operation) {
+            return '';
+        }
+
+        // Special handling for the "new" operation
+        if (null === $definition && 'new' === $operation) {
+            // The table is closed
+            if (($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null) || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)) {
+                return '';
+            }
+
+            $definition = [
+                'href' => 'act=create&amp;mode=2&amp;pid='.$this->currentRecord,
+                'icon' => 'new.svg',
+                'label' => $GLOBALS['TL_LANG'][$this->foreignTable]['new'] ?? $GLOBALS['TL_LANG']['DCA']['new'],
+            ];
+        }
+
+        if (null === $definition) {
+            return '';
+        }
+
+        $definition = \is_array($definition) ? $definition : [$definition];
+        $title = $label = $operation;
+
+        if (isset($definition['label'])) {
+            $label = \is_array($definition['label']) ? $definition['label'][0] : $definition['label'];
+            $title = \is_array($definition['label']) ? ($definition['label'][1] ?? null) : $definition['label'];
+        }
+
+        $buttonHref = $this->getButtonUrl().'&amp;'.$definition['href'].'&amp;dcawizard_operation=1';
+
+        $attributes = !empty($definition['attributes']) ? ' '.ltrim((string) $definition['attributes']) : '';
+
+        if ($definition['icon'] ?? null) {
+            $definition['class'] = trim(($definition['class'] ?? '').' header_icon');
+
+            // Add the theme path if only the file name is given
+            if (!str_contains((string) $definition['icon'], '/')) {
+                $definition['icon'] = Image::getPath($definition['icon']);
+            }
+
+            $attributes = \sprintf(' style="background-image:url(\'%s\')"', Controller::addAssetsUrlTo($definition['icon'])).$attributes;
+        }
+
+        // Dca wizard specific
+        $arrBaseOptions = $this->getModalOptions();
+        $arrBaseOptions['url'] = $buttonHref;
+        $attributes .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
+        $attributes .= ' data-action="click->terminal42--dcawizard#open:prevent"';
+
+        if (!$label) {
+            $label = $operation;
+        }
+
+        if (!$title) {
+            $title = $label;
+        }
+
+        // Call a custom function instead of using the default button
+        if (\is_array($definition['button_callback'] ?? null)) {
+            $this->import($definition['button_callback'][0]);
+
+            return $this->{$definition['button_callback'][0]}->{$definition['button_callback'][1]}($definition['href'] ?? '', $label, $title, $definition['class'], $attributes, $this->foreignTable);
+        }
+
+        if (\is_callable($definition['button_callback'] ?? null)) {
+            return $definition['button_callback']($definition['href'] ?? null, $label, $title, $definition['class'] ?? null, $attributes, $this->foreignTable);
+        }
+
+        return '<a href="'.$buttonHref.'" class="'.$definition['class'].'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.$label.'</a> ';
     }
 
     /**
-     * Get dca wizard javascript options.
-     *
      * @return array<string, string>
      */
-    public function getDcaWizardOptions(): array
+    public function getModalOptions(): array
     {
         return [
             'title' => StringUtil::specialchars($this->strLabel),
-            'url' => $this->getButtonHref(),
-            'id' => $this->strId,
-            'class' => base64_encode(static::class),
+            'url' => $this->getButtonUrl(),
         ];
     }
 
-    public function getButtonHref(): string
+    public function getButtonUrl(): string
     {
         return System::getContainer()->get('router')?->generate('contao_backend', $this->getButtonParams(), UrlGeneratorInterface::ABSOLUTE_URL);
     }
@@ -470,35 +485,28 @@ class DcaWizard extends Widget
      */
     public function getButtonParams(): array
     {
-        $arrParams = [
+        $params = [
             'do' => Input::get('do'),
             'table' => $this->foreignTable,
             'field' => $this->strField,
             'id' => $this->currentRecord,
             'popup' => 1,
             'nb' => 1,
-            'ref' => Input::get('ref'),
             'rt' => System::getContainer()->get('contao.csrf.token_manager')?->getDefaultTokenValue(),
             'dcawizard' => $this->foreignTable.':'.$this->currentRecord,
         ];
 
-        // Merge
         if (\is_array($this->params)) {
-            $arrParams = array_merge($arrParams, $this->params);
+            $params = array_merge($params, $this->params);
         }
 
-        return $arrParams;
-    }
-
-    public function getButtonLabel(): string
-    {
-        return StringUtil::specialchars($this->editButtonLabel ?: $this->strLabel);
+        return $params;
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function getRecords(): array
+    public function fetchRecords(): array
     {
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
@@ -506,7 +514,7 @@ class DcaWizard extends Widget
         [$where, $values] = $this->getWhereCondition();
 
         return $connection->fetchAllAssociative(
-            'SELECT * FROM '.$this->foreignTable.$where.$this->getOrderBy(),
+            'SELECT * FROM '.$this->foreignTable.$where.$this->getOrderByStatement(),
             $values,
         );
     }
@@ -516,20 +524,23 @@ class DcaWizard extends Widget
      */
     public function getHeaderFields(): array
     {
-        $arrHeaderFields = $this->headerFields;
+        $headerFields = $this->headerFields;
 
-        if (empty($arrHeaderFields) || !\is_array($arrHeaderFields)) {
+        if (empty($headerFields) || !\is_array($headerFields)) {
+            /** @var Formatter $formatter */
+            $formatter = System::getContainer()->get(Formatter::class);
+
             foreach ($this->fields as $field) {
                 if ('id' === $field) {
-                    $arrHeaderFields[] = 'ID';
+                    $headerFields[$field] = 'ID';
                     continue;
                 }
 
-                $arrHeaderFields[] = $field;
+                $headerFields[$field] = $formatter->dcaLabel($this->foreignTable, $field);
             }
         }
 
-        return $arrHeaderFields;
+        return $headerFields;
     }
 
     /**
@@ -553,7 +564,7 @@ class DcaWizard extends Widget
     /**
      * Get ORDER BY statement.
      */
-    public function getOrderBy(): string
+    public function getOrderByStatement(): string
     {
         $strOrderBy = '';
         $orderFields = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'] ?? null;

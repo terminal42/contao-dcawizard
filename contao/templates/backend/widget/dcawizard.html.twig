@@ -1,0 +1,96 @@
+{% trans_default_domain "dcawizard" %}
+
+{% set widget_attributes = attrs()
+    .addClass(['dcawizard', css_class])
+    .set('id', 'ctrl_%s'|format(id))
+    .set('data-controller', 'terminal42--dcawizard')
+%}
+
+{% block widget %}
+    <div{{ widget_attributes }}>
+        {% block widget_inner %}
+            {% block global_operations %}
+                {% if global_operations %}
+                    <div id="tl_buttons" class="dcawizard__global-operations">
+                        {% for global_operation in global_operations %}
+                            {% block global_operation %}
+                                {{ global_operation|raw }}
+                            {% endblock %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endblock %}
+
+            {% block records_wrapper %}
+                {% if records %}
+                    <table class="tl_listing dcawizard__records">
+                        <thead>
+                        <tr>
+                            {% for header_field in header_fields %}
+                                <th class="tl_folder_tlist">{{ header_field }}</th>
+                            {% endfor %}
+                            {% if has_record_operations %}
+                                <th class="tl_folder_tlist"></th>
+                            {% endif %}
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for record in records %}
+                            {% block record %}
+                                {% set row_attributes = attrs()
+                                    .addClass('hover-row')
+                                    .addClass('draft', record.draft)
+                                %}
+
+                                <tr{{ row_attributes }}>
+                                    {% for field in record.fields %}
+                                        <td class="tl_file_list">
+                                            {% block record_value %}
+                                                {{ field|default('-') }}
+                                            {% endblock %}
+                                        </td>
+                                    {% endfor %}
+
+                                    {% if record.operations %}
+                                        <td class="tl_file_list tl_right_nowrap">
+                                            {% block record_operations %}
+                                                {% for operation in record.operations %}
+                                                    {{ operation|raw }}
+                                                {% endfor %}
+                                            {% endblock %}
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endblock %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    {% block records_empty %}
+                        <p>{{ empty_label|default('empty'|trans) }}</p>
+                    {% endblock %}
+                {% endif %}
+            {% endblock %}
+
+            {% block edit_button_wrapper %}
+                {% if edit_button %}
+                    <div class="dcawizard__button-wrapper">
+                        {% block edit_button %}
+                            {% set edit_button_attributes = attrs()
+                                .addClass('tl_submit')
+                                .set('href', edit_button.url)
+                                .set('data-dcawizard-options', edit_button.jsConfig|json_encode)
+                                .set('data-action', 'click->terminal42--dcawizard#open:prevent')
+                            %}
+
+                            <a{{ edit_button_attributes }}>
+                                {{ edit_button.label }}
+                            </a>
+                        {% endblock %}
+                    </div>
+                {% endif %}
+            {% endblock %}
+        {% endblock %}
+    </div>
+{% endblock %}

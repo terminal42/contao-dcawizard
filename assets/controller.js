@@ -1,32 +1,28 @@
-var DcaWizard = {
-    /**
-     * Open a modal window
-     *
-     * @param {Object} options
-     */
-    openModalWindow: function (options) {
+import { Controller } from "@hotwired/stimulus";
+
+export default class GroupWidgetController extends Controller {
+    open(event) {
+        let options;
+
+        try {
+            options = JSON.parse(event.target.dataset.dcawizardOptions);
+        } catch {
+            return;
+        }
+
         var opt = options || {},
             maxWidth = (window.getSize().x - 20).toInt(),
             maxHeight = (window.getSize().y - 137).toInt();
         if (!opt.width || opt.width > maxWidth) opt.width = Math.min(maxWidth, 900);
         if (!opt.height || opt.height > maxHeight) opt.height = maxHeight;
-
         var M = new SimpleModal({
-            'keyEsc': false, // see https://github.com/terminal42/contao-notification_center/issues/99
             'width': opt.width,
-            'draggable': false,
             'hideFooter': true,
-            'overlayOpacity': .5,
-            'onShow': function () {
-                document.body.setStyle('overflow', 'hidden');
-
-                window.addEventListener('message', function (message) {
-                    if (message.data === 'closeModal') {
-                        M.hide();
-                    }
-                });
-            },
-            'onHide': function () {
+            'draggable': false,
+            'overlayOpacity': .7,
+            'overlayClick': false,
+            'onShow': function() { document.body.setStyle('overflow', 'hidden'); },
+            'onHide': function() {
                 document.body.setStyle('overflow', 'auto');
 
                 new Request.Contao({
@@ -36,6 +32,7 @@ var DcaWizard = {
                         $('ctrl_' + opt.id).set('html', json.content);
                         json.javascript && Browser.exec(json.javascript);
                         AjaxRequest.hideBox();
+                        window.fireEvent('ajax_change');
                     }
                 }).post({
                     'action': 'reloadDcaWizard',
@@ -46,9 +43,9 @@ var DcaWizard = {
             }
         });
         M.show({
-            'title': opt.title,
-            'contents': '<iframe src="' + opt.url + '" name="simple-modal-iframe" width="100%" height="' + opt.height + '" frameborder="0"></iframe>',
+            'title': opt.title?.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'),
+            'contents': '<iframe src="' + opt.url + '" width="100%" height="' + opt.height + '" frameborder="0"></iframe>',
             'model': 'modal'
         });
     }
-};
+}
