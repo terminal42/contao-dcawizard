@@ -17,7 +17,7 @@ use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -63,9 +63,11 @@ class DcaWizard extends Widget
             System::loadLanguageFile($this->foreignTable);
         }
 
-        /** @var Request|null $request */
-        $request = System::getContainer()->get('request_stack')?->getCurrentRequest();
-        $request?->getSession()->getBag('contao_backend')->set('dcaWizardReferer', $request->getRequestUri());
+        $requestStack = System::getContainer()->get('request_stack');
+
+        /** @var AttributeBagInterface $sessionBag */
+        $sessionBag = $requestStack->getSession()->getBag('contao_backend');
+        $sessionBag->set('dcaWizardReferer', $requestStack->getCurrentRequest()?->getRequestUri());
     }
 
     /**
@@ -147,24 +149,19 @@ class DcaWizard extends Widget
         $varCallback = $this->list_callback;
         $blnShowOperations = $this->showOperations;
 
-        /** @var BackendTemplate&\stdClass $objTemplate */
         $objTemplate = new BackendTemplate($this->customTpl ?: 'be_widget_dcawizard');
         $objTemplate->strId = $this->strId;
         $objTemplate->hideButton = $this->hideButton;
 
-        $objTemplate->dcaLabel = function ($field) {
-            return System::getContainer()
-                ->get(Formatter::class)
-                ?->dcaLabel($this->foreignTable, $field)
-            ;
-        };
+        $objTemplate->dcaLabel = fn ($field) => System::getContainer()
+            ->get(Formatter::class)
+            ->dcaLabel($this->foreignTable, $field)
+        ;
 
-        $objTemplate->dcaValue = function ($field, $value) {
-            return System::getContainer()
-                ->get(Formatter::class)
-                ?->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
-            ;
-        };
+        $objTemplate->dcaValue = fn ($field, $value) => System::getContainer()
+            ->get(Formatter::class)
+            ->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
+        ;
 
         $objTemplate->dcaValueCallback = function ($row) {
             if (!$this->objDca instanceof DataContainer) {
@@ -334,7 +331,7 @@ class DcaWizard extends Widget
             $id = StringUtil::specialchars(rawurldecode((string) $row['id']));
 
             // Dereference pointer to $GLOBALS['TL_LANG']
-            $config = method_exists(StringUtil::class, 'resolveReferences') ? StringUtil::resolveReferences($def) : $def;
+            $config = StringUtil::resolveReferences($def);
 
             if (isset($config['label'])) {
                 if (\is_array($config['label'])) {
@@ -364,7 +361,7 @@ class DcaWizard extends Widget
             $callback = System::importStatic($config['button_callback'][0]);
             $ref = new \ReflectionMethod($callback, $config['button_callback'][1]);
 
-            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && DataContainerOperation::class === $type->getName()) {
+            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && $type instanceof \ReflectionNamedType && DataContainerOperation::class === $type->getName()) {
                 $callback->{$config['button_callback'][1]}($config);
             } else {
                 return $callback->{$config['button_callback'][1]}($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
@@ -372,7 +369,7 @@ class DcaWizard extends Widget
         } elseif (\is_callable($config['button_callback'] ?? null)) {
             $ref = new \ReflectionFunction($config['button_callback']);
 
-            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && DataContainerOperation::class === $type->getName()) {
+            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && $type instanceof \ReflectionNamedType && DataContainerOperation::class === $type->getName()) {
                 $config['button_callback']($config);
             } else {
                 return $config['button_callback']($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
@@ -403,7 +400,7 @@ class DcaWizard extends Widget
                     ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['toggle'] ?? false) !== true
                     && ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['reverseToggle'] ?? false) !== true
                 ) || (
-                    (!method_exists(DataContainer::class, 'isFieldExcluded') || DataContainer::isFieldExcluded($this->foreignTable, $params['field']))
+                    DataContainer::isFieldExcluded($this->foreignTable, $params['field'])
                     && !System::getContainer()->get('security.helper')->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $this->foreignTable.'::'.$params['field'])
                 )
             ) {
@@ -469,7 +466,7 @@ class DcaWizard extends Widget
     /**
      * Get dca wizard javascript options.
      *
-     * @return array<string, string>
+     * @return array<string, int|string>
      */
     public function getDcaWizardOptions(): array
     {
@@ -483,7 +480,7 @@ class DcaWizard extends Widget
 
     public function getButtonHref(): string
     {
-        return System::getContainer()->get('router')?->generate('contao_backend', $this->getButtonParams(), UrlGeneratorInterface::ABSOLUTE_URL);
+        return System::getContainer()->get('router')->generate('contao_backend', $this->getButtonParams(), UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
     /**
@@ -498,7 +495,7 @@ class DcaWizard extends Widget
             'id' => $this->currentRecord,
             'popup' => 1,
             'ref' => Input::get('ref'),
-            'rt' => System::getContainer()->get('contao.csrf.token_manager')?->getDefaultTokenValue(),
+            'rt' => System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue(),
             'dcawizard' => $this->foreignTable.':'.$this->currentRecord,
         ];
 
@@ -516,7 +513,7 @@ class DcaWizard extends Widget
     }
 
     /**
-     * @return array<string, mixed>
+     * @return list<array<string, mixed>>
      */
     public function getRecords(): array
     {

@@ -7,7 +7,7 @@ namespace Terminal42\DcawizardBundle\EventListener;
 use Codefog\HasteBundle\UrlParser;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 
 #[AsHook('loadDataContainer')]
 class FixRefererListener
@@ -80,7 +80,7 @@ class FixRefererListener
         $session = $this->requestStack->getSession();
         $referer = $session->get('popupReferer');
 
-        /** @var Session $sessionBag */
+        /** @var AttributeBagInterface $sessionBag */
         $sessionBag = $session->getBag('contao_backend');
         $dcaWizardReferer = $sessionBag->get('dcaWizardReferer');
 
