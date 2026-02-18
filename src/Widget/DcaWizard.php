@@ -166,6 +166,14 @@ class DcaWizard extends Widget
             ;
         };
 
+        $objTemplate->dcaValueCallback = function ($row) {
+            if (!$this->objDca instanceof DataContainer) {
+                throw new \RuntimeException('DcaWizard does not have a DataContainer object');
+            }
+
+            return $this->objDca->generateRecordLabel($row, 'tl_iso_rule_condition');
+        };
+
         $objTemplate->generateGlobalOperation = $this->generateGlobalOperation(...);
 
         // Get the available records
@@ -526,11 +534,15 @@ class DcaWizard extends Widget
     /**
      * @return array<string>
      */
-    public function getHeaderFields(): array
+    public function getHeaderFields(): array|null
     {
         $arrHeaderFields = $this->headerFields;
 
         if (empty($arrHeaderFields) || !\is_array($arrHeaderFields)) {
+            if (empty($this->fields) || !\is_array($this->fields)) {
+                return null;
+            }
+
             foreach ($this->fields as $field) {
                 if ('id' === $field) {
                     $arrHeaderFields[] = 'ID';

@@ -11,6 +11,7 @@
       <?= $this->listCallbackContent ?>
     <?php elseif ($this->hasRows): ?>
       <table class="tl_listing showColumns">
+        <?php if ($this->headerFields): ?>
         <thead>
           <tr>
             <?php foreach ($this->headerFields as $field): ?>
@@ -21,12 +22,17 @@
             <?php endif; ?>
           </tr>
         </thead>
+        <?php endif; ?>
         <tbody>
         <?php foreach ($this->rows as $row): ?>
           <tr class="<?= '0' === (string) ($row['tstamp'] ?? null) ? 'draft ' : '' ?> hover-row">
-            <?php foreach ($this->fields as $field): ?>
-              <td class="tl_file_list"><?= $this->dcaValue($field, $row[$field]) ?: '-' ?></td>
-            <?php endforeach; ?>
+            <?php if ($this->headerFields): ?>
+              <?php foreach ($this->fields as $field): ?>
+                <td class="tl_file_list"><?= $this->dcaValue($field, $row[$field]) ?: '-' ?></td>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <td class="tl_file_list"><?= $this->dcaValueCallback($row) ?: '-' ?></td>
+            <?php endif; ?>
 
             <?php if ($this->showOperations): ?>
               <td class="tl_file_list tl_right_nowrap">
