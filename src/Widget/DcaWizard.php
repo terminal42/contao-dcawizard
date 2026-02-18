@@ -17,7 +17,6 @@ use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
-use Haste\Util\Format;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -152,29 +151,8 @@ class DcaWizard extends Widget
         $objTemplate = new BackendTemplate($this->customTpl ?: 'be_widget_dcawizard');
         $objTemplate->strId = $this->strId;
         $objTemplate->hideButton = $this->hideButton;
-
-        $objTemplate->dcaLabel = function ($field) {
-            if (class_exists(Formatter::class)) {
-                return System::getContainer()
-                    ->get(Formatter::class)
-                    ?->dcaLabel($this->foreignTable, $field)
-                ;
-            }
-
-            return Format::dcaLabel($this->foreignTable, $field);
-        };
-
-        $objTemplate->dcaValue = function ($field, $value) {
-            if (class_exists(Formatter::class)) {
-                return System::getContainer()
-                    ->get(Formatter::class)
-                    ?->dcaValue($this->foreignTable, $field, $value, $this->dataContainer)
-                ;
-            }
-
-            return Format::dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
-        };
-
+        $objTemplate->dcaLabel = fn (string $field) => System::getContainer()->get(Formatter::class)->dcaLabel($this->foreignTable, $field);
+        $objTemplate->dcaValue = fn (string $field, mixed $value) => System::getContainer()->get(Formatter::class)->dcaValue($this->foreignTable, $field, $value, $this->dataContainer);
         $objTemplate->generateGlobalOperation = $this->generateGlobalOperation(...);
 
         // Get the available records
