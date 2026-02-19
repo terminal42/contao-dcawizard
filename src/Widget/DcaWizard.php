@@ -297,12 +297,16 @@ class DcaWizard extends Widget
             return Image::getHtml($config['icon'], $config['label']).' ';
         }
 
-        // Dca wizard specific
         $href = $this->getButtonUrl().'&amp;'.$config['href'].'&amp;id='.$row['id'].'&amp;dcawizard_operation=1';
-        $arrBaseOptions = $this->getModalOptions();
-        $arrBaseOptions['url'] = $href;
-        $config['attributes'] .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
-        $config['attributes'] .= ' data-action="click->terminal42--dcawizard#open:prevent"';
+
+        // Dca wizard specific
+        if (empty($config['attributes']) || !str_contains((string) $config['attributes'], 'onclick="')) {
+            $baseOptions = $this->getModalOptions();
+            $baseOptions['url'] = $href;
+
+            $config['attributes'] .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($baseOptions, JSON_THROW_ON_ERROR)).'"';
+            $config['attributes'] .= ' data-action="click->terminal42--dcawizard#open:prevent"';
+        }
 
         parse_str(StringUtil::decodeEntities($config['href'] ?? ''), $params);
 
@@ -437,10 +441,13 @@ class DcaWizard extends Widget
         }
 
         // Dca wizard specific
-        $arrBaseOptions = $this->getModalOptions();
-        $arrBaseOptions['url'] = $buttonHref;
-        $attributes .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
-        $attributes .= ' data-action="click->terminal42--dcawizard#open:prevent"';
+        if (empty($config['attributes']) || !str_contains((string) $config['attributes'], 'onclick="')) {
+            $arrBaseOptions = $this->getModalOptions();
+            $arrBaseOptions['url'] = $buttonHref;
+
+            $attributes .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
+            $attributes .= ' data-action="click->terminal42--dcawizard#open:prevent"';
+        }
 
         if (!$label) {
             $label = $operation;
@@ -470,6 +477,8 @@ class DcaWizard extends Widget
     public function getModalOptions(): array
     {
         return [
+            'class' => base64_encode(static::class),
+            'id' => $this->strId,
             'title' => StringUtil::specialchars($this->strLabel),
             'url' => $this->getButtonUrl(),
         ];

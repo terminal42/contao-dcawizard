@@ -5,17 +5,20 @@ export default class GroupWidgetController extends Controller {
         let options;
 
         try {
-            options = JSON.parse(event.target.dataset.dcawizardOptions);
+            options = JSON.parse(event.currentTarget.dataset.dcawizardOptions);
         } catch {
+            console.error('Could not parse JSON options for DCA wizard: ' + event.currentTarget.dataset.dcawizardOptions);
+
             return;
         }
 
-        var opt = options || {},
+        let opt = options || {},
             maxWidth = (window.getSize().x - 20).toInt(),
             maxHeight = (window.getSize().y - 137).toInt();
         if (!opt.width || opt.width > maxWidth) opt.width = Math.min(maxWidth, 900);
         if (!opt.height || opt.height > maxHeight) opt.height = maxHeight;
-        var M = new SimpleModal({
+
+        const M = new SimpleModal({
             'width': opt.width,
             'hideFooter': true,
             'draggable': false,
@@ -42,6 +45,7 @@ export default class GroupWidgetController extends Controller {
                 });
             }
         });
+
         M.show({
             'title': opt.title?.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'),
             'contents': '<iframe src="' + opt.url + '" width="100%" height="' + opt.height + '" frameborder="0"></iframe>',
