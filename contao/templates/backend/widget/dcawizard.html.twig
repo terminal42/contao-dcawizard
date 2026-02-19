@@ -55,9 +55,13 @@
                                     {% if record.operations %}
                                         <td class="tl_file_list tl_right_nowrap">
                                             {% block record_operations %}
-                                                {% for operation in record.operations %}
-                                                    {{ operation|raw }}
-                                                {% endfor %}
+                                                <div class="operations">
+                                                    <ul>
+                                                        {% for operation in record.operations %}
+                                                            <li>{{ operation|raw }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
                                             {% endblock %}
                                         </td>
                                     {% endif %}
