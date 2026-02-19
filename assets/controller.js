@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 
-export default class WidgetController extends Controller {
+export default class extends Controller {
     open(event) {
         let options;
 
