@@ -9,6 +9,7 @@ use Contao\Backend;
 use Contao\Controller;
 use Contao\CoreBundle\DataContainer\DataContainerOperation;
 use Contao\CoreBundle\Security\ContaoCorePermissions;
+use Contao\CoreBundle\String\HtmlAttributes;
 use Contao\DataContainer;
 use Contao\Image;
 use Contao\Input;
@@ -322,13 +323,25 @@ class DcaWizard extends Widget
 
         $href = $this->getButtonUrl().'&amp;'.$config['href'].'&amp;id='.$row['id'].'&amp;dcawizard_operation=1';
 
-        // Dca wizard specific
-        if (empty($config['attributes']) || !str_contains((string) $config['attributes'], 'onclick="')) {
+        if ($config['attributes'] instanceof HtmlAttributes) {
+            $attributes = $config['attributes'];
+        } else {
+            $attributes = new HtmlAttributes($config['attributes'] ?? '');
+        }
+
+        if ($operation === 'delete' || empty($attributes['onclick'])) {
             $baseOptions = $this->getModalOptions();
             $baseOptions['url'] = $href;
 
-            $config['attributes'] .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($baseOptions, JSON_THROW_ON_ERROR)).'"';
-            $config['attributes'] .= ' data-action="click->terminal42--dcawizard#open:prevent"';
+            if ($operation === 'delete') {
+                $baseOptions['confirm'] = sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $row['id']);
+                $attributes->set('data-action', 'click->terminal42--dcawizard#delete:prevent');
+                $attributes->unset('onclick');
+            } else {
+                $attributes->set('data-action', 'click->terminal42--dcawizard#open:prevent');
+            }
+
+            $attributes->set('data-dcawizard-options', StringUtil::specialchars(json_encode($baseOptions, JSON_THROW_ON_ERROR)));
         }
 
         parse_str(StringUtil::decodeEntities($config['href'] ?? ''), $params);
