@@ -24,16 +24,18 @@
             {% block records_wrapper %}
                 {% if records %}
                     <table class="tl_listing dcawizard__records">
-                        <thead>
-                        <tr>
-                            {% for header_field in header_fields %}
-                                <th class="tl_folder_tlist">{{ header_field }}</th>
-                            {% endfor %}
-                            {% if has_record_operations %}
-                                <th class="tl_folder_tlist"></th>
-                            {% endif %}
-                        </tr>
-                        </thead>
+                        {% if header_fields %}
+                            <thead>
+                            <tr>
+                                {% for header_field in header_fields %}
+                                    <th class="tl_folder_tlist">{{ header_field }}</th>
+                                {% endfor %}
+                                {% if has_record_operations %}
+                                    <th class="tl_folder_tlist"></th>
+                                {% endif %}
+                            </tr>
+                            </thead>
+                        {% endif %}
 
                         <tbody>
                         {% for record in records %}
@@ -47,7 +49,7 @@
                                     {% for field in record.fields %}
                                         <td class="tl_file_list">
                                             {% block record_value %}
-                                                {{ field|default('-') }}
+                                                {{ field|default('-')|raw }}
                                             {% endblock %}
                                         </td>
                                     {% endfor %}

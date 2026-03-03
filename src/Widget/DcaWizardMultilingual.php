@@ -11,9 +11,6 @@ namespace Terminal42\DcawizardBundle\Widget;
  */
 class DcaWizardMultilingual extends DcaWizard
 {
-    /**
-     * @return array<string>
-     */
     public function getForeignTableCondition(): array
     {
         $langColumn = $this->langColumn ?: 'language';
