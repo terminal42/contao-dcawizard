@@ -149,7 +149,7 @@ class DcaWizard extends Widget
             ];
         }
 
-        return System::getContainer()->get('twig')->render($this->customTpl ?: '@Contao/backend/widget/dcawizard.html.twig', $templateData);
+        return System::getContainer()->get('twig')->render(sprintf('@Contao/%s.html.twig', $this->customTpl ?: 'backend/widget/dcawizard'), $templateData);
     }
 
     /**
@@ -162,6 +162,12 @@ class DcaWizard extends Widget
         }
 
         $records = [];
+        $dataContainer = null;
+
+        // Prepare the data container for formatter
+        if ($this->objDca instanceof DataContainer) {
+            $dataContainer = $this->objDca;
+        }
 
         /** @var Formatter $formatter */
         $formatter = System::getContainer()->get(Formatter::class);
@@ -169,7 +175,7 @@ class DcaWizard extends Widget
         foreach ($rawRecords as $rawRecord) {
             $records[] = [
                 'draft' => 0 === (int) ($rawRecord['tstamp'] ?? 0),
-                'fields' => array_map(fn (string $field) => $formatter->dcaValue($this->foreignTable, $field, $rawRecord[$field] ?? null), $this->fields),
+                'fields' => array_map(fn (string $field) => $formatter->dcaValue($this->foreignTable, $field, $rawRecord[$field] ?? null, $dataContainer), $this->fields),
                 'operations' => $this->getRecordOperations($rawRecord),
                 'raw' => $rawRecord,
             ];
