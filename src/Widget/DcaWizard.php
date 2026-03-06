@@ -156,7 +156,7 @@ class DcaWizard extends Widget
     }
 
     /**
-     * @return array<string>
+     * @return array<array<string, mixed>>
      */
     public function getRecords(): array
     {
@@ -474,7 +474,7 @@ class DcaWizard extends Widget
         }
 
         // Dca wizard specific
-        if (empty($config['attributes']) || !str_contains((string) $config['attributes'], 'onclick="')) {
+        if (empty($definition['attributes']) || !str_contains((string) $definition['attributes'], 'onclick="')) {
             $arrBaseOptions = $this->getModalOptions();
             $arrBaseOptions['url'] = $buttonHref;
 
