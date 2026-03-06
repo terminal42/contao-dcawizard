@@ -17,7 +17,6 @@ use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
-use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -62,12 +61,6 @@ class DcaWizard extends Widget
             Controller::loadDataContainer($this->foreignTable);
             System::loadLanguageFile($this->foreignTable);
         }
-
-        $requestStack = System::getContainer()->get('request_stack');
-
-        /** @var AttributeBagInterface $sessionBag */
-        $sessionBag = $requestStack->getSession()->getBag('contao_backend');
-        $sessionBag->set('dcaWizardReferer', $requestStack->getCurrentRequest()?->getRequestUri());
     }
 
     public function __set($strKey, $varValue): void
