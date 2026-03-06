@@ -28,7 +28,7 @@ class CloseModalListener
             return;
         }
 
-        [$table] = explode(':', $request->query->get('dcawizard')) + [null];
+        [$table] = explode(':', (string) $request->query->get('dcawizard')) + [null];
 
         if ($table === $dcaTable) {
             $GLOBALS['TL_DCA'][$table]['edit']['buttons_callback'][] = $this->replaceCloseButton(...);

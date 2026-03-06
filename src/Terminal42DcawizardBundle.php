@@ -8,6 +8,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class Terminal42DcawizardBundle extends Bundle
 {
+    #[\Override]
     public function getPath(): string
     {
         return \dirname(__DIR__);

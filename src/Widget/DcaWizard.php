@@ -63,6 +63,7 @@ class DcaWizard extends Widget
         }
     }
 
+    #[\Override]
     public function __set($strKey, $varValue): void
     {
         switch ($strKey) {
@@ -88,6 +89,7 @@ class DcaWizard extends Widget
         }
     }
 
+    #[\Override]
     public function __isset($strKey)
     {
         return match ($strKey) {
@@ -100,6 +102,7 @@ class DcaWizard extends Widget
         };
     }
 
+    #[\Override]
     public function __get($strKey)
     {
         return match ($strKey) {
@@ -112,6 +115,7 @@ class DcaWizard extends Widget
         };
     }
 
+    #[\Override]
     public function validate(): void
     {
         if ($this->mandatory) {
