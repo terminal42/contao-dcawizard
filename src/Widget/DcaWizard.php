@@ -134,7 +134,7 @@ class DcaWizard extends Widget
             'css_class' => $this->strClass,
             'global_operations' => $this->getGlobalOperations(),
             'header_fields' => $this->getHeaderFields(),
-            'has_record_operations' => $this->getAvailableRecordOperations() !== [],
+            'has_record_operations' => [] !== $this->getAvailableRecordOperations(),
             'records' => $this->getRecords(),
             'empty_label' => $this->emptyLabel,
             'edit_button' => null,
@@ -148,7 +148,7 @@ class DcaWizard extends Widget
             ];
         }
 
-        return System::getContainer()->get('twig')->render(sprintf('@Contao/%s.html.twig', $this->customTpl ?: 'backend/widget/dcawizard'), $templateData);
+        return System::getContainer()->get('twig')->render(\sprintf('@Contao/%s.html.twig', $this->customTpl ?: 'backend/widget/dcawizard'), $templateData);
     }
 
     /**
@@ -173,7 +173,7 @@ class DcaWizard extends Widget
 
         foreach ($rawRecords as $rawRecord) {
             // Generate the record fields defined in the widget settings
-            if (!empty($this->fields) && is_array($this->fields)) {
+            if (!empty($this->fields) && \is_array($this->fields)) {
                 $fields = array_map(fn (string $field) => $formatter->dcaValue($this->foreignTable, $field, $rawRecord[$field] ?? null, $dataContainer), $this->fields);
             } else {
                 // Generate the record default label
@@ -215,7 +215,7 @@ class DcaWizard extends Widget
             return [];
         }
 
-        if (is_array($this->operations) && [] !== $this->operations) {
+        if (\is_array($this->operations) && [] !== $this->operations) {
             return $this->operations;
         }
 
@@ -322,12 +322,12 @@ class DcaWizard extends Widget
             $attributes = new HtmlAttributes($config['attributes'] ?? '');
         }
 
-        if ($operation === 'delete' || empty($attributes['onclick'])) {
+        if ('delete' === $operation || empty($attributes['onclick'])) {
             $baseOptions = $this->getModalOptions();
             $baseOptions['url'] = $href;
 
-            if ($operation === 'delete') {
-                $baseOptions['confirm'] = sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $row['id']);
+            if ('delete' === $operation) {
+                $baseOptions['confirm'] = \sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $row['id']);
                 $attributes->set('data-action', 'click->terminal42--dcawizard#delete:prevent');
                 $attributes->unset('onclick');
             } else {

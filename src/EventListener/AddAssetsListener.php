@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Terminal42\DcawizardBundle\EventListener;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
@@ -14,11 +16,10 @@ readonly class AddAssetsListener
         private Packages $packages,
         private RequestStack $requestStack,
         private ScopeMatcher $scopeMatcher,
-    )
-    {
+    ) {
     }
 
-    public function __invoke()
+    public function __invoke(): void
     {
         $request = $this->requestStack->getCurrentRequest();
 
