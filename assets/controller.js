@@ -18,7 +18,7 @@ export default class extends Controller {
             evalScripts: false,
             followRedirects: false,
             onRequest: AjaxRequest.displayBox(Contao.lang.loading + ' …'),
-            onComplete: () => this.#reloadWidget(options, false),
+            onComplete: () => this.#reloadWidget(options),
         }).send();
     }
 
@@ -49,6 +49,7 @@ export default class extends Controller {
             'onShow': () => document.body.setStyle('overflow', 'hidden'),
             'onHide': () => {
                 document.body.setStyle('overflow', 'auto');
+                AjaxRequest.displayBox(Contao.lang.loading + ' …')
                 this.#reloadWidget(options);
             }
         });
@@ -73,11 +74,6 @@ export default class extends Controller {
     #reloadWidget(options, displayBox = true) {
         new Request.Contao({
             evalScripts: false,
-            onRequest: () => {
-                if (displayBox) {
-                    AjaxRequest.displayBox(Contao.lang.loading + ' …')
-                }
-            },
             onSuccess: (txt, json) => {
                 $('ctrl_' + options.id).set('html', json.content);
                 json.javascript && Browser.exec(json.javascript);
