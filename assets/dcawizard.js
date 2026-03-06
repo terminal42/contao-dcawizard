@@ -1,3 +1,5 @@
+/* eslint-disable no-alert,no-console,no-undef */
+
 import './dcawizard.scss';
 
 import { Application, Controller } from '@hotwired/stimulus';
@@ -21,7 +23,7 @@ application.register('terminal42--dcawizard', class extends Controller {
             url: options.url,
             evalScripts: false,
             followRedirects: false,
-            onRequest: AjaxRequest.displayBox(Contao.lang.loading + ' …'),
+            onRequest: AjaxRequest.displayBox(`${Contao.lang.loading} …`),
             onComplete: () => this.#reloadWidget(options),
         }).send();
     }
@@ -45,23 +47,23 @@ application.register('terminal42--dcawizard', class extends Controller {
         }
 
         const M = new SimpleModal({
-            'width': options.width,
-            'hideFooter': true,
-            'draggable': false,
-            'overlayOpacity': .7,
-            'overlayClick': false,
-            'onShow': () => document.body.setStyle('overflow', 'hidden'),
-            'onHide': () => {
+            width: options.width,
+            hideFooter: true,
+            draggable: false,
+            overlayOpacity: 0.7,
+            overlayClick: false,
+            onShow: () => document.body.setStyle('overflow', 'hidden'),
+            onHide: () => {
                 document.body.setStyle('overflow', 'auto');
-                AjaxRequest.displayBox(Contao.lang.loading + ' …')
+                AjaxRequest.displayBox(`${Contao.lang.loading} …`);
                 this.#reloadWidget(options);
-            }
+            },
         });
 
         M.show({
-            'title': options.title?.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'),
-            'contents': '<iframe src="' + options.url + '" width="100%" height="' + options.height + '" frameborder="0"></iframe>',
-            'model': 'modal'
+            title: options.title?.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'),
+            contents: `<iframe src="${options.url}" width="100%" height="${options.height}" frameborder="0"></iframe>`,
+            model: 'modal',
         });
     }
 
@@ -69,26 +71,30 @@ application.register('terminal42--dcawizard', class extends Controller {
         try {
             return JSON.parse(event.currentTarget.dataset.dcawizardOptions);
         } catch {
-            console.error('Could not parse JSON options for DCA wizard: ' + event.currentTarget.dataset.dcawizardOptions);
+            console.error(`Could not parse JSON options for DCA wizard: ${event.currentTarget.dataset.dcawizardOptions}`);
 
             return null;
         }
     }
 
-    #reloadWidget(options, displayBox = true) {
+    #reloadWidget(options) {
         new Request.Contao({
             evalScripts: false,
             onSuccess: (txt, json) => {
-                $('ctrl_' + options.id).set('html', json.content);
-                json.javascript && Browser.exec(json.javascript);
+                $(`ctrl_${options.id}`).set('html', json.content);
+
+                if (json.javascript) {
+                    Browser.exec(json.javascript);
+                }
+
                 AjaxRequest.hideBox();
                 window.fireEvent('ajax_change');
-            }
+            },
         }).post({
-            'action': 'reloadDcaWizard',
-            'name': options.id,
-            'REQUEST_TOKEN': Contao.request_token,
-            'class': options.class
+            action: 'reloadDcaWizard',
+            name: options.id,
+            REQUEST_TOKEN: Contao.request_token,
+            class: options.class,
         });
     }
 });
