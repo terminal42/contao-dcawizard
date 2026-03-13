@@ -533,6 +533,7 @@ class DcaWizard extends Widget
             'field' => $this->strField,
             'id' => $this->currentRecord,
             'popup' => 1,
+            'nb' => 1,
             'ref' => Input::get('ref'),
             'rt' => System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue(),
             'dcawizard' => $this->foreignTable.':'.$this->currentRecord,
