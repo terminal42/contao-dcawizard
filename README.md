@@ -9,7 +9,7 @@ A backend widget for Contao that allows editors to manage records from a foreign
 Install via Composer:
 
 ```bash
-composer require terminal42/contao-dcawizard
+composer require terminal42/dcawizard
 ```
 
 ---
