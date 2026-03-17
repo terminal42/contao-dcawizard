@@ -18,4 +18,4 @@ services:
     Terminal42\DcawizardBundle\EventListener\CloseModalListener:
         arguments:
             - "@request_stack"
-            - "@contao.routing.content_url_generator"
+            - "@cmf_routing.router"
