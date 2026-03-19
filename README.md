@@ -26,6 +26,54 @@ composer require terminal42/dcawizard
 ],
 ```
 
+### Supporting both versions simultaneously
+
+If your project needs to support both Contao 5.6 and 5.7+, you can allow both major
+versions using a version union constraint in your `composer.json`:
+```json
+"require": {
+    "terminal42/dcawizard": "^3.0 || ^4.0"
+}
+```
+
+Composer will then automatically install:
+- `3.x` when the project uses Contao ≤ 5.6
+- `4.x` when the project uses Contao ≥ 5.7
+
+No code changes are needed on your end — the correct version will be resolved
+based on the Contao version constraint in your own `composer.json`.
+
+---
+
+## Migrating from 3.x to 4.x
+
+The 4.x release is largely backwards compatible.
+
+The `list_callback` option has been removed. To customize the record list rendering, override the `{% block record %}`
+block in a custom template that extends the default one:
+
+```twig
+{# contao/templates/backend/widget/dcawizard_custom.html.twig #}
+{% extends '@Contao/backend/widget/dcawizard.html.twig' %}
+
+{% block record_value %}
+    {# your custom rendering here #}
+{% endblock %}
+```
+
+Then reference your template via `customTpl`:
+```php
+'eval' => [
+    'customTpl' => 'backend/widget/dcawizard_custom',
+],
+```
+
+The default template name has also been renamed. If you have overridden it in your project, update it accordingly:
+
+| Version 3.x (.html5)  | Version 4.x (.html.twig)          |
+|-----------------------|-----------------------------------|
+| `be_widget_dcawizard` | `backend/widget/dcawizard_custom` |
+
 ---
 
 ## Configuration Reference
