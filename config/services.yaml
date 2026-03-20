@@ -1,8 +1,21 @@
 services:
     _defaults:
         autoconfigure: true
-        autowire: true
 
-    Terminal42\DcawizardBundle\:
-        resource: ../src/
-        exclude: ../src/Widget
+    Terminal42\Controller\CloseModalController: ~
+
+    Terminal42\DcawizardBundle\EventListener\AddAssetsListener:
+        arguments:
+            - "@assets.packages"
+            - "@request_stack"
+            - "@contao.routing.scope_matcher"
+
+    Terminal42\DcawizardBundle\EventListener\AjaxActionsListener:
+        arguments:
+            - "@database_connection"
+            - "@request_stack"
+
+    Terminal42\DcawizardBundle\EventListener\CloseModalListener:
+        arguments:
+            - "@request_stack"
+            - "@cmf_routing.router"
