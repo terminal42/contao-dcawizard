@@ -59,7 +59,7 @@ class MyFieldAttributesListener
 {
     public function __invoke(array $attributes): array
     {
-        $isNewVersion = version_compare(InstalledVersions::getVersion('terminal42/contao-dcawizard'), '4.0', '>=');
+        $isNewVersion = version_compare(InstalledVersions::getVersion('terminal42/dcawizard'), '4.0', '>=');
 
         $attributes['eval']['customTpl'] = $isNewVersion ? 'backend/widget/dcawizard_custom': 'be_widget_dcawizard_custom';
 
