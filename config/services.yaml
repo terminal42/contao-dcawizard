@@ -12,8 +12,8 @@ services:
 
     Terminal42\DcawizardBundle\EventListener\AjaxActionsListener:
         arguments:
-            - "@database_connection"
             - "@request_stack"
+            - "@database_connection"
 
     Terminal42\DcawizardBundle\EventListener\CloseModalListener:
         arguments:
