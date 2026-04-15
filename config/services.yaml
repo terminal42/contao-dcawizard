@@ -2,7 +2,7 @@ services:
     _defaults:
         autoconfigure: true
 
-    Terminal42\Controller\CloseModalController: ~
+    Terminal42\DcawizardBundle\Controller\CloseModalController: ~
 
     Terminal42\DcawizardBundle\EventListener\AddAssetsListener:
         arguments:
@@ -18,4 +18,4 @@ services:
     Terminal42\DcawizardBundle\EventListener\CloseModalListener:
         arguments:
             - "@request_stack"
-            - "@cmf_routing.router"
+            - "@router"
