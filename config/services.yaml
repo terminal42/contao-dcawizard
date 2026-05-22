@@ -19,3 +19,8 @@ services:
         arguments:
             - "@request_stack"
             - "@router"
+
+    Terminal42\DcawizardBundle\EventListener\TableEditListener:
+      arguments:
+        - "@request_stack"
+        - "@database_connection"

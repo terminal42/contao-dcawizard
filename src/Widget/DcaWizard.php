@@ -25,6 +25,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * @property string        $foreignTable
  * @property string        $foreignField
  * @property callable|null $foreignTable_callback
+ * @property bool          $useParentTable
+ * @property bool          $useParentField
  * @property array         $headerFields
  * @property array         $fields
  * @property string        $editButtonLabel
@@ -83,6 +85,14 @@ class DcaWizard extends Widget
                 $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] = $varValue;
                 break;
 
+            case 'useParentTable':
+                $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['useParentTable'] = $varValue;
+                break;
+
+            case 'useParentField':
+                $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['useParentField'] = $varValue;
+                break;
+
             default:
                 parent::__set($strKey, $varValue);
                 break;
@@ -98,6 +108,8 @@ class DcaWizard extends Widget
             'foreignTable' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable']),
             'foreignField' => true,
             'foreignTable_callback' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable_callback']),
+            'useParentTable' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['useParentTable']),
+            'useParentField' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['useParentField']),
             default => parent::__get($strKey),
         };
     }
@@ -111,6 +123,8 @@ class DcaWizard extends Widget
             'foreignTable' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] ?? null,
             'foreignField' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] ?? 'pid',
             'foreignTable_callback' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable_callback'] ?? null,
+            'useParentTable' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['useParentTable'] ?? false,
+            'useParentField' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['useParentField'] ?? false,
             default => parent::__get($strKey),
         };
     }
@@ -532,6 +546,7 @@ class DcaWizard extends Widget
             'table' => $this->foreignTable,
             'field' => $this->strField,
             'id' => $this->currentRecord,
+            'ptable' => $this->strTable,
             'popup' => 1,
             'nb' => 1,
             'ref' => Input::get('ref'),
@@ -605,6 +620,11 @@ class DcaWizard extends Widget
 
         $strWhere = ' WHERE '.$foreignTableCondition;
 
+        if ($this->useParentField) {
+            $strWhere .= ' AND pfield=?';
+            $values[] = $this->strField;
+        }
+
         if ($this->whereCondition) {
             $strWhere .= ' AND '.$this->whereCondition;
         }
@@ -639,7 +659,7 @@ class DcaWizard extends Widget
         $where = "$this->foreignField=?";
         $values = [$this->currentRecord];
 
-        if (isset($GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'])) {
+        if (isset($GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable']) || $this->useParentTable) {
             $where .= ' AND ptable=?';
             $values[] = $this->strTable;
         }
