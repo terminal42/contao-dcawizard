@@ -61,7 +61,7 @@ class MyFieldAttributesListener
     {
         $isNewVersion = version_compare(InstalledVersions::getVersion('terminal42/dcawizard'), '4.0', '>=');
 
-        $attributes['eval']['customTpl'] = $isNewVersion ? 'backend/widget/dcawizard_custom': 'be_widget_dcawizard_custom';
+        $attributes['customTpl'] = $isNewVersion ? 'backend/widget/dcawizard_custom': 'be_widget_dcawizard_custom';
 
         return $attributes;
     }
