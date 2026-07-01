@@ -109,11 +109,13 @@ These options are set directly on the field definition, outside of `eval`.
 
 #### Foreign Table Options
 
-| Option                  | Type     | Default | Description                                                              |
-|-------------------------|----------|---------|--------------------------------------------------------------------------|
-| `foreignTable`          | `string` | -       | The foreign database table to manage records from.                       |
-| `foreignField`          | `string` | `'pid'` | The foreign key field linking child records to the parent (e.g. `fid`).  |
-| `foreignTable_callback` | `array`  | -       | Callback to dynamically determine the foreign table name.                |
+| Option                  | Type     | Default | Description                                                                   |
+|-------------------------|----------|---------|-------------------------------------------------------------------------------|
+| `foreignTable`          | `string` | -       | The foreign database table to manage records from.                            |
+| `foreignField`          | `string` | `'pid'` | The foreign key field linking child records to the parent (e.g. `fid`).       |
+| `foreignTable_callback` | `array`  | -       | Callback to dynamically determine the foreign table name.                     |
+| `useParentTable`        | `bool`   | false   | Add the parent table name to the database field "ptable", limit backend view  |
+| `useParentField`        | `bool`   | false   | Add the parent field name to the database field "pfield", limit backend view  |
 
 #### URL Params Options
 
