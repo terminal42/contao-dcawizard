@@ -1,5 +1,3 @@
-/* eslint-disable no-alert,no-console,no-undef */
-
 import './dcawizard.scss';
 
 import { Application, Controller } from '@hotwired/stimulus';
@@ -9,87 +7,99 @@ application.debug = process.env.NODE_ENV === 'development';
 application.register(
     'terminal42--dcawizard',
     class extends Controller {
-        delete(event) {
-            const options = this.#getOptions(event);
-
-            if (options === null) {
-                return;
-            }
-
-            if (!window.confirm(options.confirm)) {
-                return;
-            }
-
-            new Request.Contao({
-                method: 'get',
-                url: options.url,
-                evalScripts: false,
-                followRedirects: false,
-                onRequest: AjaxRequest.displayBox(`${Contao.lang.loading} …`),
-                onComplete: () => this.#reloadWidget(options),
-            }).send();
-        }
+        static values = {
+            id: String,
+            class: String,
+            title: String,
+        };
 
         open(event) {
-            const options = this.#getOptions(event);
+            const width = Math.min((window.getSize().x - 20).toInt(), 900);
+            const height = (window.getSize().y - 137).toInt();
 
-            if (options === null) {
-                return;
-            }
+            let M;
+            const closeModal = function (message) {
+                if (message.data === 'closeModal') {
+                    M.hide();
+                }
+            };
 
-            const maxWidth = (window.getSize().x - 20).toInt();
-            const maxHeight = (window.getSize().y - 137).toInt();
-
-            if (!options.width || options.width > maxWidth) {
-                options.width = Math.min(maxWidth, 900);
-            }
-
-            if (!options.height || options.height > maxHeight) {
-                options.height = maxHeight;
-            }
-
-            const M = new SimpleModal({
-                width: options.width,
+            M = new SimpleModal({
+                width,
                 hideFooter: true,
                 draggable: false,
                 overlayOpacity: 0.7,
                 overlayClick: false,
-                onShow: () => document.body.setStyle('overflow', 'hidden'),
+                onShow: () => {
+                    window.addEventListener('message', closeModal);
+                    document.body.setStyle('overflow', 'hidden');
+                },
                 onHide: () => {
-                    document.body.setStyle('overflow', 'auto');
+                    window.removeEventListener('message', closeModal);
+                    document.body.setStyle('overflow', '');
                     AjaxRequest.displayBox(`${Contao.lang.loading} …`);
-                    this.#reloadWidget(options);
+                    this.#reloadWidget();
                 },
             });
 
+            const url = event.currentTarget.getAttribute('href');
+            const { form } = event.currentTarget;
+
             M.show({
-                title: options.title
+                title: this.titleValue
                     ?.replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/"/g, '&quot;')
                     .replace(/'/g, '&apos;'),
-                contents: `<iframe src="${options.url}" width="100%" height="${options.height}" frameborder="0"></iframe>`,
+                contents: `<iframe id="dcawizard_form" name="dcawizard_form" width="100%" height="${height}" frameborder="0"></iframe>`,
                 model: 'modal',
             });
-        }
 
-        #getOptions(event) {
-            try {
-                return JSON.parse(event.currentTarget.dataset.dcawizardOptions);
-            } catch {
-                console.error(
-                    `Could not parse JSON options for DCA wizard: ${event.currentTarget.dataset.dcawizardOptions}`,
-                );
+            if (url) {
+                document.getElementById('dcawizard_form').src = `${url}&popup=1`;
+            } else if (form) {
+                const originalAction = form.action;
+                form.action = `${form.action}&popup=1`;
+                form.setAttribute('target', 'dcawizard_form');
+                form.submit();
 
-                return null;
+                setTimeout(() => {
+                    form.action = originalAction;
+                    form.removeAttribute('target');
+                }, 100);
             }
         }
 
-        #reloadWidget(options) {
+        request(event) {
+            if (event.params.confirm && !window.confirm(event.params.confirm)) {
+                return;
+            }
+
+            const url = event.currentTarget.getAttribute('href');
+            const { form } = event.currentTarget;
+
+            const params = {
+                method: 'get',
+                url,
+                evalScripts: false,
+                followRedirects: false,
+                onRequest: AjaxRequest.displayBox(`${Contao.lang.loading} …`),
+                onComplete: () => this.#reloadWidget(),
+            };
+
+            if (form) {
+                params.method = form.method || 'get';
+                params.url = form.action;
+            }
+
+            new Request.Contao(params).send();
+        }
+
+        #reloadWidget() {
             new Request.Contao({
                 evalScripts: false,
                 onSuccess: (txt, json) => {
-                    $(`ctrl_${options.id}`).set('html', json.content);
+                    $(`ctrl_${this.idValue}`).set('html', json.content);
 
                     if (json.javascript) {
                         Browser.exec(json.javascript);
@@ -100,9 +110,9 @@ application.register(
                 },
             }).post({
                 action: 'reloadDcaWizard',
-                name: options.id,
+                name: this.idValue,
                 REQUEST_TOKEN: Contao.request_token,
-                class: options.class,
+                class: this.classValue,
             });
         }
     },

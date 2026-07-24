@@ -4,21 +4,16 @@
     .addClass(['dcawizard', css_class])
     .set('id', 'ctrl_%s'|format(id))
     .set('data-controller', 'terminal42--dcawizard')
+    .set('data-terminal42--dcawizard-id-value', modal.id)
+    .set('data-terminal42--dcawizard-class-value', modal.class)
+    .set('data-terminal42--dcawizard-title-value', modal.title)
 %}
 
 {% block widget %}
     <div{{ widget_attributes }}>
         {% block widget_inner %}
             {% block global_operations %}
-                {% if global_operations %}
-                    <div id="tl_buttons" class="dcawizard__global-operations">
-                        {% for global_operation in global_operations %}
-                            {% block global_operation %}
-                                {{ global_operation|raw }}
-                            {% endblock %}
-                        {% endfor %}
-                    </div>
-                {% endif %}
+                {{ global_operations|raw }}
             {% endblock %}
 
             {% block records_wrapper %}
@@ -43,6 +38,8 @@
                                 {% set row_attributes = attrs()
                                     .addClass('hover-row')
                                     .addClass('draft', record.draft)
+                                    .set('data-controller', 'contao--deeplink contao--operations-menu')
+                                    .set('data-action', 'contextmenu->contao--operations-menu#open')
                                 %}
 
                                 <tr{{ row_attributes }}>
@@ -57,13 +54,7 @@
                                     {% if record.operations %}
                                         <td class="tl_file_list tl_right_nowrap">
                                             {% block record_operations %}
-                                                <div class="operations">
-                                                    <ul>
-                                                        {% for operation in record.operations %}
-                                                            <li>{{ operation|raw }}</li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
+                                                {{ record.operations }}
                                             {% endblock %}
                                         </td>
                                     {% endif %}
@@ -86,7 +77,6 @@
                             {% set edit_button_attributes = attrs()
                                 .addClass('tl_submit')
                                 .set('href', edit_button.url)
-                                .set('data-dcawizard-options', edit_button.jsConfig|json_encode)
                                 .set('data-action', 'click->terminal42--dcawizard#open:prevent')
                             %}
 

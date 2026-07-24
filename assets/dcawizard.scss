@@ -5,7 +5,11 @@
         margin-bottom: 10px;
     }
 
-    &__global-operations {
+    > .operations {
         margin-top: -26px !important;
+
+        > ul {
+            padding-block: 5px !important;
+        }
     }
 }

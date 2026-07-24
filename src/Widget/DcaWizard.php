@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace Terminal42\DcawizardBundle\Widget;
 
 use Codefog\HasteBundle\Formatter;
-use Contao\Backend;
 use Contao\Controller;
-use Contao\CoreBundle\DataContainer\DataContainerOperation;
+use Contao\CoreBundle\DataContainer\DataContainerGlobalOperationsBuilder;
+use Contao\CoreBundle\DataContainer\DataContainerOperationsBuilder;
 use Contao\CoreBundle\Security\ContaoCorePermissions;
+use Contao\CoreBundle\Security\DataContainer\CreateAction;
 use Contao\CoreBundle\String\HtmlAttributes;
 use Contao\DataContainer;
-use Contao\Image;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Terminal42\DcawizardBundle\UrlConfig;
 
 /**
  * Provides the back end widget "dcaWizard".
@@ -142,13 +143,17 @@ class DcaWizard extends Widget
             'records' => $this->getRecords(),
             'empty_label' => $this->emptyLabel,
             'edit_button' => null,
+            'modal' => [
+                'id' => $this->strId,
+                'class' => base64_encode(static::class),
+                'title' => StringUtil::specialchars($this->strLabel),
+            ],
         ];
 
         if (!$this->hideButton) {
             $templateData['edit_button'] = [
-                'url' => $this->getButtonUrl(),
+                'url' => System::getContainer()->get('router')->generate('contao_backend', $this->getButtonParams(['nb' => 1]), UrlGeneratorInterface::ABSOLUTE_URL),
                 'label' => StringUtil::specialchars($this->editButtonLabel ?: $this->strLabel),
-                'jsConfig' => $this->getModalOptions(),
             ];
         }
 
@@ -199,15 +204,69 @@ class DcaWizard extends Widget
         return $records;
     }
 
-    public function getRecordOperations(array $record): array
+    public function getRecordOperations(array $record): DataContainerOperationsBuilder
     {
-        $operations = [];
+        $builder = System::getContainer()->get('contao.data_container.operations_builder')->initialize($this->foreignTable, $record['id']);
+        $generateOperation = new \ReflectionMethod($builder, 'generateOperation');
 
-        foreach ($this->getAvailableRecordOperations() as $operation) {
-            $operations[$operation] = $this->getRecordOperation($operation, $record);
+        foreach ($this->getAvailableRecordOperations() as $name) {
+            if ('new' === $name) {
+                if (
+                    DataContainer::MODE_PARENT !== ($GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['mode'] ?? null)
+                    || 'sorting' !== ($GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'][0] ?? null)
+                    || !System::getContainer()->get('security.helper')->isGranted(
+                        ContaoCorePermissions::DC_PREFIX.$this->foreignTable,
+                        $this->getCreateAction($record, $record['sorting'] + 1),
+                    )
+                ) {
+                    continue;
+                }
+
+                $builder->addSeparator();
+
+                $operation = [
+                    'label' => $GLOBALS['TL_LANG'][$this->foreignTable]['pastenewafter'] ?? $GLOBALS['TL_LANG']['DCA']['pastenewafter'],
+                    'attributes' => $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']['new']['attributes'] ?? null,
+                    'icon' => $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']['new']['icon'] ?? 'new.svg',
+                    'href' => 'act=create&amp;mode=1&amp;pid='.$record['id'],
+                    'method' => $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']['new']['method'] ?? 'POST',
+                    'primary' => $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']['new']['primary'] ?? false,
+                ];
+            } elseif (!isset($GLOBALS['TL_DCA'][$this->strTable]['list']['operations'][$name])) {
+                continue;
+            } else {
+                $operation = $GLOBALS['TL_DCA'][$this->strTable]['list']['operations'][$name];
+            }
+
+            if ('-' === $operation) {
+                $builder->addSeparator();
+                continue;
+            }
+
+            $operation = \is_array($operation) ? $operation : [$operation];
+
+            parse_str(StringUtil::decodeEntities($operation['href'] ?? ''), $params);
+            $params += ['table' => $this->foreignTable, 'id' => $record['id']];
+
+            $operation['href'] = http_build_query($this->getButtonParams($params, ['operation' => true]));
+
+            $config = $generateOperation->invoke($builder, $name, $operation, $record, $this->objDca);
+
+            /** @var HtmlAttributes $attributes */
+            $attributes = $config['attributes'];
+
+            if ('delete' === $name) {
+                $attributes->set('data-terminal42--dcawizard-confirm-param', \sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $record['id']));
+                $attributes->set('data-action', 'click->terminal42--dcawizard#request:prevent');
+                $attributes->unset('onclick');
+            } elseif (empty($attributes['onclick'])) {
+                $attributes->set('data-action', 'click->terminal42--dcawizard#open:prevent');
+            }
+
+            $builder->append($config);
         }
 
-        return $operations;
+        return $builder;
     }
 
     /**
@@ -226,317 +285,86 @@ class DcaWizard extends Widget
         return array_keys((array) $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']);
     }
 
-    /**
-     * @param array<string, mixed> $row
-     */
-    public function getRecordOperation(string $operation, array $row): string
-    {
-        // Load the button definition from the subtable
-        $def = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations'][$operation] ?? null;
-
-        if (null === $def && 'new' === $operation) {
-            if (
-                ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null)
-                || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)
-                || 'sorting' !== ($GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['fields'][0] ?? null)
-            ) {
-                return '';
-            }
-
-            $def = [
-                'href' => 'act=create&amp;mode=1&amp;pid='.$row['id'],
-                'icon' => 'new.svg',
-            ];
-        }
-
-        if (null === $def) {
-            return '';
-        }
-
-        $def = \is_array($def) ? $def : [$def];
-
-        if (class_exists(DataContainerOperation::class)) {
-            if (!$this->objDca instanceof DataContainer) {
-                throw new \RuntimeException('DcaWizard does not have a DataContainer object');
-            }
-
-            $config = new DataContainerOperation($operation, $def, $row, $this->objDca);
-        } else {
-            $id = StringUtil::specialchars(rawurldecode((string) $row['id']));
-
-            // Dereference pointer to $GLOBALS['TL_LANG']
-            $config = StringUtil::resolveReferences($def);
-
-            if (isset($config['label'])) {
-                if (\is_array($config['label'])) {
-                    $config['title'] = \sprintf($config['label'][1] ?? '', $id);
-                    $config['label'] = $config['label'][0] ?? $operation;
-                } else {
-                    $config['label'] = $config['title'] = \sprintf($config['label'], $id);
-                }
-            } else {
-                $config['label'] = $config['title'] = $operation;
-            }
-
-            $attributes = !empty($config['attributes']) ? ' '.ltrim(\sprintf($config['attributes'], $id, $id)) : '';
-
-            // Add the key as CSS class
-            if (str_contains($attributes, 'class="')) {
-                $attributes = str_replace('class="', 'class="'.$operation.' ', $attributes);
-            } else {
-                $attributes = ' class="'.$operation.'" '.$attributes;
-            }
-
-            $config['attributes'] = $attributes;
-        }
-
-        // Call a custom function instead of using the default button
-        if (\is_array($config['button_callback'] ?? null)) {
-            $callback = System::importStatic($config['button_callback'][0]);
-            $ref = new \ReflectionMethod($callback, $config['button_callback'][1]);
-
-            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && $type instanceof \ReflectionNamedType && DataContainerOperation::class === $type->getName()) {
-                $callback->{$config['button_callback'][1]}($config);
-            } else {
-                return $callback->{$config['button_callback'][1]}($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
-            }
-        } elseif (\is_callable($config['button_callback'] ?? null)) {
-            $ref = new \ReflectionFunction($config['button_callback']);
-
-            if (1 === $ref->getNumberOfParameters() && ($type = $ref->getParameters()[0]->getType()) && $type instanceof \ReflectionNamedType && DataContainerOperation::class === $type->getName()) {
-                $config['button_callback']($config);
-            } else {
-                return $config['button_callback']($row, $config['href'] ?? null, $config['label'], $config['title'], $config['icon'] ?? null, $config['attributes'], $this->foreignTable, [], null, false, null, null, $this);
-            }
-        }
-
-        if ($config instanceof DataContainerOperation && ($html = $config->getHtml()) !== null) {
-            return $html;
-        }
-
-        if (!isset($config['href'])) {
-            return Image::getHtml($config['icon'], $config['label']).' ';
-        }
-
-        $href = $this->getButtonUrl().'&amp;'.$config['href'].'&amp;id='.$row['id'].'&amp;dcawizard_operation=1';
-
-        if ($config['attributes'] instanceof HtmlAttributes) {
-            $attributes = $config['attributes'];
-        } else {
-            $attributes = new HtmlAttributes($config['attributes'] ?? '');
-        }
-
-        if ('delete' === $operation || empty($attributes['onclick'])) {
-            $baseOptions = $this->getModalOptions();
-            $baseOptions['url'] = $href;
-
-            if ('delete' === $operation) {
-                $baseOptions['confirm'] = \sprintf($GLOBALS['TL_LANG']['MSC']['deleteConfirm'], $row['id']);
-                $attributes->set('data-action', 'click->terminal42--dcawizard#delete:prevent');
-                $attributes->unset('onclick');
-            } else {
-                $attributes->set('data-action', 'click->terminal42--dcawizard#open:prevent');
-            }
-
-            $attributes->set('data-dcawizard-options', StringUtil::specialchars(json_encode($baseOptions, JSON_THROW_ON_ERROR)));
-        }
-
-        parse_str(StringUtil::decodeEntities($config['href'] ?? ''), $params);
-
-        if (($params['act'] ?? null) === 'toggle' && isset($params['field'])) {
-            // Hide the toggle icon if the user does not have access to the field
-            if (
-                (
-                    ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['toggle'] ?? false) !== true
-                    && ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['reverseToggle'] ?? false) !== true
-                ) || (
-                    DataContainer::isFieldExcluded($this->foreignTable, $params['field'])
-                    && !System::getContainer()->get('security.helper')->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, $this->foreignTable.'::'.$params['field'])
-                )
-            ) {
-                return '';
-            }
-
-            $icon = $config['icon'];
-            $_icon = pathinfo((string) $config['icon'], PATHINFO_FILENAME).'_.'.pathinfo((string) $config['icon'], PATHINFO_EXTENSION);
-
-            if (str_contains((string) $config['icon'], '/')) {
-                $_icon = \dirname((string) $config['icon']).'/'.$_icon;
-            }
-
-            if ('visible.svg' === $icon) {
-                $_icon = 'invisible.svg';
-            }
-
-            if (!str_contains((string) $icon, '/')) {
-                $icon = 'system/themes/'.Backend::getTheme().'/icons/'.$icon;
-                $_icon = 'system/themes/'.Backend::getTheme().'/icons/'.$_icon;
-            }
-
-            $state = $row[$params['field']] ? 1 : 0;
-
-            if (($config['reverse'] ?? false) || ($GLOBALS['TL_DCA'][$this->foreignTable]['fields'][$params['field']]['reverseToggle'] ?? false)) {
-                $state = $row[$params['field']] ? 0 : 1;
-            }
-
-            if (isset($config['titleDisabled'])) {
-                $titleDisabled = $config['titleDisabled'];
-            } else {
-                $titleDisabled = \is_array($config['label']) && isset($config['label'][2]) ? \sprintf($config['label'][2], $row['id']) : $config['title'];
-            }
-
-            return \sprintf(
-                '<a href="%s" title="%s" data-title="%s" data-title-disabled="%s" onclick="return AjaxRequest.toggleField(this,%s)">%s</a> ',
-                $href,
-                StringUtil::specialchars($state ? $config['title'] : $titleDisabled),
-                StringUtil::specialchars($config['title']),
-                StringUtil::specialchars($titleDisabled),
-                'visible.svg' === $icon ? 'true' : 'false',
-                Image::getHtml($state ? $icon : $_icon, $config['label'], 'data-icon="'.$icon.'" data-icon-disabled="'.$_icon.'" data-state="'.$state.'"'),
-            );
-        }
-
-        return \sprintf(
-            '<a href="%s" title="%s"%s>%s</a> ',
-            $href,
-            StringUtil::specialchars($config['title']),
-            $config['attributes'],
-            Image::getHtml($config['icon'], $config['label']),
-        );
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getGlobalOperations(): array
+    public function getGlobalOperations(): DataContainerGlobalOperationsBuilder|null
     {
         if (empty($this->global_operations)) {
-            return [];
+            return null;
         }
 
-        $globalOperations = [];
+        $builder = System::getContainer()->get('contao.data_container.global_operations_builder')->initialize($this->foreignTable);
+        $generateOperation = new \ReflectionMethod($builder, 'generateOperation');
 
-        foreach ($this->global_operations as $globalOperation) {
-            $globalOperations[$globalOperation] = $this->getGlobalOperation($globalOperation);
-        }
+        foreach ($this->global_operations as $name) {
+            $operation = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$name] ?? null;
 
-        return $globalOperations;
-    }
-
-    public function getGlobalOperation(string $operation): string
-    {
-        $definition = $GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations'][$operation] ?? null;
-
-        // Cannot edit all here
-        if ('all' === $operation) {
-            return '';
-        }
-
-        // Special handling for the "new" operation
-        if (null === $definition && 'new' === $operation) {
-            // The table is closed
-            if (($GLOBALS['TL_DCA'][$this->foreignTable]['config']['closed'] ?? null) || ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['notCreatable'] ?? null)) {
-                return '';
+            // Cannot edit all here
+            if ('all' === $name) {
+                continue;
             }
 
-            $definition = [
-                'href' => 'act=create&amp;mode=2&amp;pid='.$this->currentRecord,
-                'icon' => 'new.svg',
-                'label' => $GLOBALS['TL_LANG'][$this->foreignTable]['new'] ?? $GLOBALS['TL_LANG']['DCA']['new'],
-            ];
-        }
+            // Special handling for the "new" operation
+            if (null === $operation && 'new' === $name) {
+                if (
+                    !System::getContainer()->get('security.helper')->isGranted(
+                        ContaoCorePermissions::DC_PREFIX.$this->foreignTable,
+                        $this->getCreateAction(['pid' => $this->currentRecord]),
+                    )
+                ) {
+                    continue;
+                }
 
-        if (null === $definition) {
-            return '';
-        }
-
-        $definition = \is_array($definition) ? $definition : [$definition];
-        $title = $label = $operation;
-
-        if (isset($definition['label'])) {
-            $label = \is_array($definition['label']) ? $definition['label'][0] : $definition['label'];
-            $title = \is_array($definition['label']) ? ($definition['label'][1] ?? null) : $definition['label'];
-        }
-
-        $buttonHref = $this->getButtonUrl().'&amp;'.$definition['href'].'&amp;dcawizard_operation=1';
-
-        $attributes = !empty($definition['attributes']) ? ' '.ltrim((string) $definition['attributes']) : '';
-
-        if ($definition['icon'] ?? null) {
-            $definition['class'] = trim(($definition['class'] ?? '').' header_icon');
-
-            // Add the theme path if only the file name is given
-            if (!str_contains((string) $definition['icon'], '/')) {
-                $definition['icon'] = Image::getPath($definition['icon']);
+                $operation = [
+                    'label' => $GLOBALS['TL_LANG'][$this->foreignTable]['new'] ?? $GLOBALS['TL_LANG']['DCA']['new'],
+                    'href' => 'act=create&amp;mode=2&amp;pid='.$this->currentRecord,
+                    'icon' => $GLOBALS['TL_DCA'][$this->foreignTable]['list']['operations']['new']['icon'] ?? 'new.svg',
+                    'attributes' => (new HtmlAttributes($GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations']['new']['attributes'] ?? null))->addClass($GLOBALS['TL_DCA'][$this->foreignTable]['list']['global_operations']['new']['class'] ?? 'header_new'),
+                    'method' => 'POST',
+                    'primary' => true,
+                ];
             }
 
-            $attributes = \sprintf(' style="background-image:url(\'%s\')"', Controller::addAssetsUrlTo($definition['icon'])).$attributes;
+            if (null === $operation) {
+                continue;
+            }
+
+            parse_str(StringUtil::decodeEntities($operation['href'] ?? ''), $params);
+            $params += ['table' => $this->foreignTable];
+
+            $operation['href'] = http_build_query($this->getButtonParams($params));
+
+            $config = $generateOperation->invoke($builder, $name, $operation, $this->objDca);
+
+            if ($config) {
+                /** @var HtmlAttributes $attributes */
+                $attributes = $config['attributes'];
+
+                if (empty($attributes['onclick'])) {
+                    $attributes->set('data-action', 'click->terminal42--dcawizard#open:prevent');
+                }
+
+                $builder->append($config);
+            }
         }
 
-        // Dca wizard specific
-        if (empty($definition['attributes']) || !str_contains((string) $definition['attributes'], 'onclick="')) {
-            $arrBaseOptions = $this->getModalOptions();
-            $arrBaseOptions['url'] = $buttonHref;
-
-            $attributes .= ' data-dcawizard-options="'.StringUtil::specialchars(json_encode($arrBaseOptions, JSON_THROW_ON_ERROR)).'"';
-            $attributes .= ' data-action="click->terminal42--dcawizard#open:prevent"';
-        }
-
-        if (!$label) {
-            $label = $operation;
-        }
-
-        if (!$title) {
-            $title = $label;
-        }
-
-        // Call a custom function instead of using the default button
-        if (\is_array($definition['button_callback'] ?? null)) {
-            $this->import($definition['button_callback'][0]);
-
-            return $this->{$definition['button_callback'][0]}->{$definition['button_callback'][1]}($definition['href'] ?? '', $label, $title, $definition['class'], $attributes, $this->foreignTable);
-        }
-
-        if (\is_callable($definition['button_callback'] ?? null)) {
-            return $definition['button_callback']($definition['href'] ?? null, $label, $title, $definition['class'] ?? null, $attributes, $this->foreignTable);
-        }
-
-        return '<a href="'.$buttonHref.'" class="'.$definition['class'].'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.$label.'</a> ';
-    }
-
-    /**
-     * @return array<string, int|string>
-     */
-    public function getModalOptions(): array
-    {
-        return [
-            'class' => base64_encode(static::class),
-            'id' => $this->strId,
-            'title' => StringUtil::specialchars($this->strLabel),
-            'url' => $this->getButtonUrl(),
-        ];
-    }
-
-    public function getButtonUrl(): string
-    {
-        return System::getContainer()->get('router')->generate('contao_backend', $this->getButtonParams(), UrlGeneratorInterface::ABSOLUTE_URL);
+        return $builder;
     }
 
     /**
      * @return array<string, string|int>
      */
-    public function getButtonParams(): array
+    public function getButtonParams(array $params = [], array $data = []): array
     {
-        $params = [
+        $data += [
+            'foreignTable' => $this->foreignTable,
+            'field' => $this->strField,
+            'currentRecord' => $this->currentRecord,
+        ];
+
+        $params += [
             'do' => Input::get('do'),
             'table' => $this->foreignTable,
-            'field' => $this->strField,
             'id' => $this->currentRecord,
-            'popup' => 1,
-            'nb' => 1,
-            'ref' => Input::get('ref'),
-            'rt' => System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue(),
-            'dcawizard' => $this->foreignTable.':'.$this->currentRecord,
+            'picker' => (new UrlConfig($data))->urlEncode(),
         ];
 
         if (\is_array($this->params)) {
@@ -645,5 +473,21 @@ class DcaWizard extends Widget
         }
 
         return [$where, $values];
+    }
+
+    private function getCreateAction(array $record, int $sorting = 0): CreateAction
+    {
+        $data = [];
+
+        if (DataContainer::MODE_PARENT === ($GLOBALS['TL_DCA'][$this->foreignTable]['list']['sorting']['mode'] ?? null)) {
+            $data['pid'] = $record['pid'] ?? null;
+            $data['sorting'] = $sorting;
+        }
+
+        if ($GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'] ?? false) {
+            $data['ptable'] = $record['ptable'] ?? null;
+        }
+
+        return new CreateAction($this->foreignTable, $data ?: null);
     }
 }

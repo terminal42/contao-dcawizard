@@ -10,10 +10,13 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Terminal42\DcawizardBundle\Controller\CloseModalController;
+use Terminal42\DcawizardBundle\UrlConfig;
 
 #[AsHook('loadDataContainer')]
 class CloseModalListener
 {
+    private UrlConfig|false|null $config = false;
+
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly UrlGeneratorInterface $urlGenerator,
@@ -22,13 +25,7 @@ class CloseModalListener
 
     public function __invoke(string $dcaTable): void
     {
-        $request = $this->requestStack->getCurrentRequest();
-
-        if (!$request || !$request->query->has('dcawizard')) {
-            return;
-        }
-
-        [$table] = explode(':', (string) $request->query->get('dcawizard')) + [null];
+        $table = $this->getConfigFromUrl()?->getForeignTable();
 
         if ($table === $dcaTable) {
             $GLOBALS['TL_DCA'][$table]['edit']['buttons_callback'][] = $this->replaceCloseButton(...);
@@ -43,13 +40,9 @@ class CloseModalListener
      */
     private function replaceCloseButton(array $buttons): array
     {
-        $request = $this->requestStack->getCurrentRequest();
-
-        if (!$request || !$request->query->has('dcawizard_operation')) {
-            return $buttons;
+        if ($this->getConfigFromUrl()?->isOperation()) {
+            unset($buttons['saveNduplicate'], $buttons['saveNcreate']);
         }
-
-        unset($buttons['saveNduplicate'], $buttons['saveNcreate']);
 
         return $buttons;
     }
@@ -58,8 +51,23 @@ class CloseModalListener
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if ($request && $request->query->has('dcawizard_operation') && $request->request->has('saveNclose')) {
+        if ($request && $request->request->has('saveNclose') && $this->getConfigFromUrl()?->isOperation()) {
             throw new ResponseException(new RedirectResponse($this->urlGenerator->generate(CloseModalController::class)));
         }
+    }
+
+    private function getConfigFromUrl(): UrlConfig|null
+    {
+        if (false === $this->config) {
+            $request = $this->requestStack->getCurrentRequest();
+
+            if (!$request || !$request->query->has('picker')) {
+                return null;
+            }
+
+            $this->config = UrlConfig::urlDecode($request->query->getString('picker'));
+        }
+
+        return $this->config;
     }
 }
