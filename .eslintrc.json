@@ -1,0 +1,13 @@
+{
+    "languageOptions": {
+        "globals": {
+            "SimpleModal": "readonly",
+            "AjaxRequest": "readonly",
+            "Contao": "readonly",
+            "Browser": "readonly"
+        }
+    },
+    "rules": {
+        "no-alert": "off"
+    }
+}
