@@ -146,14 +146,14 @@ class DcaWizard extends Widget
             'modal' => [
                 'id' => $this->strId,
                 'class' => base64_encode(static::class),
-                'title' => StringUtil::specialchars($this->strLabel),
+                'title' => $this->strLabel,
             ],
         ];
 
         if (!$this->hideButton) {
             $templateData['edit_button'] = [
                 'url' => System::getContainer()->get('router')->generate('contao_backend', $this->getButtonParams(['nb' => 1]), UrlGeneratorInterface::ABSOLUTE_URL),
-                'label' => StringUtil::specialchars($this->editButtonLabel ?: $this->strLabel),
+                'label' => $this->editButtonLabel ?: $this->strLabel,
             ];
         }
 
