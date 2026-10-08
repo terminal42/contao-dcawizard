@@ -78,11 +78,44 @@ These options are set directly on the field definition, outside of `eval`.
 
 #### Foreign Table Options
 
-| Option                  | Type     | Default | Description                                                              |
-|-------------------------|----------|---------|--------------------------------------------------------------------------|
-| `foreignTable`          | `string` | -       | The foreign database table to manage records from.                       |
-| `foreignField`          | `string` | `'pid'` | The foreign key field linking child records to the parent (e.g. `fid`).  |
-| `foreignTable_callback` | `array`  | -       | Callback to dynamically determine the foreign table name.                |
+| Option                  | Type     | Default | Description                                                                   |
+|-------------------------|----------|---------|-------------------------------------------------------------------------------|
+| `foreignTable`          | `string` | -       | The foreign database table to manage records from.                            |
+| `foreignField`          | `string` | `'pid'` | The foreign key field linking child records to the parent (e.g. `fid`).       |
+| `foreignTable_callback` | `array`  | -       | Callback to dynamically determine the foreign table name.                     |
+| `parentColumns`         | `array`  | `[]`    | Columns of the foreign table that tie a record to this field (see below).     |
+
+#### Binding records to one field (`parentColumns`)
+
+If a table has more than one dcaWizard field, all of them select their records
+by the parent id alone and therefore show and edit the same rows. `parentColumns`
+binds a record to one field:
+
+```php
+'parentColumns' => [
+    'ptable' => DcaWizard::PARENT_TABLE,
+    'pfield' => DcaWizard::PARENT_FIELD,
+],
+```
+
+The columns are used twice: they extend the condition returned by
+`getForeignTableCondition()` (which records are listed) and they are written to
+records created through the wizard. Without the second part a new record would
+not match the condition and would disappear right after saving.
+
+Values are taken literally, so any column can be bound to any value – the two
+placeholders are replaced with the table the field is defined on and with the
+field name:
+
+```php
+'parentColumns' => [
+    'ptable' => DcaWizard::PARENT_TABLE,
+    'type'   => 'link',
+],
+```
+
+The columns have to exist in the foreign table. A table with `dynamicPtable`
+keeps filling `ptable` on its own, as before.
 
 #### URL Params Options
 

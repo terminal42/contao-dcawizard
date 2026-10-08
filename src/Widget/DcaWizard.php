@@ -26,6 +26,7 @@ use Terminal42\DcawizardBundle\UrlConfig;
  * @property string        $foreignTable
  * @property string        $foreignField
  * @property callable|null $foreignTable_callback
+ * @property array         $parentColumns
  * @property array         $headerFields
  * @property array         $fields
  * @property string        $editButtonLabel
@@ -40,6 +41,20 @@ use Terminal42\DcawizardBundle\UrlConfig;
  */
 class DcaWizard extends Widget
 {
+    /**
+     * Placeholder for the table the dcaWizard field is defined on.
+     *
+     * @see self::resolveParentColumns()
+     */
+    public const string PARENT_TABLE = '##dcawizard.parentTable##';
+
+    /**
+     * Placeholder for the name of the dcaWizard field.
+     *
+     * @see self::resolveParentColumns()
+     */
+    public const string PARENT_FIELD = '##dcawizard.parentField##';
+
     protected $strTemplate = 'be_widget';
 
     /**
@@ -84,6 +99,10 @@ class DcaWizard extends Widget
                 $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] = $varValue;
                 break;
 
+            case 'parentColumns':
+                $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['parentColumns'] = $varValue;
+                break;
+
             default:
                 parent::__set($strKey, $varValue);
                 break;
@@ -99,6 +118,7 @@ class DcaWizard extends Widget
             'foreignTable' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable']),
             'foreignField' => true,
             'foreignTable_callback' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable_callback']),
+            'parentColumns' => isset($GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['parentColumns']),
             default => parent::__get($strKey),
         };
     }
@@ -112,6 +132,7 @@ class DcaWizard extends Widget
             'foreignTable' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable'] ?? null,
             'foreignField' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignField'] ?? 'pid',
             'foreignTable_callback' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['foreignTable_callback'] ?? null,
+            'parentColumns' => $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['parentColumns'] ?? [],
             default => parent::__get($strKey),
         };
     }
@@ -364,6 +385,7 @@ class DcaWizard extends Widget
             'foreignTable' => $this->foreignTable,
             'field' => $this->strField,
             'currentRecord' => $this->currentRecord,
+            'parentTable' => $this->strTable,
         ];
 
         $params += [
@@ -473,12 +495,49 @@ class DcaWizard extends Widget
         $where = "$this->foreignField=?";
         $values = [$this->currentRecord];
 
-        if (isset($GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable'])) {
-            $where .= ' AND ptable=?';
-            $values[] = $this->strTable;
+        $parentColumns = self::resolveParentColumns($this->parentColumns, $this->strTable, $this->strField);
+
+        if (isset($GLOBALS['TL_DCA'][$this->foreignTable]['config']['dynamicPtable']) && !isset($parentColumns['ptable'])) {
+            $parentColumns['ptable'] = $this->strTable;
+        }
+
+        foreach ($parentColumns as $column => $value) {
+            $where .= ' AND '.$column.'=?';
+            $values[] = $value;
         }
 
         return [$where, $values];
+    }
+
+    /**
+     * Resolves the "parentColumns" configuration to column => value pairs.
+     *
+     * Columns listed here tie a record of the foreign table to one dcaWizard
+     * field. They are used twice: to select the records to list, and to stamp
+     * records created through the wizard. Without the second part a new record
+     * would not match the condition and disappear right after saving.
+     *
+     * Values are taken literally, so any column can be bound to any value. The
+     * two placeholders are filled with the table the field is defined on and
+     * with the field name.
+     *
+     * @param array<string, scalar> $config
+     *
+     * @return array<string, scalar>
+     */
+    public static function resolveParentColumns(array $config, string $table, string $field): array
+    {
+        $resolved = [];
+
+        foreach ($config as $column => $value) {
+            $resolved[$column] = match ($value) {
+                self::PARENT_TABLE => $table,
+                self::PARENT_FIELD => $field,
+                default => $value,
+            };
+        }
+
+        return $resolved;
     }
 
     private function getCreateAction(array $record, int $sorting = 0): CreateAction

@@ -48,6 +48,14 @@ final class UrlConfig implements \ArrayAccess
         return $this->data['currentRecord'] ?? null;
     }
 
+    /**
+     * Table the dcaWizard field is defined on.
+     */
+    public function getParentTable(): string|null
+    {
+        return $this->data['parentTable'] ?? null;
+    }
+
     public function isOperation(): bool
     {
         return (bool) ($this->data['operation'] ?? null);
